@@ -48,6 +48,19 @@ kotlin {
             implementation(libs.navigator.transitions)
             implementation(libs.navigator.koin)
             api(libs.koin.core)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.dateTimePicker2)
+            implementation(libs.dateTimePicker)
+
+
+
+        }
+        iosMain.dependencies{
+            implementation(libs.ktor.client.darwin)
 
         }
     }
@@ -82,6 +95,8 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    implementation(libs.ktor.client.android)
+
 
 }
 

@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.navigator.Navigator
 import com.tomiappdevelopment.milk_flow.core.presentation.AppTheme
+import com.tomiappdevelopment.milk_flow.presentation.productCatalog.ProductCatalogScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.core.context.startKoin
 
@@ -29,6 +30,7 @@ fun App(
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
+            ProductCatalogScreen()
         }
     }
 }

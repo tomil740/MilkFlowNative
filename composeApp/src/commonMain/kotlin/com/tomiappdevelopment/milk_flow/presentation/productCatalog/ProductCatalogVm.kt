@@ -7,6 +7,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
+import com.tomiappdevelopment.milk_flow.presentation.productCatalog.ProductCatalogEvents
+
 
 
 class ProductCatalogVm(): ScreenModel{
@@ -22,4 +24,15 @@ class ProductCatalogVm(): ScreenModel{
     //the observable stateflow ui state that is listening to the original ui state
     var uiState = _uiState.stateIn(screenModelScope, SharingStarted.WhileSubscribed(5000), _uiState.value)
 
+    fun onEvent(event:ProductCatalogEvents) {
+        when(event){
+            is ProductCatalogEvents.AddToCart -> TODO()
+            is ProductCatalogEvents.OnCategorySelected -> TODO()
+            is ProductCatalogEvents.OnProductClicked -> TODO()
+            ProductCatalogEvents.Refresh -> TODO()
+        }
+    }
+
 }
+
+
