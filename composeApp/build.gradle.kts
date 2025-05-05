@@ -7,12 +7,14 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
+            freeCompilerArgs.add("-Xuse-k2=false")
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
@@ -56,11 +58,19 @@ kotlin {
             implementation(libs.dateTimePicker2)
             implementation(libs.dateTimePicker)
 
+            implementation(libs.sqldelight.coroutines)
+
+
+
+
 
 
         }
         iosMain.dependencies{
             implementation(libs.ktor.client.darwin)
+
+            implementation(libs.sqldelight.driver.native)
+
 
         }
     }
@@ -97,6 +107,18 @@ dependencies {
     debugImplementation(compose.uiTooling)
     implementation(libs.ktor.client.android)
 
+    implementation(libs.sqldelight.driver.android)
+
+
 
 }
+sqldelight {
+    databases {
+        create("WorkData") {
+            packageName.set("com.tomiappdevelopment.milk_flow.database")
+        }
+    }
+}
+
+
 

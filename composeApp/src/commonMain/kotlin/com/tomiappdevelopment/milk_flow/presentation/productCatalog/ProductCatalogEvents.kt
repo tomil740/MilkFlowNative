@@ -5,8 +5,8 @@ import com.tomiappdevelopment.milk_flow.domain.models.Product
 import com.tomiappdevelopment.milk_flow.domain.models.Category
 
 sealed interface ProductCatalogEvents {
-    data class OnProductClicked(val product: Product) : ProductCatalogEvents
-    data class OnCategorySelected(val category: Category) : ProductCatalogEvents
+    data class OnCategorySelected(val category: Category?) : ProductCatalogEvents
     data class AddToCart(val cartItem: CartItem) : ProductCatalogEvents
-    object Refresh : ProductCatalogEvents
+    data object OnEmptyProducts:ProductCatalogEvents
+    data object Refresh : ProductCatalogEvents
 }

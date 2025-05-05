@@ -11,5 +11,6 @@ data class ProductCatalogUiState(
     val selectedCategory: Category? = null,                   // Current category filter
     val selectedProduct: Product? = null,                     // For product detail or dialog
     val isLoading: Boolean = false,                           // Loading state
+    val emptyDataMes:String? = null,
     val uiMessage : Channel<UiText>,
 )

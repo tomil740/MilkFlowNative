@@ -9,5 +9,4 @@ data class Product(
     val itemsPerPackage: Int,
     val weight: Int,
     val description: String,
-
 )
