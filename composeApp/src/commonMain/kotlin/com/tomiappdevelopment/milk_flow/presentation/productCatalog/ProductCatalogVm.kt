@@ -9,10 +9,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
+import com.tomiappdevelopment.milk_flow.domain.util.Result
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.ProductCatalogEvents
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class ProductCatalogVm(productsRepo: ProductRepository): ScreenModel{
@@ -30,7 +34,31 @@ class ProductCatalogVm(productsRepo: ProductRepository): ScreenModel{
 
     init {
         screenModelScope.launch {
+            withContext(Dispatchers.IO) {
+                delay(1000)
+                _uiState.update { it.copy(isLoading = true) }
+                if(uiState.value.products.isEmpty()) {
+                    val a = productsRepo.syncProductData()
 
+                    when (a) {
+                        is Result.Error<*> -> {
+                            _uiState.update { it.copy(isLoading = false) }
+                            uiMessage.send(UiText.DynamicString(a.error.toString()))
+                        }
+
+                        is Result.Success<*> -> {
+                            _uiState.update { it.copy(isLoading = false) }
+                            uiMessage.send(UiText.DynamicString("Sessfuly synced"))
+                        }
+                    }
+                }else{
+                    _uiState.update { it.copy(isLoading = false) }
+                    uiMessage.send(UiText.DynamicString("Local data is in sync!!"))
+                }
+            }
+        }
+
+        screenModelScope.launch {
             productsRepo.getProducts().collect{ products->
                 _uiState.update { it.copy(products = products) }
                 filterByCategory(uiState.value.selectedCategory)

@@ -1,21 +1,20 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.sqldelight)
+    alias(libs.plugins.jetbrainsCompose)
+
+     alias(libs.plugins.ksp)
+     alias(libs.plugins.room)
 }
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            freeCompilerArgs.add("-Xuse-k2=false")
-            jvmTarget.set(JvmTarget.JVM_11)
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "11"
+            }
         }
     }
     
@@ -33,15 +32,15 @@ kotlin {
     sourceSets {
         
         androidMain.dependencies {
-            implementation(compose.preview)
+            implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
         }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+              implementation(compose.runtime)
+              implementation(compose.foundation)
+              implementation(compose.ui)
+              implementation(compose.components.resources)
+              implementation(compose.components.uiToolingPreview)
 
 
             implementation(libs.androidx.material3)
@@ -49,7 +48,11 @@ kotlin {
             implementation(libs.navigator.screen.model)
             implementation(libs.navigator.transitions)
             implementation(libs.navigator.koin)
-            api(libs.koin.core)
+
+            implementation(libs.koin.core)
+            implementation(libs.koin.android)
+            implementation(libs.koin.androidx.compose) // includes viewModel support
+
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
             implementation(libs.ktor.client.core)
@@ -58,18 +61,14 @@ kotlin {
             implementation(libs.dateTimePicker2)
             implementation(libs.dateTimePicker)
 
-            implementation(libs.sqldelight.coroutines)
-
-
-
-
+            implementation(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
 
 
         }
         iosMain.dependencies{
             implementation(libs.ktor.client.darwin)
 
-            implementation(libs.sqldelight.driver.native)
 
 
         }
@@ -77,6 +76,7 @@ kotlin {
 }
 
 android {
+
     namespace = "com.tomiappdevelopment.milk_flow"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
@@ -103,22 +103,21 @@ android {
     }
 }
 
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
 dependencies {
     debugImplementation(compose.uiTooling)
     implementation(libs.ktor.client.android)
+   // implementation(libs.koin.android)
+ //   implementation(libs.koin.androidx.compose)
 
-    implementation(libs.sqldelight.driver.android)
-
+    ksp(libs.room.compiler)
 
 
 }
-sqldelight {
-    databases {
-        create("WorkData") {
-            packageName.set("com.tomiappdevelopment.milk_flow.database")
-        }
-    }
-}
+
 
 
 

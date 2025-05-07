@@ -19,11 +19,7 @@ fun App(
     dynamicColor: Boolean=true,
 ) {
     //todo : need to figure out how that should be realy solve (init / some intalize function ...)
-    try {
-        initializeKoin()
-    }catch (e:Exception){
-        //
-    }
+
     AppTheme(
         darkTheme = darkTheme,
         dynamicColor = dynamicColor
@@ -34,10 +30,5 @@ fun App(
         ) {
             Navigator(ProductCatalogScreenClass())
         }
-    }
-}
-fun initializeKoin() {
-    startKoin {
-        modules(appModule)
     }
 }
