@@ -1,9 +1,13 @@
 package com.tomiappdevelopment.milk_flow.di
 
+import androidx.room.RoomDatabase
+import com.tomiappdevelopment.milk_flow.data.local.AppDatabaseConstructor
 import com.tomiappdevelopment.milk_flow.data.local.MilkFlowDb
-import com.tomiappdevelopment.milk_flow.data.local.getMilkFlowDb
 import org.koin.dsl.module
 
 actual fun platformModule() = module {
-    single<MilkFlowDb> { getMilkFlowDb() }
+    single<RoomDatabase.Builder<MilkFlowDb>> { AppDatabaseConstructor.initialize() }
+
+    //single<RoomDatabase.Builder<MilkFlowDb>> { iosDatabaseBuilder() }
+    //single<MilkFlowDb> { getMilkFlowDb() }
 }

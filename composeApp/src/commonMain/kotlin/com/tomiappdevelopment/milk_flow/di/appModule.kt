@@ -1,7 +1,6 @@
 package com.tomiappdevelopment.milk_flow.di
 
 import com.tomiappdevelopment.milk_flow.data.ProductRepositoryImpl
-import com.tomiappdevelopment.milk_flow.data.local.DatabaseFactory
 import com.tomiappdevelopment.milk_flow.data.local.MilkFlowDb
 import com.tomiappdevelopment.milk_flow.data.local.dao.ProductDao
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
