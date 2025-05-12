@@ -34,6 +34,8 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.koin.android)
+            implementation(libs.koin.androidx.compose) // includes viewModel support
         }
         commonMain.dependencies {
               implementation(compose.runtime)
@@ -50,8 +52,8 @@ kotlin {
             implementation(libs.navigator.koin)
 
             implementation(libs.koin.core)
-            implementation(libs.koin.android)
-            implementation(libs.koin.androidx.compose) // includes viewModel support
+           // implementation(libs.koin.android)
+            //implementation(libs.koin.androidx.compose) // includes viewModel support
 
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)

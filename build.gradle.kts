@@ -1,7 +1,6 @@
 repositories {
     google()
     mavenCentral()  // Ensure Maven Central is included
-    jcenter()  // Optional, if you still need some dependencies
 }
 
 plugins {
