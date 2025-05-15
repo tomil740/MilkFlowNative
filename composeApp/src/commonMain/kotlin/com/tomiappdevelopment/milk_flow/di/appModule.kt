@@ -4,7 +4,9 @@ import com.tomiappdevelopment.milk_flow.data.ProductRepositoryImpl
 import com.tomiappdevelopment.milk_flow.data.local.DatabaseFactory
 import com.tomiappdevelopment.milk_flow.data.local.MilkFlowDb
 import com.tomiappdevelopment.milk_flow.data.local.dao.ProductDao
+import com.tomiappdevelopment.milk_flow.data.remote.ProductsRemoteDataSource
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
+import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.ProductCatalogVm
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -25,10 +27,14 @@ fun initKoin(config: KoinAppDeclaration? = null) =
     }
 
 val appModule = module {
-    
+
+    singleOf(::ProductsRemoteDataSource)
+
     single<ProductDao> { get<MilkFlowDb>().productDao() }
 
     singleOf(::ProductRepositoryImpl).bind(ProductRepository::class)
+
+    singleOf(::SyncIfNeededUseCase)
 
     factoryOf(::ProductCatalogVm)
 }

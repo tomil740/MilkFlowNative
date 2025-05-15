@@ -23,6 +23,13 @@ dateTimePickerV = "1.0.2"
 
 dateTimePickerV2 = "1.0.0-beta01"
 
+googleGmsGoogleServices = "4.4.2"
+firebaseDatabase = "21.0.0"
+gitLive = "1.13.0"
+firebaseAuth = "21.1.0"
+firebase-firestore-ktx = "24.10.3"
+gitlive-firebase = "2.0.0"
+
 
 
 
@@ -90,7 +97,13 @@ room-runtime-android = { module = "androidx.room:room-runtime-android", version.
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 
-
+google-gms-auth ={module="com.google.android.gms:play-services-auth" ,version.ref = "googleGmsGoogleServices"}
+firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
+firebase-gitLive-database = { module = "dev.gitlive:firebase-database", version.ref = "gitLive" }
+firebase-gitLive-auth = { module = "dev.gitlive:firebase-auth", version.ref = "gitLive" }
+firebase-auth ={group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuth"}
+gitlive-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "gitlive-firebase" }
+firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebase-firestore-ktx" }
 
 
 [plugins]
@@ -101,6 +114,8 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "room" }
+google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+
 
 
 

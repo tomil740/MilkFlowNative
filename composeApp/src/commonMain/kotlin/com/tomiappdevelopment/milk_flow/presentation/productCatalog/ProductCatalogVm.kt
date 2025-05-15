@@ -4,11 +4,13 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
 import com.tomiappdevelopment.milk_flow.domain.models.Category
+import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
+import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.ProductCatalogEvents
 import kotlinx.coroutines.Dispatchers
@@ -17,9 +19,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDate
+import network.chaintech.utils.now
 
 
-class ProductCatalogVm(productsRepo: ProductRepository): ScreenModel{
+class ProductCatalogVm(productsRepo: ProductRepository,
+                       syncIfNeededUseCase:SyncIfNeededUseCase): ScreenModel{
 
     private val uiMessage = Channel<UiText>()
 
@@ -35,25 +40,21 @@ class ProductCatalogVm(productsRepo: ProductRepository): ScreenModel{
     init {
         screenModelScope.launch {
             withContext(Dispatchers.IO) {
-                delay(1000)
                 _uiState.update { it.copy(isLoading = true) }
                 if(uiState.value.products.isEmpty()) {
-                    val a = productsRepo.syncProductData()
-
-                    when (a) {
-                        is Result.Error<*> -> {
-                            _uiState.update { it.copy(isLoading = false) }
-                            uiMessage.send(UiText.DynamicString(a.error.toString()))
-                        }
-
-                        is Result.Success<*> -> {
-                            _uiState.update { it.copy(isLoading = false) }
-                            uiMessage.send(UiText.DynamicString("Sessfuly synced"))
-                        }
+                    productsRepo.setProductLocalMetaData(ProductMetadata())
+                }
+                val a = syncIfNeededUseCase.invoke(LocalDate.now())
+                when (a) {
+                    is Result.Error<*> -> {
+                        _uiState.update { it.copy(isLoading = false) }
+                        uiMessage.send(UiText.DynamicString(a.error.toString()))
                     }
-                }else{
-                    _uiState.update { it.copy(isLoading = false) }
-                    uiMessage.send(UiText.DynamicString("Local data is in sync!!"))
+
+                    is Result.Success<*> -> {
+                        _uiState.update { it.copy(isLoading = false) }
+                        uiMessage.send(UiText.DynamicString("Sessfuly synced"))
+                    }
                 }
             }
         }

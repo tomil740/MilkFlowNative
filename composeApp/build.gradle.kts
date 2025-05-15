@@ -7,13 +7,15 @@ plugins {
 
      alias(libs.plugins.ksp)
      alias(libs.plugins.room)
+    alias(libs.plugins.google.gms.google.services)
+
 }
 
 kotlin {
     androidTarget {
         compilations.all {
             kotlinOptions {
-                jvmTarget = "11"
+                jvmTarget = "17"
             }
         }
     }
@@ -36,6 +38,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose) // includes viewModel support
+
         }
         commonMain.dependencies {
               implementation(compose.runtime)
@@ -65,6 +68,10 @@ kotlin {
 
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
+
+            implementation(libs.firebase.gitLive.database)
+            implementation(libs.firebase.gitLive.auth)
+            implementation(libs.gitlive.firestore)
 
 
         }
@@ -100,8 +107,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
@@ -116,7 +123,6 @@ dependencies {
  //   implementation(libs.koin.androidx.compose)
 
     ksp(libs.room.compiler)
-
 
 }
 

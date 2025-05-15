@@ -18,3 +18,4 @@ sealed interface DataError: Error {
         DISK_FULL
     }
 }
+class DataException(val error: DataError) : Exception()

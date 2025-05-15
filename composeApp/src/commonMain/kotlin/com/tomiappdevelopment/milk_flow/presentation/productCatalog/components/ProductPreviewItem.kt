@@ -48,7 +48,7 @@ fun ProductPreviewItem(
                 .fillMaxSize()
         ) {
             AsyncImage(
-                model ="https://milkflow.netlify.app/productsImages/regular/7290000554822.webp",
+                model ="https://milkflow.netlify.app/productsImages/regular/${product.barcode}.webp",
                 contentDescription = product.name,
                 contentScale = ContentScale.Crop,
                 modifier = modifier.padding(16.dp ,16.dp,16.dp,0.dp)
