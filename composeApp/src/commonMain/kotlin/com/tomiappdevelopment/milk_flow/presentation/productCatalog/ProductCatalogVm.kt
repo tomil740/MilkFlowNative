@@ -4,23 +4,23 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
 import com.tomiappdevelopment.milk_flow.domain.models.Category
+import com.tomiappdevelopment.milk_flow.domain.models.Product
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
+import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
+import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
+import com.tomiappdevelopment.milk_flow.domain.util.Result
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
-import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
-import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
-import com.tomiappdevelopment.milk_flow.domain.util.Result
-import com.tomiappdevelopment.milk_flow.presentation.productCatalog.ProductCatalogEvents
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.LocalDate
-import network.chaintech.utils.now
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 
 class ProductCatalogVm(productsRepo: ProductRepository,
@@ -42,9 +42,22 @@ class ProductCatalogVm(productsRepo: ProductRepository,
             withContext(Dispatchers.IO) {
                 _uiState.update { it.copy(isLoading = true) }
                 if(uiState.value.products.isEmpty()) {
+
                     productsRepo.setProductLocalMetaData(ProductMetadata())
                 }
-                val a = syncIfNeededUseCase.invoke(LocalDate.now())
+
+                val c = productsRepo.fetchRemoteSyncTimestamp()
+                withContext(Dispatchers.Main) {
+                    val instant = Instant.fromEpochMilliseconds(c)
+                    val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+                    println("Date: $localDateTime")  // ISO format by default
+                }
+
+
+                //val a = syncIfNeededUseCase.invoke(
+                  //Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                //)
+                val a =productsRepo.syncProductData(productMetadata = ProductMetadata())
                 when (a) {
                     is Result.Error<*> -> {
                         _uiState.update { it.copy(isLoading = false) }
@@ -56,6 +69,8 @@ class ProductCatalogVm(productsRepo: ProductRepository,
                         uiMessage.send(UiText.DynamicString("Sessfuly synced"))
                     }
                 }
+
+
             }
         }
 

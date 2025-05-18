@@ -4,6 +4,7 @@ import com.tomiappdevelopment.milk_flow.data.local.dao.ProductDao
 import com.tomiappdevelopment.milk_flow.data.local.entities.ProductEntity
 import com.tomiappdevelopment.milk_flow.data.local.entities.ProductsMetadataEntity
 import com.tomiappdevelopment.milk_flow.data.remote.ProductsRemoteDataSource
+import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.ProductDto
 import com.tomiappdevelopment.milk_flow.domain.models.Product
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
@@ -20,11 +21,15 @@ class ProductRepositoryImpl(private val productsDao: ProductDao,
     override suspend fun syncProductData(productMetadata:ProductMetadata): Result<Boolean, DataError> {
         return try {
             val products = productsRemoteDao.getAllProducts()
+            when(products){
+                is Result.Error<DataError.Network> -> Result.Error(products.error)
+                is Result.Success<List<ProductDto>> -> {
+                    productsDao.syncNewProducts(newProducts = products.data.map {
+                        ProductEntity(id=it.id.toInt(), barcode = it.barcode.toString(), name = it.name, imageUrl = it.imgKey, category = it.category, itemsPerPackage = it.itemsPerPackage.toInt())
+                    }, newMetadata = ProductsMetadataEntity(lastProductsUpdate = productMetadata.lastProductsUpdate, lastSyncCheckDate = productMetadata.lastSyncCheckDate))
+                }
 
-            productsDao.syncNewProducts(newProducts = products.map {
-                ProductEntity(id=it.id, barcode = it.barcode, name = it.name, imageUrl = it.imageUrl, category = it.category, itemsPerPackage = it.itemsPerPackage)
-            }, newMetadata = ProductsMetadataEntity(lastProductsUpdate = productMetadata.lastProductsUpdate, lastSyncCheckDate = productMetadata.lastSyncCheckDate))
-
+            }
             Result.Success(true)
         } catch (e: DataException) {
             Result.Error(e.error)
@@ -32,6 +37,7 @@ class ProductRepositoryImpl(private val productsDao: ProductDao,
             Result.Error(DataError.Network.UNKNOWN)
         }
     }
+
     override suspend fun getLocalMetadata(): ProductMetadata {
         val a = productsDao.getMetadata()
         if (a!= null){
@@ -44,7 +50,17 @@ class ProductRepositoryImpl(private val productsDao: ProductDao,
 
     override suspend fun fetchRemoteSyncTimestamp(): Long {
         val a = productsRemoteDao.getProductsMetadata()
-        return a
+        return when(a){
+            is Result.Error<*> -> {
+                println("the obj ${a.error}")
+                 -1
+            }
+            is Result.Success<*> -> {
+                println("the obj ${a.data}")
+                a.data.toString().toLong()
+            }
+        }
+
     }
 
     override fun getProducts(): Flow<List<Product>> {

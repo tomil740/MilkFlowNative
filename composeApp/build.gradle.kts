@@ -5,9 +5,11 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
 
-     alias(libs.plugins.ksp)
-     alias(libs.plugins.room)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
     alias(libs.plugins.google.gms.google.services)
+
+    alias(libs.plugins.kotlin.serialization)
 
 }
 
@@ -55,30 +57,30 @@ kotlin {
             implementation(libs.navigator.koin)
 
             implementation(libs.koin.core)
-           // implementation(libs.koin.android)
-            //implementation(libs.koin.androidx.compose) // includes viewModel support
 
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.ktor.serialization.kotlinx.json)
+
+            implementation(libs.bundles.ktor)
+
+
             implementation(libs.dateTimePicker2)
             implementation(libs.dateTimePicker)
 
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
 
-            implementation(libs.firebase.gitLive.database)
-            implementation(libs.firebase.gitLive.auth)
             implementation(libs.gitlive.firestore)
+
+
+
+
+
 
 
         }
         iosMain.dependencies{
             implementation(libs.ktor.client.darwin)
-
-
 
         }
     }
@@ -118,9 +120,7 @@ room {
 
 dependencies {
     debugImplementation(compose.uiTooling)
-    implementation(libs.ktor.client.android)
-   // implementation(libs.koin.android)
- //   implementation(libs.koin.androidx.compose)
+    implementation(libs.ktor.client.okhttp)
 
     ksp(libs.room.compiler)
 

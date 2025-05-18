@@ -4,12 +4,12 @@ import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.Result
-import kotlinx.datetime.LocalDate
 
 class SyncIfNeededUseCase(
     private val repository: ProductRepository
 ) {
-    suspend operator fun invoke(currentDate: LocalDate): Result<Boolean, DataError> {
+    suspend operator fun invoke(): Result<Boolean, DataError> {
+
         val localMetadata = try {
             repository.getLocalMetadata()
         } catch (e: Exception) {
@@ -19,15 +19,15 @@ class SyncIfNeededUseCase(
         // 1. Threshold check: already synced today?
         val lastCheckDate = localMetadata.lastSyncCheckDate?.let {
             try {
-                LocalDate.parse(it)
+               // LocalDate.parse(it)
             } catch (e: Exception) {
                 null // fallback to force sync
             }
         }
 
-        if (lastCheckDate != null &&
-            lastCheckDate.year == currentDate.year &&
-            lastCheckDate.dayOfYear == currentDate.dayOfYear
+        if (lastCheckDate != null //&&
+         //   lastCheckDate.year == currentDate.year &&
+           // lastCheckDate.dayOfYear == currentDate.dayOfYear
         ) {
             return Result.Success(false) // Already synced today
         }
@@ -51,7 +51,7 @@ class SyncIfNeededUseCase(
             repository.setProductLocalMetaData(
                 ProductMetadata(
                     lastProductsUpdate = localMetadata.lastProductsUpdate,
-                    lastSyncCheckDate = currentDate.toString()
+                    lastSyncCheckDate = ""//currentDate.toString()
                 )
             )
             return Result.Success(false)
@@ -61,7 +61,7 @@ class SyncIfNeededUseCase(
         val syncResult = repository.syncProductData(
             ProductMetadata(
                 lastProductsUpdate = remoteTimestamp,
-                lastSyncCheckDate = currentDate.toString()
+                lastSyncCheckDate = ""//currentDate.toString()
             )
         )
 
