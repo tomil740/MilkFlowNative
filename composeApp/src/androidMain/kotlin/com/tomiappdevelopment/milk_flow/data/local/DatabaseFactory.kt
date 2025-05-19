@@ -16,6 +16,7 @@ actual class DatabaseFactory(
         )
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
+            .fallbackToDestructiveMigration(true)
             .build()
     }
 }

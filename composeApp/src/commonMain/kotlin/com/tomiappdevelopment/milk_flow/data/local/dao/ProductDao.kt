@@ -17,9 +17,9 @@ interface ProductDao {
         newMetadata: ProductsMetadataEntity
     ) {
         deleteAll()
-        clearMetadata()
 
         upsertAll(newProducts)
+        setMetadata(metadata = newMetadata)
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -28,12 +28,12 @@ interface ProductDao {
     @Query("DELETE FROM products")
     suspend fun deleteAll()
 
-    @Query("SELECT * FROM products_metadata WHERE id = 0")
+    @Query("SELECT * FROM productsmetadata WHERE id = 0")
     suspend fun getMetadata(): ProductsMetadataEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun setMetadata(metadata: ProductsMetadataEntity)
 
-    @Query("DELETE FROM products_metadata")
+    @Query("DELETE FROM productsmetadata")
     suspend fun clearMetadata()
 }

@@ -1,0 +1,11 @@
+package com.tomiappdevelopment.milk_flow.domain.repositories
+
+import com.tomiappdevelopment.milk_flow.domain.util.DataError
+import com.tomiappdevelopment.milk_flow.domain.util.Result
+
+
+interface AuthRepository {
+    suspend fun signIn(email: String, password: String): Result<Boolean, DataError>
+    suspend fun refreshToken(): Result<Boolean, DataError>
+    suspend fun logout()
+}

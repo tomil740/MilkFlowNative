@@ -1,5 +1,5 @@
 package com.tomiappdevelopment.milk_flow
-
+/*
 import dev.gitlive.firebase.firestore.DocumentSnapshot
 import platform.Foundation.NSNumber
 import platform.Foundation.NSString
@@ -15,4 +15,6 @@ actual fun DocumentSnapshot.getProductName(): Int? {
     println("IOS working?? ${a}")
     return 7
 }
+
+ */
 

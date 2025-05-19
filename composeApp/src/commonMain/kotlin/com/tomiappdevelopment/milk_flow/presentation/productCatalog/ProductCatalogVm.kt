@@ -8,10 +8,12 @@ import com.tomiappdevelopment.milk_flow.domain.models.Product
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
+import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -41,32 +43,30 @@ class ProductCatalogVm(productsRepo: ProductRepository,
         screenModelScope.launch {
             withContext(Dispatchers.IO) {
                 _uiState.update { it.copy(isLoading = true) }
+                delay(500)
                 if(uiState.value.products.isEmpty()) {
-
-                    productsRepo.setProductLocalMetaData(ProductMetadata())
-                }
-
-                val c = productsRepo.fetchRemoteSyncTimestamp()
-                withContext(Dispatchers.Main) {
-                    val instant = Instant.fromEpochMilliseconds(c)
-                    val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-                    println("Date: $localDateTime")  // ISO format by default
+                    //demand a sync
+                    delay(500)
+                    if(uiState.value.products.isEmpty()){
+                        productsRepo.setProductLocalMetaData(ProductMetadata())
+                    }
                 }
 
 
-                //val a = syncIfNeededUseCase.invoke(
-                  //Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-                //)
-                val a =productsRepo.syncProductData(productMetadata = ProductMetadata())
+
+                val a = syncIfNeededUseCase.invoke()
                 when (a) {
-                    is Result.Error<*> -> {
+                    is Result.Error<Error> -> {
                         _uiState.update { it.copy(isLoading = false) }
                         uiMessage.send(UiText.DynamicString(a.error.toString()))
                     }
-
-                    is Result.Success<*> -> {
+                    is Result.Success<Boolean> -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        uiMessage.send(UiText.DynamicString("Sessfuly synced"))
+                        if (a.data) {
+                            uiMessage.send(UiText.DynamicString("Successfully synced"))
+                        }else{
+                            uiMessage.send(UiText.DynamicString("All products up to date no sync is needed"))
+                        }
                     }
                 }
 
@@ -93,6 +93,7 @@ class ProductCatalogVm(productsRepo: ProductRepository,
                 filterByCategory(event.category)
             }
             ProductCatalogEvents.Refresh -> TODO()
+
             ProductCatalogEvents.OnEmptyProducts -> {
 
                 //get the matched case(connection error, auth or a server error) and update the matched field

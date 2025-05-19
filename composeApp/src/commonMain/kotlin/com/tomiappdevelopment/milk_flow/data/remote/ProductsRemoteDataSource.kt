@@ -2,19 +2,12 @@ package com.tomiappdevelopment.milk_flow.data.remote
 
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.ProductDto
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
-import com.tomiappdevelopment.milk_flow.domain.util.DataException
 import com.tomiappdevelopment.milk_flow.domain.util.Result
-import com.tomiappdevelopment.milk_flow.getProductName
-import dev.gitlive.firebase.Firebase
-import dev.gitlive.firebase.firestore.FirebaseFirestoreException
-import dev.gitlive.firebase.firestore.code
-import dev.gitlive.firebase.firestore.firestore
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.datetime.Instant
-import kotlinx.io.IOException
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -27,70 +20,6 @@ import kotlinx.serialization.json.longOrNull
 class ProductsRemoteDataSource(
     private val httpClient: HttpClient
 ){
-
-    private val firestore = Firebase.firestore
-
-    suspend fun getAllProducts1(): List<ProductDto> {
-        try {
-
-            val snapshot1 = firestore.collection("products").document("53746").get()
-            println("@@@@@@@THIS ${snapshot1.id}")
-
-            println("@@@@@@@THIS Try!!!!")
-
-            if (snapshot1.exists) {
-               // println("the val@@!$@#${snapshot1.get("updateAt") as? TimestampEncoder}")
-
-                val imgKey  = runCatching { snapshot1.get<Int>("itemsPerPackage") }.getOrNull() ?: ""
-                val imgKey1  = runCatching { snapshot1.get<Long>("itemsPerPackage") }.getOrNull() ?: ""
-                val imgKey3  = runCatching { snapshot1.getProductName() }.getOrNull() ?: ""
-
-                println("isnt working!!!?????? $imgKey")
-                println("the val999999@@!$@#${imgKey1}")
-                println("the val999999@@!$@#${imgKey3}")
-
-
-            }
-
-
-            val snapshot = firestore.collection("products").get()
-
-            //my temp fix
-            if (snapshot.documents.isEmpty()){
-                throw DataException(DataError.Network.NO_INTERNET)
-            }
-
-            //print("working@@@@@@@@@@ ${snapshot.documents.toString()}")
-            val products = snapshot.documents.map { doc ->
-                if (doc.exists){
-                   // print("working@@@@@@@@@@ ${doc.id}")
-                   // print("working@@@@@@@@@@ ${firestore.collection("products").document(doc.id).get()}")
-                }
-
-            }
-              //  doc.data<ProductDto>()
-           // }
-            return listOf()
-        } catch (e: IOException) {
-            println("isnt working!!!?????? $e")
-
-            throw DataException(DataError.Network.NO_INTERNET)
-        } catch (e: FirebaseFirestoreException) {
-            val code = e.code.name.lowercase()
-
-            val error = when {
-                "permission_denied" in code -> DataError.Network.UNAUTHORIZED
-                "unavailable" in code -> DataError.Network.SERVER_ERROR
-                "deadline_exceeded" in code || "timeout" in code -> DataError.Network.REQUEST_TIMEOUT
-                else -> DataError.Network.UNKNOWN
-            }
-
-            throw DataException(error)
-        } catch (e: Exception) {
-            println("isnt working!!!?????? $e")
-            throw DataException(DataError.Network.UNKNOWN)
-        }
-    }
 
     suspend fun getAllProducts(): Result<List<ProductDto>, DataError.Network> {
         val response = try {

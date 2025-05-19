@@ -1,4 +1,4 @@
-package com.tomiappdevelopment.milk_flow.data
+package com.tomiappdevelopment.milk_flow.data.repositories
 
 import com.tomiappdevelopment.milk_flow.data.local.dao.ProductDao
 import com.tomiappdevelopment.milk_flow.data.local.entities.ProductEntity
@@ -10,23 +10,34 @@ import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.DataException
-import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class ProductRepositoryImpl(private val productsDao: ProductDao,
-                            private val productsRemoteDao:ProductsRemoteDataSource):ProductRepository {
+                            private val productsRemoteDao: ProductsRemoteDataSource
+): ProductRepository {
 
-    override suspend fun syncProductData(productMetadata:ProductMetadata): Result<Boolean, DataError> {
+    override suspend fun syncProductData(productMetadata: ProductMetadata): Result<Boolean, DataError> {
         return try {
             val products = productsRemoteDao.getAllProducts()
             when(products){
                 is Result.Error<DataError.Network> -> Result.Error(products.error)
                 is Result.Success<List<ProductDto>> -> {
                     productsDao.syncNewProducts(newProducts = products.data.map {
-                        ProductEntity(id=it.id.toInt(), barcode = it.barcode.toString(), name = it.name, imageUrl = it.imgKey, category = it.category, itemsPerPackage = it.itemsPerPackage.toInt())
-                    }, newMetadata = ProductsMetadataEntity(lastProductsUpdate = productMetadata.lastProductsUpdate, lastSyncCheckDate = productMetadata.lastSyncCheckDate))
+                        ProductEntity(
+                            id = it.id.toInt(),
+                            barcode = it.barcode.toString(),
+                            name = it.name,
+                            imageUrl = it.imgKey,
+                            category = it.category,
+                            itemsPerPackage = it.itemsPerPackage.toInt()
+                        )
+                    }, newMetadata = ProductsMetadataEntity(
+                        lastProductsUpdate = productMetadata.lastProductsUpdate,
+                        lastSyncCheckDate = productMetadata.lastSyncCheckDate
+                    )
+                    )
                 }
 
             }
@@ -41,9 +52,14 @@ class ProductRepositoryImpl(private val productsDao: ProductDao,
     override suspend fun getLocalMetadata(): ProductMetadata {
         val a = productsDao.getMetadata()
         if (a!= null){
-            return ProductMetadata(a.lastProductsUpdate,a.lastSyncCheckDate)
+            return ProductMetadata(a.lastProductsUpdate, a.lastSyncCheckDate)
         }else{
-            productsDao.setMetadata(ProductsMetadataEntity(lastProductsUpdate = null, lastSyncCheckDate = null))
+            setProductLocalMetaData(
+                ProductMetadata(
+                    lastProductsUpdate = 1L,
+                    lastSyncCheckDate = "null"
+                )
+            )
             return ProductMetadata()
         }
     }
@@ -64,12 +80,26 @@ class ProductRepositoryImpl(private val productsDao: ProductDao,
     }
 
     override fun getProducts(): Flow<List<Product>> {
-        return productsDao.getAllProducts().map { prdouctEntityLst ->prdouctEntityLst.map { Product(it.id,it.barcode,it.name,it.imageUrl,it.category,it.itemsPerPackage) }  }
+        return productsDao.getAllProducts().map { prdouctEntityLst ->prdouctEntityLst.map {
+            Product(
+                it.id,
+                it.barcode,
+                it.name,
+                it.imageUrl,
+                it.category,
+                it.itemsPerPackage
+            )
+        }  }
     }
 
     override suspend fun setProductLocalMetaData(productMetadata: ProductMetadata) {
+        println("@@@@@@ updateLocal synconh @@@@@@@ ${productMetadata}")
+
         productsDao.setMetadata(
-            ProductsMetadataEntity(lastProductsUpdate = productMetadata.lastProductsUpdate, lastSyncCheckDate = productMetadata.lastSyncCheckDate)
+            ProductsMetadataEntity(
+                lastProductsUpdate = productMetadata.lastProductsUpdate,
+                lastSyncCheckDate = productMetadata.lastSyncCheckDate
+            )
         )
     }
 }

@@ -37,6 +37,7 @@ room = "2.7.0-alpha01"
 ksp = "1.9.23-1.0.19"
 sqlite = "2.5.0-SNAPSHOT"
 koin-compose = "1.0.4"
+kotlinx-serialization = "1.6.2"
 
 
 
@@ -87,6 +88,8 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
 dateTimePicker = {module = "network.chaintech:kmp-date-time-picker",version.ref = "dateTimePickerV"}
 dateTimePicker2 = {module = "io.github.darkokoa:datetime-wheel-picker",version.ref = "dateTimePickerV2"}

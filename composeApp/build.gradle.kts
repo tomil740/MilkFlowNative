@@ -9,8 +9,6 @@ plugins {
     alias(libs.plugins.room)
     alias(libs.plugins.google.gms.google.services)
 
-    alias(libs.plugins.kotlin.serialization)
-
 }
 
 kotlin {
@@ -41,6 +39,8 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose) // includes viewModel support
 
+
+
         }
         commonMain.dependencies {
               implementation(compose.runtime)
@@ -70,17 +70,16 @@ kotlin {
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
 
-            implementation(libs.gitlive.firestore)
+         //   implementation(libs.gitlive.firestore)
 
-
-
-
+            implementation(libs.kotlinx.serialization.json)
 
 
 
         }
         iosMain.dependencies{
             implementation(libs.ktor.client.darwin)
+
 
         }
     }
@@ -91,13 +90,6 @@ android {
     namespace = "com.tomiappdevelopment.milk_flow"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
-    defaultConfig {
-        applicationId = "com.tomiappdevelopment.milk_flow"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -112,6 +104,25 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    defaultConfig {
+        applicationId = "com.tomiappdevelopment.milk_flow"
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        versionCode = 1
+        versionName = "1.0"
+
+      //  buildConfigField("String", "FIREBASE_API_KEY", AIzaSyDbmxhBoZHY0H5MJSzz5idhrC6FbFQSSI)
+        buildConfigField("String", "FIREBASE_API_KEY", "\"${"AIzaSyDbmxh-BoZHY0H5MJSzz5idhrC6FbFQSSI"}\"")
+
+
+
+    }
+
 }
 
 room {

@@ -40,7 +40,8 @@ fun ProductPreviewItem(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            , contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     ) {
         Column(
