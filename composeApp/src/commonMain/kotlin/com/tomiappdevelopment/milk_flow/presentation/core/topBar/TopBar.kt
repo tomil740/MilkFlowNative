@@ -1,4 +1,4 @@
-package com.tomiappdevelopment.milk_flow.presentation.core
+package com.tomiappdevelopment.milk_flow.presentation.core.topBar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,36 +14,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import com.tomiappdevelopment.milk_flow.NavigationManager
-import com.tomiappdevelopment.milk_flow.presentation.LoginScreen.LoginScreenClass
-import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.util.ActionButton
+import com.tomiappdevelopment.milk_flow.presentation.core.AppRoute
+import com.tomiappdevelopment.milk_flow.presentation.core.components.ActionButton
+import com.tomiappdevelopment.milk_flow.presentation.core.components.AuthActionButton
 
 @Composable
 fun TopBar(
-    isLoggedIn: Boolean,
-    isDistributor: Boolean,
-    cartItemCount: Int = 0,
-    onNavigate: (String) -> Unit,
-    onLogout: () -> Unit
+    state: TopBarUiState,
+    onNavigate: (AppRoute) -> Unit,
+    onLogout: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(horizontal = 16.dp, vertical = 8.dp)
-        ,
+            .padding(top = 30.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         ActionButton(
             icon = "🛍️",
             label = "כל המוצרים",
-            onClick = { onNavigate("/") }
+            onClick = { onNavigate(AppRoute.ProductsCatalog) }
         )
 
-        if (!isLoggedIn) {
+        if (!state.isLoggedIn) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     "היי אורח",
@@ -51,7 +47,7 @@ fun TopBar(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Button(
-                    onClick = { NavigationManager.navigateTo(LoginScreenClass()) },
+                    onClick = { onNavigate(AppRoute.Login) }, // Adjust route
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                 ) {
                     Text("🔐 התחבר כדי לצפות בנתונים שלך")
@@ -60,24 +56,24 @@ fun TopBar(
         } else {
             ActionButton(
                 icon = "📋",
-                label = if (isDistributor) "מנהל הזמנות" else "ההזמנות שלי",
-                onClick = { onNavigate("/demandsView") }
+                label = if (state.isDistributor) "מנהל הזמנות" else "ההזמנות שלי",
+                onClick = { onNavigate(AppRoute.ProductsCatalog) }
             )
 
-            if (!isDistributor) {
+            if (!state.isDistributor) {
                 ActionButton(
                     icon = "🛒",
                     label = "העגלה שלי",
-                    floatingLabel = cartItemCount,
-                    onClick = { onNavigate("/cart") }
+                    floatingLabel = state.cartItemCount,
+                    onClick = { onNavigate(AppRoute.ProductsCatalog) }
                 )
             }
 
-            ActionButton(
-                icon = "🚪",
-                label = "התנתקות",
-                onClick = onLogout
+            AuthActionButton(
+                userName = state.name,
+                onLogout =  onLogout
             )
         }
     }
 }
+

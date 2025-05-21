@@ -1,4 +1,4 @@
-package com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.util
+package com.tomiappdevelopment.milk_flow.presentation.core.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,17 +26,17 @@ fun ActionButton(
     onClick: () -> Unit
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+        horizontalAlignment = Alignment.Companion.CenterHorizontally,
+        modifier = Modifier.Companion
             .padding(8.dp)
             .clickable { onClick() }
     ) {
         Box(
-            modifier = Modifier
+            modifier = Modifier.Companion
                 .size(56.dp)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surface),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Companion.Center
         ) {
             Text(
                 text = icon,
@@ -45,13 +45,13 @@ fun ActionButton(
 
             if (floatingLabel != null && floatingLabel > 0) {
                 Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
+                    modifier = Modifier.Companion
+                        .align(Alignment.Companion.TopEnd)
                         .offset(x = 6.dp, y = (-6).dp)
                         .size(18.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.error),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Companion.Center
                 ) {
                     Text(
                         text = floatingLabel.toString(),
@@ -65,8 +65,8 @@ fun ActionButton(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(top = 4.dp),
-            textAlign = TextAlign.Center
+            modifier = Modifier.Companion.padding(top = 4.dp),
+            textAlign = TextAlign.Companion.Center
         )
     }
 }

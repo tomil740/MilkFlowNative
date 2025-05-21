@@ -37,7 +37,7 @@ fun CategoriesBar(
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .padding( vertical = 8.dp)
             .padding(top = 18.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {

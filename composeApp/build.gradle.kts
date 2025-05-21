@@ -57,6 +57,7 @@ kotlin {
             implementation(libs.navigator.koin)
 
             implementation(libs.koin.core)
+            implementation(libs.koin.compose)
 
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
@@ -74,12 +75,13 @@ kotlin {
 
             implementation(libs.kotlinx.serialization.json)
 
+            implementation(libs.multiplatform.settings)
+
 
 
         }
         iosMain.dependencies{
             implementation(libs.ktor.client.darwin)
-
 
         }
     }

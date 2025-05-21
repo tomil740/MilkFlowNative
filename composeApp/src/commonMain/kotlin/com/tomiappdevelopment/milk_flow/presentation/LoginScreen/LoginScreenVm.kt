@@ -2,9 +2,11 @@ package com.tomiappdevelopment.milk_flow.presentation.LoginScreen
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.tomiappdevelopment.milk_flow.core.AuthManager
 import com.tomiappdevelopment.milk_flow.data.remote.AuthService
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.AuthResponse
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
+import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -16,7 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class LoginViewModel(private val authService: AuthService) : ScreenModel {
+class LoginViewModel(private val authManager: AuthManager) : ScreenModel {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -25,23 +27,7 @@ class LoginViewModel(private val authService: AuthService) : ScreenModel {
 
     init {
         screenModelScope.launch {
-
-            withContext(Dispatchers.IO) {
-                val a =authService.signIn("someMail@gmail.com", password = "1234")
-                println("res $a")
-                val b = authService.signIn("shvprslshly@mail.com", password = "1234567")
-
-                println("@@@@@@working $b")
-
-                when(b){
-                    is Result.Error<DataError> ->                 println("@@@@@@working ${b.error}")
-
-                    is Result.Success<AuthResponse> ->                println("@@@@@@working ${b.data}")
-
-                }
-            }
-
-
+            authManager.userFlow(screenModelScope)
         }
     }
 
@@ -78,22 +64,26 @@ class LoginViewModel(private val authService: AuthService) : ScreenModel {
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            delay(1000) // simulate network
-
             // You’d actually call your AuthRepository here.
-            val success = _uiState.value.email == "demo@demo.com" && _uiState.value.password == "1234"
+            val a = authManager.signIn(uiState.value.email,uiState.value.password)
 
-            if (success) {
-                _uiState.update { it.copy(isLoading = false) }
-                // Delegate to AuthManager or call a callback
-            } else {
-                _uiState.update {
+            when(a){
+                is Result.Error<Error> ->  _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "פרטי התחברות שגויים"
+                        errorMessage = "פרטי התחברות שגויים ${a.error}"
                     )
                 }
+                is Result.Success<Boolean> -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "התחבר בהצלחה! ${a.data}"
+                        )
+                    }
+                }
             }
+
         }
     }
 }
