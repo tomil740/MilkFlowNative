@@ -56,7 +56,7 @@ fun ProductDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
-                    model = product.imgKey,
+                    model ="https://milkflow.netlify.app/productsImages/regular/${product.barcode}.webp",
                     contentDescription = product.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

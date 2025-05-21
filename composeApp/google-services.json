@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "645066156053",
+    "project_id": "milkflow-5c80c",
+    "storage_bucket": "milkflow-5c80c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:645066156053:android:60cd11a0c891b8cdf0061c",
+        "android_client_info": {
+          "package_name": "com.tomiappdevelopment.milk_flow"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbmxh-BoZHY0H5MJSzz5idhrC6FbFQSSI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

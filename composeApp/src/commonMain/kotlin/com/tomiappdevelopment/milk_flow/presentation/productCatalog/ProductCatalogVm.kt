@@ -4,18 +4,29 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
 import com.tomiappdevelopment.milk_flow.domain.models.Category
+import com.tomiappdevelopment.milk_flow.domain.models.Product
+import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
+import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
+import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
+import com.tomiappdevelopment.milk_flow.domain.util.Error
+import com.tomiappdevelopment.milk_flow.domain.util.Result
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
-import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
-import com.tomiappdevelopment.milk_flow.presentation.productCatalog.ProductCatalogEvents
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 
-class ProductCatalogVm(productsRepo: ProductRepository): ScreenModel{
+class ProductCatalogVm(productsRepo: ProductRepository,
+                       syncIfNeededUseCase:SyncIfNeededUseCase): ScreenModel{
 
     private val uiMessage = Channel<UiText>()
 
@@ -30,7 +41,40 @@ class ProductCatalogVm(productsRepo: ProductRepository): ScreenModel{
 
     init {
         screenModelScope.launch {
+            withContext(Dispatchers.IO) {
+                _uiState.update { it.copy(isLoading = true) }
+                delay(500)
+                if(uiState.value.products.isEmpty()) {
+                    //demand a sync
+                    delay(500)
+                    if(uiState.value.products.isEmpty()){
+                        productsRepo.setProductLocalMetaData(ProductMetadata())
+                    }
+                }
 
+
+
+                val a = syncIfNeededUseCase.invoke()
+                when (a) {
+                    is Result.Error<Error> -> {
+                        _uiState.update { it.copy(isLoading = false) }
+                        uiMessage.send(UiText.DynamicString(a.error.toString()))
+                    }
+                    is Result.Success<Boolean> -> {
+                        _uiState.update { it.copy(isLoading = false) }
+                        if (a.data) {
+                            uiMessage.send(UiText.DynamicString("Successfully synced"))
+                        }else{
+                            uiMessage.send(UiText.DynamicString("All products up to date no sync is needed"))
+                        }
+                    }
+                }
+
+
+            }
+        }
+
+        screenModelScope.launch {
             productsRepo.getProducts().collect{ products->
                 _uiState.update { it.copy(products = products) }
                 filterByCategory(uiState.value.selectedCategory)
@@ -49,6 +93,7 @@ class ProductCatalogVm(productsRepo: ProductRepository): ScreenModel{
                 filterByCategory(event.category)
             }
             ProductCatalogEvents.Refresh -> TODO()
+
             ProductCatalogEvents.OnEmptyProducts -> {
 
                 //get the matched case(connection error, auth or a server error) and update the matched field
