@@ -13,6 +13,7 @@ import com.tomiappdevelopment.milk_flow.data.repositories.AuthRepositoryImpl
 import com.tomiappdevelopment.milk_flow.data.repositories.ProductRepositoryImpl
 import com.tomiappdevelopment.milk_flow.domain.repositories.AuthRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
+import com.tomiappdevelopment.milk_flow.domain.usecase.GetAuthorizedProducts
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.presentation.LoginScreen.LoginViewModel
 import com.tomiappdevelopment.milk_flow.presentation.core.topBar.TopBarViewModel
@@ -55,6 +56,8 @@ val appModule = module {
     singleOf(::AuthRepositoryImpl).bind(AuthRepository::class)
 
     singleOf(::SyncIfNeededUseCase)
+
+    singleOf(::GetAuthorizedProducts)
 
     factoryOf(::ProductCatalogVm)
 

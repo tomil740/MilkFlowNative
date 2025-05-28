@@ -93,7 +93,6 @@ class ProductRepositoryImpl(private val productsDao: ProductDao,
     }
 
     override suspend fun setProductLocalMetaData(productMetadata: ProductMetadata) {
-        println("@@@@@@ updateLocal synconh @@@@@@@ ${productMetadata}")
 
         productsDao.setMetadata(
             ProductsMetadataEntity(

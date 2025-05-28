@@ -38,7 +38,6 @@ class TopBarViewModel(
     init {
         screenModelScope.launch {
             authManager.userFlow(this).collect { user ->
-                println("!!!!!@@!@#!@#the user update!!@!!@ $user")
                 _uiState.update {
                     it.copy(
                         name = user?.name,

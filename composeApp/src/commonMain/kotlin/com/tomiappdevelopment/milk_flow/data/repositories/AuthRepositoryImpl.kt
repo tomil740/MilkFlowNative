@@ -51,7 +51,7 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun logout() {
-     //   authStorage.clear()
+         authStorage.clearAuth()
     }
 
     override fun getAuthState(): AuthData? {
@@ -62,17 +62,14 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun getUserObjById(uid: String): User? {
-        println("%%%!!%%Called@@@")
         // 1. Try to get from local cache
         val cachedEntity = userDao.getUserById(uid)
         if (cachedEntity != null) {
-            println("%%%!!%%Avialble $cachedEntity")
             return cachedEntity.toUserDomain() // convert DB entity to domain model User
         }
 
         // 2. Fetch from remote
         val remoteResult = authService.getUserById(uid)
-        println("%%%!!%% get remote user $remoteResult")
         return when (remoteResult) {
             is Result.Success -> {
                 val user = remoteResult.data

@@ -7,6 +7,7 @@ import com.tomiappdevelopment.milk_flow.domain.models.Category
 import com.tomiappdevelopment.milk_flow.domain.models.Product
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
+import com.tomiappdevelopment.milk_flow.domain.usecase.GetAuthorizedProducts
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
@@ -25,8 +26,11 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 
-class ProductCatalogVm(productsRepo: ProductRepository,
-                       syncIfNeededUseCase:SyncIfNeededUseCase): ScreenModel{
+class ProductCatalogVm(
+    productsRepo: ProductRepository,
+    syncIfNeededUseCase:SyncIfNeededUseCase,
+    getAuthorizedProducts:GetAuthorizedProducts
+    ): ScreenModel{
 
     private val uiMessage = Channel<UiText>()
 
@@ -36,6 +40,9 @@ class ProductCatalogVm(productsRepo: ProductRepository,
             uiMessage = uiMessage
         )
     )
+
+    private val fullCacheEmptyFlag = MutableStateFlow<Boolean>(false)
+
     //the observable stateflow ui state that is listening to the original ui state
     var uiState = _uiState.stateIn(screenModelScope, SharingStarted.WhileSubscribed(5000), _uiState.value)
 
@@ -44,10 +51,10 @@ class ProductCatalogVm(productsRepo: ProductRepository,
             withContext(Dispatchers.IO) {
                 _uiState.update { it.copy(isLoading = true) }
                 delay(500)
-                if(uiState.value.products.isEmpty()) {
+                if(fullCacheEmptyFlag.value) {
                     //demand a sync
                     delay(500)
-                    if(uiState.value.products.isEmpty()){
+                    if(fullCacheEmptyFlag.value){
                         productsRepo.setProductLocalMetaData(ProductMetadata())
                     }
                 }
@@ -75,8 +82,18 @@ class ProductCatalogVm(productsRepo: ProductRepository,
         }
 
         screenModelScope.launch {
-            productsRepo.getProducts().collect{ products->
-                _uiState.update { it.copy(products = products) }
+            getAuthorizedProducts.invoke(this).collect {
+                products->
+                var theProducts = products
+                //flag of problem in all cached data
+                if(products.size==1 && products.first().id == -1){
+                    fullCacheEmptyFlag.value = true
+                    theProducts = emptyList()
+                }else{
+                    fullCacheEmptyFlag.value = false
+                }
+
+                _uiState.update { it.copy(products = theProducts) }
                 filterByCategory(uiState.value.selectedCategory)
                 if (uiState.value.filteredProducts.isEmpty()){
                     onEvent(ProductCatalogEvents.OnEmptyProducts)
