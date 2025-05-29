@@ -9,6 +9,7 @@ import com.tomiappdevelopment.milk_flow.data.local.SettingsProvider
 import com.tomiappdevelopment.milk_flow.data.remote.AuthService
 import com.tomiappdevelopment.milk_flow.data.remote.ProductsRemoteDataSource
 import com.tomiappdevelopment.milk_flow.data.remote.createHttpClient
+import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -18,8 +19,12 @@ actual fun platformModule() = module {
 
     single<MilkFlowDb> { DatabaseFactory(get()).create() }
 
-    single<ProductsRemoteDataSource> {ProductsRemoteDataSource(createHttpClient(OkHttp.create())) }
+    single<HttpClient> {createHttpClient(OkHttp.create()) }
 
-    single<AuthService> {AuthService(client = createHttpClient(OkHttp.create()), firebaseApiKey = apiKey) }
+    single<ProductsRemoteDataSource> {ProductsRemoteDataSource(get()) }
+
+    single<AuthService> {AuthService(client = get(), firebaseApiKey = apiKey) }
+
+
 
 }

@@ -3,14 +3,17 @@ package com.tomiappdevelopment.milk_flow.presentation.core.topBar
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.tomiappdevelopment.milk_flow.core.AuthManager
+import com.tomiappdevelopment.milk_flow.domain.repositories.CartRepository
 import com.tomiappdevelopment.milk_flow.presentation.core.AppRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TopBarViewModel(
-    private val authManager: AuthManager
+    private val authManager: AuthManager,
+    private val cartRepository: CartRepository
 ) : ScreenModel {
 
     private val _uiState = MutableStateFlow(TopBarUiState())
@@ -37,14 +40,29 @@ class TopBarViewModel(
 
     init {
         screenModelScope.launch {
-            authManager.userFlow(this).collect { user ->
-                _uiState.update {
-                    it.copy(
-                        name = user?.name,
-                        isLoggedIn = user != null,
-                        isDistributor = user?.isDistributer ?: false
-                    )
+
+            launch {
+
+                authManager.userFlow(this).collectLatest { user ->
+
+                    _uiState.update {
+                        it.copy(
+                            name = user?.name,
+                            isLoggedIn = user != null,
+                            isDistributor = user?.isDistributer ?: false
+                        )
+                    }
+
+                    if(user!=null){
+                        cartRepository.getCart(user.uid).collectLatest {  cartItems->
+                            _uiState.update { it.copy(cartItemCount = cartItems.size) }
+                        }
+                    }
                 }
+            }
+
+            launch {
+
             }
         }
     }

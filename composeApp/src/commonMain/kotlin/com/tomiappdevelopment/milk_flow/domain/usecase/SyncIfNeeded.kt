@@ -5,12 +5,14 @@ import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import network.chaintech.utils.now
-
 
 /*
 
@@ -26,40 +28,68 @@ according to that need to implement soem retry mechnisem on error when error app
 class SyncIfNeededUseCase(
     private val repository: ProductRepository
 ) {
-    suspend operator fun invoke(): Result<Boolean, Error> {
+    private val maxRetryAttempts = 3
+    private val retryDelayMillis = 2000L // 2 seconds
 
+    suspend operator fun invoke(): Result<Boolean, Error> {
+        return withContext(Dispatchers.IO) {
+            // Retry logic to handle intermittent failures
+            retryOperation { syncOperation() }
+        }
+    }
+
+    private suspend fun retryOperation(operation: suspend () -> Result<Boolean, Error>): Result<Boolean, Error> {
+        var attempt = 0
+        var result: Result<Boolean, Error> = Result.Error(DataError.Network.SERVER_ERROR) // Default error value
+
+        while (attempt < maxRetryAttempts) {
+            result = operation()  // Update result with the outcome of the operation
+            if (result is Result.Success) {
+                return result // If operation is successful, return the result
+            } else {
+                attempt++
+                if (attempt < maxRetryAttempts) {
+                    delay(retryDelayMillis) // Wait before retrying
+                }
+            }
+        }
+
+        // After all retries, return the last result
+        return result
+    }
+
+    private suspend fun syncOperation(): Result<Boolean, Error> {
         val localMetadata = try {
             repository.getLocalMetadata()
         } catch (e: Exception) {
-            return Result.Error(DataError.Local.DISK_FULL) // general DB error fallback
+            return Result.Error(DataError.Local.DISK_FULL) // Fallback error for DB issues
         }
-        println("@@@@@@ Check @@@@@@@ ${localMetadata}")
 
-        // 1. Threshold check: already synced today?
+        // 1. Check if sync has already occurred today
         val lastCheckDate = localMetadata.lastSyncCheckDate?.let {
             try {
                 LocalDate.parse(it)
             } catch (e: Exception) {
-                null // fallback to force sync
+                null // If the date is malformed, force a sync
             }
         }
-        println("@@@@@@ Check @@@@@@@ ${localMetadata.lastSyncCheckDate}")
 
         val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        if (lastCheckDate != null&&
+        if (lastCheckDate != null &&
             lastCheckDate.year == currentDate.year &&
             lastCheckDate.dayOfYear == currentDate.dayOfYear
         ) {
             return Result.Success(false) // Already synced today
         }
 
-        // 2. Get remote sync timestamp
+        // 2. Fetch remote sync timestamp
         val remoteTimestamp = try {
             repository.fetchRemoteSyncTimestamp()
         } catch (e: Exception) {
-            return Result.Error(DataError.Network.NO_INTERNET)
+            return Result.Error(DataError.Network.NO_INTERNET) // No internet connection
         }
-        //update the check
+
+        // Update the local metadata with the new sync check date
         repository.setProductLocalMetaData(
             ProductMetadata(
                 lastProductsUpdate = remoteTimestamp,
@@ -67,13 +97,12 @@ class SyncIfNeededUseCase(
             )
         )
 
-        // 3. Skip if already up to date
+        // 3. Check if data is up-to-date
         if (remoteTimestamp == localMetadata.lastProductsUpdate) {
-
-            return Result.Success(false)
+            return Result.Success(false) // No need to sync
         }
 
-        // 4. Sync
+        // 4. Perform the data sync
         val syncResult = repository.syncProductData(
             ProductMetadata(
                 lastProductsUpdate = remoteTimestamp,
@@ -81,17 +110,11 @@ class SyncIfNeededUseCase(
             )
         )
 
-        if (syncResult is Result.Error) {
-          //  repository.setProductLocalMetaData(ProductMetadata(null, null)) // clear metadata on fail
-            return Result.Error(DataError.Network.SERVER_ERROR)
+        return when (syncResult) {
+            is Result.Error -> Result.Error(DataError.Network.SERVER_ERROR) // If sync fails
+            is Result.Success -> Result.Success(syncResult.data) // Return sync success
         }
-       val a = when(syncResult){
-            is Result.Error<Error> -> Result.Error(syncResult.error)
-            is Result.Success<Boolean> -> Result.Success(syncResult.data)
-        }
-
-        return a
-
     }
 }
+
 

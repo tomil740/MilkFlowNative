@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.tomiappdevelopment.milk_flow.domain.models.CartItem
 import com.tomiappdevelopment.milk_flow.domain.models.Product
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.CategoriesBar
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.ProductDialog
@@ -139,9 +140,10 @@ fun ProductCatalogScreen(productCatalogStatesAndEvents:ProductCatalogStatesAndEv
                 ProductDialog(
                     product = product,
                     onClose = { selectedProduct = null },
-                    addToCart = { productId, amount ->
-                        // TODO: Handle add to cart logic here if needed
-                        println("Add to cart: $productId x$amount")
+                    onAddOrUpdate = { productId, amount ->
+                        productCatalogStatesAndEvents.onAddToCart(
+                            CartItem(productId,amount)
+                        )
                     },
                     modifier = Modifier
                         .padding(horizontal = 4.dp)

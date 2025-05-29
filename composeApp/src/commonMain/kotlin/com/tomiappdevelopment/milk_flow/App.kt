@@ -11,6 +11,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
 import com.tomiappdevelopment.milk_flow.core.presentation.AppTheme
+import com.tomiappdevelopment.milk_flow.presentation.CartScreen.CartScreenClass
 import com.tomiappdevelopment.milk_flow.presentation.LoginScreen.LoginScreenClass
 import com.tomiappdevelopment.milk_flow.presentation.core.AppRoute
 import com.tomiappdevelopment.milk_flow.presentation.core.topBar.TopBar
@@ -58,6 +59,7 @@ fun App(
                     when (route) {
                         AppRoute.Login -> navigator.push(LoginScreenClass())
                         AppRoute.ProductsCatalog -> navigator.push(ProductCatalogScreenClass())
+                        AppRoute.Cart -> navigator.push(CartScreenClass())
                     }
                 }
             }

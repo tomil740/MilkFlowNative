@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 
 @Composable
 fun ActionButton(
@@ -34,34 +35,40 @@ fun ActionButton(
         Box(
             modifier = Modifier.Companion
                 .size(56.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface),
+                ,
             contentAlignment = Alignment.Companion.Center
         ) {
-            Text(
-                text = icon,
-                fontSize = 24.sp
-            )
+            Box(
+                modifier = Modifier.Companion
+                    .size(56.dp)
+                     .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surface),
+                contentAlignment = Alignment.Companion.Center
+            ) {
+                Text(
+                    text = icon,
+                    fontSize = 24.sp
+                )
 
+            }
             if (floatingLabel != null && floatingLabel > 0) {
                 Box(
                     modifier = Modifier.Companion
                         .align(Alignment.Companion.TopEnd)
                         .offset(x = 6.dp, y = (-6).dp)
-                        .size(18.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.error),
-                    contentAlignment = Alignment.Companion.Center
+                        .size(height = 21.dp, width = 30.dp)
+                        .clip(CircleShape).zIndex(100f)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Companion.TopCenter
                 ) {
                     Text(
                         text = floatingLabel.toString(),
-                        fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.onError
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
         }
-
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,

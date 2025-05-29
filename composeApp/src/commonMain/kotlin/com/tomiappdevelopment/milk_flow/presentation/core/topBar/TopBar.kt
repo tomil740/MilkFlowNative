@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.tomiappdevelopment.milk_flow.presentation.core.AppRoute
 import com.tomiappdevelopment.milk_flow.presentation.core.components.ActionButton
 import com.tomiappdevelopment.milk_flow.presentation.core.components.AuthActionButton
@@ -65,7 +66,7 @@ fun TopBar(
                     icon = "🛒",
                     label = "העגלה שלי",
                     floatingLabel = state.cartItemCount,
-                    onClick = { onNavigate(AppRoute.ProductsCatalog) }
+                    onClick = { onNavigate(AppRoute.Cart) }
                 )
             }
 

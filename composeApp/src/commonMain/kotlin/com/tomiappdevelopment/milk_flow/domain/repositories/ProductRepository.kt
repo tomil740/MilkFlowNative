@@ -18,4 +18,7 @@ interface ProductRepository {
 
     suspend fun setProductLocalMetaData(productMetadata: ProductMetadata)
 
+    suspend fun getProductsByIds(ids: List<Int>): List<Product>
+
+
 }

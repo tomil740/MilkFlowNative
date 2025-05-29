@@ -22,6 +22,9 @@ interface ProductDao {
         setMetadata(metadata = newMetadata)
     }
 
+    @Query("SELECT * FROM products WHERE id IN (:ids)")
+    suspend fun getByIds(ids: List<Int>): List<ProductEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(products: List<ProductEntity>)
 
