@@ -2,6 +2,7 @@ package com.tomiappdevelopment.milk_flow.data.remote.dtoModels
 
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
+import com.tomiappdevelopment.milk_flow.domain.models.Demand
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -21,3 +22,15 @@ fun LocalDateTime.toISO(): String {
     val instant = this.toInstant(TimeZone.UTC)
     return instant.toString() // This automatically formats it to ISO 8601
 }
+
+fun Demand.toDemandDto(): DemandDto{
+    return DemandDto(
+         userId,
+         distributerId,
+         status,
+         createdAt = this.createdAt.toISO(),
+         updatedAt = this.updatedAt.toISO(),
+         products
+    )
+}
+

@@ -57,9 +57,9 @@ fun App(
             LaunchedEffect(Unit) {
                 viewModel.setNavigationHandler { route: AppRoute ->
                     when (route) {
-                        AppRoute.Login -> navigator.push(LoginScreenClass())
-                        AppRoute.ProductsCatalog -> navigator.push(ProductCatalogScreenClass())
-                        AppRoute.Cart -> navigator.push(CartScreenClass())
+                        AppRoute.Login -> navigator.replaceAll(LoginScreenClass())
+                        AppRoute.ProductsCatalog -> navigator.replaceAll(ProductCatalogScreenClass())
+                        AppRoute.Cart -> navigator.replaceAll(CartScreenClass())
                     }
                 }
             }

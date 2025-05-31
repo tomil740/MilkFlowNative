@@ -5,6 +5,7 @@ import com.tomiappdevelopment.milk_flow.data.local.MilkFlowDb
 import com.tomiappdevelopment.milk_flow.data.remote.AuthService
 import com.tomiappdevelopment.milk_flow.data.remote.ProductsRemoteDataSource
 import com.tomiappdevelopment.milk_flow.data.remote.createHttpClient
+import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
 import org.koin.dsl.module
 import platform.Foundation.NSBundle
@@ -16,6 +17,8 @@ actual fun platformModule() = module {
 
      single<MilkFlowDb> { DatabaseFactory().create() }
 
-     single<AuthService> {AuthService(client = createHttpClient(Darwin.create()),firebaseApiKey=apiKey) }
+     single<HttpClient> {createHttpClient(Darwin.create())}
+
+     single<AuthService> {AuthService(client = get(),firebaseApiKey=apiKey) }
 
 }

@@ -18,6 +18,7 @@ import com.tomiappdevelopment.milk_flow.domain.repositories.AuthRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.CartRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
 import com.tomiappdevelopment.milk_flow.domain.usecase.GetAuthorizedProducts
+import com.tomiappdevelopment.milk_flow.domain.usecase.MakeCartDemand
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.CartScreenVm
 import com.tomiappdevelopment.milk_flow.presentation.LoginScreen.LoginViewModel
@@ -67,6 +68,8 @@ val appModule = module {
     singleOf(::CartRepositoryImpl).bind(CartRepository::class)
 
     singleOf(::SyncIfNeededUseCase)
+
+    singleOf(::MakeCartDemand)
 
     singleOf(::GetAuthorizedProducts)
 

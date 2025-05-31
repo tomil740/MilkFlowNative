@@ -13,18 +13,23 @@ import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
 import com.tomiappdevelopment.milk_flow.domain.models.Product
 import com.tomiappdevelopment.milk_flow.domain.repositories.CartRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
+import com.tomiappdevelopment.milk_flow.domain.usecase.MakeCartDemand
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
+import com.tomiappdevelopment.milk_flow.domain.util.DemandError
 import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.ProductCatalogEvents
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -37,8 +42,7 @@ class CartScreenVm(
     private val cartRepository: CartRepository,
     private val authManager: AuthManager,
     syncIfNeededUseCase:SyncIfNeededUseCase,
-    private val demandsRemoteDao: DemandsRemoteDao
-
+    private val makeCartDemand:MakeCartDemand
     ): ScreenModel {
 
     private val uiMessage = Channel<UiText>()
@@ -53,6 +57,7 @@ class CartScreenVm(
     )
     val uiState = _uiState.stateIn(screenModelScope, SharingStarted.WhileSubscribed(5000), _uiState.value)
 
+    var makeDemandJob: Job? =null
 
     init {
         screenModelScope.launch {
@@ -123,46 +128,44 @@ class CartScreenVm(
     fun onEvent(event: CartScreenEvents) {
         when (event) {
             CartScreenEvents.OnMakeDemand -> {
-                screenModelScope.launch {
-                    withContext(Dispatchers.IO) {
+                makeDemandJob?.cancel()
+                makeDemandJob = screenModelScope.launch {
                     _uiState.update { it.copy(isLoading = true) }
-                        authManager.userFlow(this).collectLatest { autState ->
-                            if (autState != null) {
-                                 val a = demandsRemoteDao.makeDemand(
-                                    DemandDto(
-                                        userId = autState.uid,
-                                        distributerId =autState.distributerId,
-                                        status = Status.completed,
-                                        products = _uiState.value.cartProducts.map {
-                                            CartItem(productId = it.product.id, amount = it.amount)
-                                        }
-                                    )
-                                )
+                    delay(500)
+                    val authState = authManager.userFlow(this).firstOrNull()
+                    if (authState == null) {
+                        _uiState.update { it.copy(isLoading = false) }
+                        uiMessage.send(UiText.DynamicString("User not authenticated"))
+                        return@launch
+                    }
 
-                                withContext(Dispatchers.Main) {
-                                    when (a) {
-                                        is Result.Error<DataError> -> {
-                                            uiMessage.send(UiText.DynamicString("a demand was fail ${a.error}"))
-                                        }
-
-                                        is Result.Success<Unit> -> {
-                                            uiMessage.send(UiText.DynamicString("a demand was made"))
-                                        }
-                                    }
-                                }
-                                        }
-
-                                _uiState.update {
-                                    it.copy(
-                                        isLoading = false,
-                                        cartProducts = listOf()
-                                    )
-                                }
-                             //   uiMessage.send(UiText.DynamicString("a demand was made"))
-                            }
+                    val result = makeCartDemand(
+                        authState = authState,
+                        cartItems = _uiState.value.cartProducts.map {
+                            CartItem(it.product.id, it.amount)
                         }
+                    )
+
+                    when (result) {
+                        is Result.Error -> {
+                             _uiState.update { it.copy(isLoading = false) }
+                            uiMessage.send(UiText.DynamicString("Demand failed: ${result.error}"))
+                        }
+
+                        is Result.Success -> {
+                            cartRepository.clearCart(authState.uid)
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                )
+                            }
+                            uiMessage.send(UiText.DynamicString("Demand submitted successfully"))
+                        }
+                    }
                 }
             }
+
+
             is CartScreenEvents.UpdateItem -> {
                 screenModelScope.launch {
                     _uiState.update { it.copy(isLoading = true) }

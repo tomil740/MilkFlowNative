@@ -22,7 +22,7 @@ class DemandsRemoteDao(
         {
           "mapValue": {
             "fields": {
-              "productId": { "stringValue": "${product.productId}" },
+              "productId": { "integerValue": "${product.productId}" },
               "amount": { "integerValue": "${product.amount}" },
             }
           }

@@ -2,13 +2,20 @@ package com.tomiappdevelopment.milk_flow.data.repositories
 
 import com.tomiappdevelopment.milk_flow.data.local.dao.CartDao
 import com.tomiappdevelopment.milk_flow.data.local.entities.CartEntity
+import com.tomiappdevelopment.milk_flow.data.remote.DemandsRemoteDao
+import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.toDemandDto
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
+import com.tomiappdevelopment.milk_flow.domain.models.Demand
 import com.tomiappdevelopment.milk_flow.domain.repositories.CartRepository
+import com.tomiappdevelopment.milk_flow.domain.util.DataError
+import com.tomiappdevelopment.milk_flow.domain.util.DemandError
+import com.tomiappdevelopment.milk_flow.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class CartRepositoryImpl(
-    private val cartDao: CartDao
+    private val cartDao: CartDao,
+    private val demandsRemoteDao: DemandsRemoteDao,
 ): CartRepository {
 
     override suspend fun addItemToCart(
@@ -60,6 +67,10 @@ class CartRepositoryImpl(
                 )
             }
         }
+    }
+
+    override suspend fun makeDemand(demand: Demand): Result<Unit, DataError.Network> {
+        return demandsRemoteDao.makeDemand(demand= demand.toDemandDto())
     }
 
 

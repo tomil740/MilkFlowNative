@@ -82,8 +82,6 @@ class ProductCatalogVm(
                         _uiState.update { it.copy(isLoading = false) }
                         if (a.data) {
                             uiMessage.send(UiText.DynamicString("Successfully synced"))
-                        } else {
-                            uiMessage.send(UiText.DynamicString("All products up to date no sync is needed"))
                         }
                     }
                 }
