@@ -58,7 +58,7 @@ fun TopBar(
             ActionButton(
                 icon = "📋",
                 label = if (state.isDistributor) "מנהל הזמנות" else "ההזמנות שלי",
-                onClick = { onNavigate(AppRoute.ProductsCatalog) }
+                onClick = { onNavigate(AppRoute.DemandsManger) }
             )
 
             if (!state.isDistributor) {

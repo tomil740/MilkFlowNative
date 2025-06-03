@@ -101,7 +101,6 @@ class ProductsRemoteDataSource(
         return when (response.status.value) {
             in 200..299 -> {
                 val json = response.body<JsonObject>()
-                println("the obj $json")
                 val syncTimestamp = json["fields"]?.jsonObject
                     ?.get("updateAt")?.jsonObject
                     ?.get("timestampValue")?.jsonPrimitive?.contentOrNull

@@ -11,7 +11,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun AuthActionButton(
     userName: String?,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    isStatic: Boolean = false
 ) {
     var showLogout by remember { mutableStateOf(false) }
 
@@ -29,10 +30,12 @@ fun AuthActionButton(
         icon = icon,
         label = label,
         onClick = {
-            if (showLogout) {
-                onLogout()
-            } else {
-                showLogout = true
+            if (!isStatic) {
+                if (showLogout) {
+                    onLogout()
+                } else {
+                    showLogout = true
+                }
             }
         }
     )

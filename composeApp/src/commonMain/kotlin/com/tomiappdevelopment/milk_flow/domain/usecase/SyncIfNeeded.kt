@@ -1,6 +1,7 @@
 package com.tomiappdevelopment.milk_flow.domain.usecase
 
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
+import com.tomiappdevelopment.milk_flow.domain.repositories.DemandsRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.Error
@@ -9,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
+import kotlinx.datetime.Clock.System
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -26,7 +27,8 @@ according to that need to implement soem retry mechnisem on error when error app
  */
 
 class SyncIfNeededUseCase(
-    private val repository: ProductRepository
+    private val repository: ProductRepository,
+    private val demandsRepository: DemandsRepository
 ) {
     private val maxRetryAttempts = 3
     private val retryDelayMillis = 2000L // 2 seconds
@@ -74,12 +76,16 @@ class SyncIfNeededUseCase(
             }
         }
 
-        val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        val currentDate = System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         if (lastCheckDate != null &&
             lastCheckDate.year == currentDate.year &&
             lastCheckDate.dayOfYear == currentDate.dayOfYear
         ) {
             return Result.Success(false) // Already synced today
+        }else{
+            val thresholdTime = System.now().toEpochMilliseconds() - 72 * 60 * 60 * 1000L
+            demandsRepository.cleanOldDemands(thresholdTime)
+
         }
 
         // 2. Fetch remote sync timestamp

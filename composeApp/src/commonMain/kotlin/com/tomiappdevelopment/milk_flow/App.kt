@@ -12,6 +12,8 @@ import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
 import com.tomiappdevelopment.milk_flow.core.presentation.AppTheme
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.CartScreenClass
+import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsMangerScreen
+import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsMangerScreenClass
 import com.tomiappdevelopment.milk_flow.presentation.LoginScreen.LoginScreenClass
 import com.tomiappdevelopment.milk_flow.presentation.core.AppRoute
 import com.tomiappdevelopment.milk_flow.presentation.core.topBar.TopBar
@@ -60,6 +62,7 @@ fun App(
                         AppRoute.Login -> navigator.replaceAll(LoginScreenClass())
                         AppRoute.ProductsCatalog -> navigator.replaceAll(ProductCatalogScreenClass())
                         AppRoute.Cart -> navigator.replaceAll(CartScreenClass())
+                        AppRoute.DemandsManger -> navigator.replaceAll(DemandsMangerScreenClass())
                     }
                 }
             }

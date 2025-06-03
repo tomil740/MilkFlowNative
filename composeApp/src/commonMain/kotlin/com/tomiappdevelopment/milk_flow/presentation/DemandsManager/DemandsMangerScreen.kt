@@ -1,4 +1,4 @@
-package com.tomiappdevelopment.milk_flow.presentation.CartScreen
+package com.tomiappdevelopment.milk_flow.presentation.DemandsManager
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -21,10 +21,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
 import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
-import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
+import com.tomiappdevelopment.milk_flow.presentation.CartScreen.CartSatesAndEvents
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartHeader
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartPreviewItem
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CheckoutButton
@@ -33,19 +32,13 @@ import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.S
 import com.tomiappdevelopment.milk_flow.presentation.core.components.LoadingSpinner
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.ProductDialog
 import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.datetime.LocalDateTime
-import network.chaintech.utils.now
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CartScreen(cartSatesAndEvents: CartSatesAndEvents
+fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
 ) {
-     val uiState =cartSatesAndEvents.uiState
+    val uiState = demandsMangerSatesAndEvents.uiState
 
     val snackBarHostState = remember { SnackbarHostState() }
-
-    // State for the selected product
-    var selectedProduct by remember { mutableStateOf<CartProduct?>(null) }
 
     Box {
 
@@ -56,14 +49,14 @@ fun CartScreen(cartSatesAndEvents: CartSatesAndEvents
             bottomBar = {
                 CheckoutButton(
                     loading = false,
-                    onClick = { cartSatesAndEvents.onMakeDemand() },
+                    onClick = {  },
                 )
             }
 
         ) {
 
-            LaunchedEffect(cartSatesAndEvents.uiState.uiMessage) {
-                cartSatesAndEvents.uiState.uiMessage.consumeAsFlow()
+            LaunchedEffect(demandsMangerSatesAndEvents.uiState.uiMessage) {
+                demandsMangerSatesAndEvents.uiState.uiMessage.consumeAsFlow()
                     .collect {
                         snackBarHostState.showSnackbar(
                             it.asString2(),
@@ -74,7 +67,11 @@ fun CartScreen(cartSatesAndEvents: CartSatesAndEvents
 
 
             Column {
-                CartHeader(totalItems = uiState.cartProducts.size)
+                //header...
+
+                StatusMenuBar(currentStatus=uiState.status, onStatusChange = demandsMangerSatesAndEvents.onStatusSelected,
+                    syncStatus=uiState.syncStatus )
+
 
                 LazyColumn(
                     modifier = Modifier
@@ -88,27 +85,10 @@ fun CartScreen(cartSatesAndEvents: CartSatesAndEvents
                         LoadingSpinner(isLoading = uiState.isLoading)
                     }
 
-                    items(uiState.cartProducts) { item ->
-                        CartPreviewItem(
-                            cartProduct = item,
-                            onEdit = { selectedProduct = it }
-                        )
+                    items(uiState.demandSummaryList) { item ->
+                        DemandPreviewItem(demand = item,false)
+
                     }
-                }
-                // Overlay Dialog shown only when a product is selected
-                selectedProduct?.let { product ->
-                    ProductDialog(
-                        product = product.product,
-                        onClose = { selectedProduct = null },
-                        initialAmount = product.amount,
-                        onAddOrUpdate = { productId, amount ->
-                            cartSatesAndEvents.updateItem(
-                                CartItem(productId,amount)
-                            )
-                        },
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                    )
                 }
             }
         }

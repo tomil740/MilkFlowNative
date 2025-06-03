@@ -4,4 +4,5 @@ sealed class AppRoute {
     object Login : AppRoute()
     object ProductsCatalog : AppRoute()
     object Cart: AppRoute()
+    object DemandsManger: AppRoute()
 }

@@ -42,7 +42,7 @@ class MakeCartDemand(
 
             // 3. Validate timeframe (8:00 to 12:00)
             val hour = LocalTime.now().hour
-            if (hour < 8 || hour >= 12) {
+            if (hour < 8 || hour >= 22) {
                 return@withContext Result.Error(DemandError.InvalidTimeframe)
             }
 
@@ -59,7 +59,8 @@ class MakeCartDemand(
                 status = Status.pending,
                 createdAt = now,
                 updatedAt = now,
-                products = cartItems
+                products = cartItems,
+                id = ""
             )
 
             when (val result = cartRepository.makeDemand(demand)) {
