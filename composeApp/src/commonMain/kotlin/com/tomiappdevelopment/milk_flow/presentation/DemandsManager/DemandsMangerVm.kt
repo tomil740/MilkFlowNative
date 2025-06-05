@@ -5,11 +5,12 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import com.tomiappdevelopment.milk_flow.core.AuthManager
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
 import com.tomiappdevelopment.milk_flow.domain.core.SyncStatus
-import com.tomiappdevelopment.milk_flow.domain.models.Demand
 import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
-import com.tomiappdevelopment.milk_flow.domain.repositories.DemandsRepository
+import com.tomiappdevelopment.milk_flow.domain.models.ProductSummaryItem
+import com.tomiappdevelopment.milk_flow.domain.models.UserProductDemand
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
+import com.tomiappdevelopment.milk_flow.domain.usecase.GetDemandsWithUserNames
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncNewDemands
 import com.tomiappdevelopment.milk_flow.domain.util.Error
@@ -20,10 +21,10 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -33,11 +34,11 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DemandsMangerVm(
-    productsRepo: ProductRepository,
+    private val productsRepo: ProductRepository,
     syncIfNeededUseCase:SyncIfNeededUseCase,
     private val authManager: AuthManager,
-    private val demandsRepo: DemandsRepository,
-    private val syncNewDemands:SyncNewDemands
+    private val syncNewDemands:SyncNewDemands,
+    private val getDemandsWithUserNames: GetDemandsWithUserNames
 ): ScreenModel {
 
 
@@ -58,35 +59,41 @@ class DemandsMangerVm(
         _uiState.stateIn(screenModelScope, SharingStarted.WhileSubscribed(5000), _uiState.value)
 
     init {
+
         combine(
             _uiState.map { it.status }.distinctUntilChanged(),
-            _uiState.map { it.isProductView }.distinctUntilChanged()
-        ) { status, isProductView -> status to isProductView }
-            .flatMapLatest { (status, isProductView) ->
-                demandsRepo.getDemands(status).map { demands ->
-                    Triple(demands, status, isProductView)
+            _uiState.map { it.isProductView }.distinctUntilChanged(),
+            _uiState.map { it.authState }.distinctUntilChanged()
+        ) { status, isProductView, authState -> Triple(status, isProductView, authState) }
+            .flatMapLatest { (status, isProductView, authState) ->
+                if (authState == null) {
+                    flowOf(emptyList<DemandWithNames>()).map { demands ->
+                        Triple(demands, status, isProductView)
+                    }
+                } else {
+                    getDemandsWithUserNames.invoke(status, authState.uid, authState.isDistributer)
+                        .map { demands -> Triple(demands, status, isProductView) }
                 }
             }
             .onEach { (demands, status, isProductView) ->
                 if (isProductView) {
-                    //  val productSummary = summarizeByProduct(demands)
-                    //  _uiState.update { it.copy(productSummaryList = productSummary) }
+                    // update UI for product view here if needed
+                    val a = buildProductSummaryItems(demands)
+                    _uiState.update { it.copy(productSummaryList = a) }
                 } else {
-                    val demandSummary = demands.map {
-                        DemandWithNames(base = it, userName = "name", distributerName = "name")
-                    }
-                    _uiState.update { it.copy(demandSummaryList = demandSummary) }
+                    _uiState.update { it.copy(demandSummaryList = demands) }
                 }
             }
             .launchIn(screenModelScope)
+
 
 
         screenModelScope.launch {
 
 
             launch {
-                authManager.authState.collect { authRes ->
-                    _uiState.update { it.copy(authState = (authRes?.localId)) }
+                authManager.userFlow(this).collect{ authRes ->
+                    _uiState.update { it.copy(authState = (authRes)) }
                 }
             }
 
@@ -112,6 +119,7 @@ class DemandsMangerVm(
                     is Result.Success<Boolean> -> {
                         _uiState.update { it.copy(isLoading = false) }
                         if (a.data) {
+                            println("A full products replacement ${a.data}")
                             uiMessage.send(UiText.DynamicString("Successfully synced"))
                         }
                     }
@@ -128,24 +136,84 @@ class DemandsMangerVm(
             is DemandsMangerEvents.OnStatusSelected -> {
                 _uiState.update { it.copy(status = event.status) }
             }
-            DemandsMangerEvents.OnToggleView -> TODO()
+            DemandsMangerEvents.OnToggleView -> {
+                _uiState.update { it.copy(isProductView = (!it.isProductView)) }
+            }
             DemandsMangerEvents.OnUpdateDemandsStatus -> TODO()
             DemandsMangerEvents.Refresh -> TODO()
         }
     }
 
     fun syncNewDemandUseCase() {
+        val auth = _uiState.value.authState ?: return  // prevent crash
         syncNewDemandJob?.cancel()
         syncNewDemandJob = screenModelScope.launch {
             _uiState.update { it.copy(syncStatus = SyncStatus.IN_PROGRESS) }
             try {
-                syncNewDemands.invoke()
+               syncNewDemands.invoke(
+                   uid = auth.uid,
+                   isDistributor = auth.isDistributer
+                )
                 _uiState.update { it.copy(syncStatus = SyncStatus.SUCCESS) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(syncStatus = SyncStatus.ERROR) }
             }
         }
     }
+
+    suspend fun buildProductSummaryItems(
+        demands: List<DemandWithNames>
+    ): List<ProductSummaryItem> {
+        // Step 1: Flatten to (productId, userName, amount)
+        val flattened: List<Triple<Int, String, Int>> = demands.flatMap { demand ->
+            demand.products.map { item ->
+                Triple(item.productId, demand.userName, item.amount)
+            }
+        }
+
+        // Step 2: Group by productId AND userName to sum per-user amounts
+        val perUserGrouped: Map<Pair<Int, String>, Int> = flattened
+            .groupBy { (productId, userName, _) -> productId to userName }
+            .mapValues { (_, entries) ->
+                entries.sumOf { it.third }
+            }
+
+        // Step 3: Re-group by productId to collect user orders
+        val summaryMap: Map<Int, Pair<Int, List<UserProductDemand>>> = perUserGrouped
+            .entries
+            .groupBy(keySelector = { it.key.first }) // productId
+            .mapValues { (_, entries) ->
+                val usersDemand = entries.map { (key, amountSum) ->
+                    UserProductDemand(
+                        userName = key.second,
+                        amount = amountSum
+                    )
+                }
+                val totalAmount = usersDemand.sumOf { it.amount }
+                totalAmount to usersDemand
+            }
+
+        // Step 4: Fetch product data from repository
+        val productIds = summaryMap.keys.toList()
+        val products = productsRepo.getProductsByIds(productIds)
+
+        // Step 5: Map into ProductSummaryItem list
+        return products.mapNotNull { product ->
+            val (amountSum, usersDemand) = summaryMap[product.id] ?: return@mapNotNull null
+
+            ProductSummaryItem(
+                productId = product.id,
+                productName = product.name,
+                barcode = product.barcode,
+                productImgUrl = product.barcode,
+                amountSum = amountSum,
+                usersDemand = usersDemand
+            )
+        }
+    }
+
+
+
 
 
 

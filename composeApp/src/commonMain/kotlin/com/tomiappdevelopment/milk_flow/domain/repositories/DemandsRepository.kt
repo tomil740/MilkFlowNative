@@ -11,7 +11,7 @@ interface DemandsRepository {
 
     // Fetch a page of demands from remote API within last 72 hours,
     // ordered by updatedAt, paginated by page number
-    suspend fun fetchNewPage(pageToken: String?): Result<DemandsWithNextPageToken, DataError.Network>
+    suspend fun fetchNewPage(pageToken: String?,uid: String,isDistributor: Boolean): Result<DemandsWithNextPageToken, DataError.Network>
 
     // Get a single demand by its ID from local DB
     suspend fun getDemandById(demandId: String): Demand?
@@ -23,6 +23,6 @@ interface DemandsRepository {
     suspend fun cleanOldDemands(cutoffTimestamp: Long)
 
     // Get a single demand by its ID from local DB
-    suspend fun getDemands(status: Status): Flow<List<Demand>>
+    suspend fun getDemands(status: Status,uid: String,isDistributor: Boolean): Flow<List<Demand>>
 
 }

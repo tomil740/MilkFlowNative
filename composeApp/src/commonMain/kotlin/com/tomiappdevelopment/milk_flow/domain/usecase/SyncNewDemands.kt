@@ -7,13 +7,13 @@ class SyncNewDemands(
     private val repo: DemandsRepository
 ) {
 
-    suspend fun invoke() {
-        var nextPageToken: String? = null
+    suspend fun invoke(uid: String,isDistributor: Boolean) {
+        var nextPageToken: String? =null
         var pagesFetched = 0
 
         try {
             do {
-                val result = repo.fetchNewPage(nextPageToken)
+                val result = repo.fetchNewPage(nextPageToken,uid,isDistributor)
 
                 val page = when (result) {
                     is Result.Success -> result.data
@@ -25,9 +25,9 @@ class SyncNewDemands(
 
                 if (page.demands.isEmpty()) break
 
-                repo.upsertDemandsList(page.demands)
-
                 val isMostlyNew = isNewData(page.demands)
+
+                repo.upsertDemandsList(page.demands)
 
                 nextPageToken = page.nextPageToken
                 pagesFetched++
@@ -55,7 +55,7 @@ class SyncNewDemands(
         }
 
         val ratio = newCount.toDouble() / newData.size
-        return ratio >= 0.8
+        return ratio >= 0.3
     }
 
     companion object {

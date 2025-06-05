@@ -71,8 +71,8 @@ fun TopBar(
             }
 
             AuthActionButton(
-                userName = state.name,
-                onLogout =  onLogout
+                userName = state.name ?: "",
+                onClick =  onLogout
             )
         }
     }

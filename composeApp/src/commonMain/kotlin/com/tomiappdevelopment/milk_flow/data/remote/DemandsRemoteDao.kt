@@ -10,7 +10,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -22,6 +21,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -39,61 +39,74 @@ class DemandsRemoteDao(
 ) {
 
     suspend fun getDemandsPage(
-        startAfterTimestamp: String? = null
+        startAfterTimestamp: String? = null,
     ): Result<PagedDemandsDto, DataError.Network> {
         val now = Clock.System.now()
         val thresholdInstant = now.minus(72.hours)
         val thresholdTimestamp = thresholdInstant.toLocalDateTime(TimeZone.UTC).toString() + "Z"
 
-        val limit = 1
+        val limit = if(startAfterTimestamp!=null){50}else{20}
 
         val structuredQuery = buildJsonObject {
             putJsonObject("structuredQuery") {
                 putJsonArray("from") {
                     add(buildJsonObject { put("collectionId", "Demands") })
                 }
-
-                // WHERE: only the 72h filter
                 putJsonObject("where") {
-                    putJsonObject("fieldFilter") {
-                        putJsonObject("field") {
-                            put("fieldPath", "createdAt")
-                        }
-                        put("op", "GREATER_THAN_OR_EQUAL")
-                        putJsonObject("value") {
-                            put("timestampValue", thresholdTimestamp)
+                    putJsonObject("compositeFilter") {
+                        put("op", "AND")
+                        putJsonArray("filters") {
+                            // Filter by createdAt >= timestamp
+                            addJsonObject {
+                                putJsonObject("fieldFilter") {
+                                    putJsonObject("field") { put("fieldPath", "createdAt") }
+                                    put("op", "GREATER_THAN_OR_EQUAL")
+                                    putJsonObject("value") { put("timestampValue", thresholdTimestamp) }
+                                }
+                            }
+/*
+                            addJsonObject {
+                                putJsonObject("fieldFilter") {
+                                    putJsonObject("field") { put("fieldPath", "distributerId") }
+                                    put("op", "EQUAL")
+                                    putJsonObject("value") { put("stringValue", uid) }
+                                }
+                            }
+
+ */
+
                         }
                     }
                 }
 
-                // ORDER BY
                 putJsonArray("orderBy") {
                     addJsonObject {
-                        putJsonObject("field") { put("fieldPath", "createdAt") }
-                        put("direction", "ASCENDING")
+                        putJsonObject("field") { put("fieldPath", "updateAt") }
+                        put("direction", "DESCENDING")
                     }
                 }
-
-                // START AFTER
+/*
                 if (startAfterTimestamp != null) {
                     putJsonArray("startAfter") {
-                        addJsonObject {
-                            put("timestampValue", startAfterTimestamp)
-                        }
+                        add(JsonPrimitive(startAfterTimestamp)) // ✅ Raw timestamp string
                     }
-
-                    put("limit", limit)
                 }
+
+ */
+
+                put("limit", limit) // Always include
             }
         }
 
         val url =
             "https://firestore.googleapis.com/v1/projects/milkflow-5c80c/databases/(default)/documents:runQuery"
 
+        val jsonBodyString = structuredQuery.toString()
+
         val response = try {
             httpClient.post(url) {
                 contentType(ContentType.Application.Json)
-                setBody(structuredQuery)
+                setBody(TextContent(jsonBodyString, ContentType.Application.Json))
             }
         } catch (e: UnresolvedAddressException) {
             return Result.Error(DataError.Network.NO_INTERNET)
@@ -102,6 +115,7 @@ class DemandsRemoteDao(
         } catch (e: Exception) {
             return Result.Error(DataError.Network.UNKNOWN)
         }
+        println("Response ${response.status.value}")
 
         if (response.status.value !in 200..299) {
             return when (response.status.value) {

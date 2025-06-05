@@ -15,10 +15,12 @@ import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -29,9 +31,9 @@ import kotlinx.datetime.toLocalDateTime
 
 
 class ProductCatalogVm(
-    productsRepo: ProductRepository,
-    syncIfNeededUseCase:SyncIfNeededUseCase,
-    getAuthorizedProducts:GetAuthorizedProducts,
+    private val productsRepo: ProductRepository,
+    private val syncIfNeededUseCase:SyncIfNeededUseCase,
+    private val getAuthorizedProducts:GetAuthorizedProducts,
     private val authManager: AuthManager,
     private val cartRepository: CartRepository
     ): ScreenModel{
@@ -44,7 +46,7 @@ class ProductCatalogVm(
             uiMessage = uiMessage
         )
     )
-
+    private var syncJob: Job? = null
     private val fullCacheEmptyFlag = MutableStateFlow<Boolean>(false)
 
     //the observable stateflow ui state that is listening to the original ui state
@@ -58,31 +60,14 @@ class ProductCatalogVm(
                     _uiState.update { it.copy(authState=(authRes?.localId)) }
                 }
             }
+            launch {
+                launchInitialSync()
+            }
 
             launch {
-                _uiState.update { it.copy(isLoading = true) }
-                delay(500)
-                if (fullCacheEmptyFlag.value) {
-                    //demand a sync
-                    delay(500)
-                    if (fullCacheEmptyFlag.value) {
-                        productsRepo.setProductLocalMetaData(ProductMetadata())
-                    }
-                }
-
-
-                val a = syncIfNeededUseCase.invoke()
-                when (a) {
-                    is Result.Error<Error> -> {
-                        _uiState.update { it.copy(isLoading = false) }
-                        uiMessage.send(UiText.DynamicString(a.error.toString()))
-                    }
-
-                    is Result.Success<Boolean> -> {
-                        _uiState.update { it.copy(isLoading = false) }
-                        if (a.data) {
-                            uiMessage.send(UiText.DynamicString("Successfully synced"))
-                        }
+                fullCacheEmptyFlag.collectLatest { theFlag->
+                    if(theFlag){
+                        launchInitialSync(true)
                     }
                 }
             }
@@ -144,6 +129,32 @@ class ProductCatalogVm(
                 }
 
                 _uiState.update { it.copy(emptyDataMes =theMes) }
+            }
+        }
+    }
+
+    private fun launchInitialSync(forceResetMetaData: Boolean = false) {
+        if (syncJob?.isActive == true) return
+
+        syncJob = screenModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            if (forceResetMetaData) {
+                productsRepo.setProductLocalMetaData(ProductMetadata())
+            }
+
+            when (val result = syncIfNeededUseCase.invoke()) {
+                is Result.Error -> {
+                    _uiState.update { it.copy(isLoading = false) }
+                    uiMessage.send(UiText.DynamicString(result.error.toString()))
+                }
+
+                is Result.Success -> {
+                    _uiState.update { it.copy(isLoading = false) }
+                    if (result.data) {
+                        uiMessage.send(UiText.DynamicString("Successfully synced"))
+                    }
+                }
             }
         }
     }

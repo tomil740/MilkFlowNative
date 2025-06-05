@@ -1,5 +1,6 @@
 package com.tomiappdevelopment.milk_flow.presentation.DemandsManager
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,14 +24,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
 import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
+import com.tomiappdevelopment.milk_flow.domain.models.ProductSummaryItem
+import com.tomiappdevelopment.milk_flow.domain.models.UserProductDemand
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.CartSatesAndEvents
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartHeader
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartPreviewItem
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CheckoutButton
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.DemandPreviewItem
+import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.ProductSummaryItemView
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.StatusMenuBar
+import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.TwoWaySwitch
+import com.tomiappdevelopment.milk_flow.presentation.core.components.EmptyDataMessage
 import com.tomiappdevelopment.milk_flow.presentation.core.components.LoadingSpinner
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.ProductDialog
+import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.ProductPreviewItem
 import kotlinx.coroutines.flow.consumeAsFlow
 
 @Composable
@@ -72,7 +79,12 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                 StatusMenuBar(currentStatus=uiState.status, onStatusChange = demandsMangerSatesAndEvents.onStatusSelected,
                     syncStatus=uiState.syncStatus )
 
+                TwoWaySwitch(isProductSummary = uiState.isProductView, onToggle = {demandsMangerSatesAndEvents.onToggleView()})
 
+                AnimatedVisibility(uiState.productSummaryList.isEmpty() && uiState.demandSummaryList.isEmpty()) {
+                    val mes = if(uiState.authState==null){"מתשתמש לא מחובר , התחבר לקבלת מידע"}else{""}
+                    EmptyDataMessage(message = mes)
+                }
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxHeight(0.85f)
@@ -85,9 +97,17 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                         LoadingSpinner(isLoading = uiState.isLoading)
                     }
 
-                    items(uiState.demandSummaryList) { item ->
-                        DemandPreviewItem(demand = item,false)
-
+                    if (uiState.isProductView) {
+                        items(uiState.productSummaryList) { item ->
+                            ProductSummaryItemView(item)
+                        }
+                    } else {
+                        items(uiState.demandSummaryList) { item ->
+                            DemandPreviewItem(
+                                demand = item,
+                                isDistributer = uiState.authState?.isDistributer ?: false
+                            )
+                        }
                     }
                 }
             }

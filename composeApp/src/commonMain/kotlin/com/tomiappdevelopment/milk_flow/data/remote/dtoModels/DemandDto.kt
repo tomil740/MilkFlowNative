@@ -27,12 +27,16 @@ fun LocalDateTime.toISO(): String {
     val instant = this.toInstant(TimeZone.UTC)
     return instant.toString() // This automatically formats it to ISO 8601
 }
-fun String.toLocalDateTimeFromISO(): LocalDateTime {
-    // Parse the ISO string back into an Instant
-    val instant = Instant.parse(this)
-    // Convert Instant to LocalDateTime in UTC time zone (or other time zones if needed)
-    return instant.toLocalDateTime(TimeZone.UTC)
+fun String.toLocalDateTimeFromISOOrNull(): LocalDateTime {
+    return try {
+        val instant = Instant.parse(this)
+        instant.toLocalDateTime(TimeZone.UTC)
+    } catch (e: Exception) {
+        println("Failed to parse ISO timestamp: \"$this\" — Error: ${e.message}")
+        LocalDateTime.now()
+    }
 }
+
 fun Demand.toDemandDto(): DemandDto{
     return DemandDto(
         id,
@@ -51,8 +55,8 @@ fun DemandDto.toDemand(): Demand{
         userId,
         distributerId,
         status,
-        createdAt = this.createdAt.toLocalDateTimeFromISO(),
-        updatedAt = this.updatedAt.toLocalDateTimeFromISO(),
+        createdAt = this.createdAt.toLocalDateTimeFromISOOrNull(),
+        updatedAt = this.updatedAt.toLocalDateTimeFromISOOrNull(),
         products
     )
 }

@@ -49,7 +49,6 @@ class CartScreenVm(
 
             launch {
                 authManager.authState.collectLatest { authRes ->
-                    println("dose it updates from other featuere scope #$authRes")
                     _uiState.update { it.copy(authState = authRes?.localId) }
                 }
             }

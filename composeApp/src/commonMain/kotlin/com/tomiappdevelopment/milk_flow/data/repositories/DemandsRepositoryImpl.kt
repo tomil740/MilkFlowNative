@@ -1,12 +1,10 @@
 package com.tomiappdevelopment.milk_flow.data.repositories
 
 import com.tomiappdevelopment.milk_flow.data.local.dao.DemandDao
-import com.tomiappdevelopment.milk_flow.data.local.entities.toDemandEntity
 import com.tomiappdevelopment.milk_flow.data.local.entities.toDemandWithProductsE
 import com.tomiappdevelopment.milk_flow.data.remote.DemandsRemoteDao
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.PagedDemandsDto
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.toDemand
-import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.toDemandDto
 import com.tomiappdevelopment.milk_flow.data.util.toLocalDateTime
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
@@ -17,22 +15,24 @@ import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.LocalDateTime
-import network.chaintech.utils.now
 
 class DemandsRepositoryImpl(
     private val demandsRemoteDao: DemandsRemoteDao,
     private val demandsDao: DemandDao
 ): DemandsRepository {
-    override suspend fun fetchNewPage(pageToken: String?): Result<DemandsWithNextPageToken, DataError.Network> {
-         val a = demandsRemoteDao.getDemandsPage()
-       return when(a){
-            is Result.Error<DataError.Network> -> return a
+    override suspend fun fetchNewPage(pageToken: String?,uid: String,isDistributor: Boolean): Result<DemandsWithNextPageToken, DataError.Network> {
+         val fetchedData = demandsRemoteDao.getDemandsPage(pageToken)
+       return when(fetchedData){
+            is Result.Error<DataError.Network> -> return fetchedData
             is Result.Success<PagedDemandsDto> -> {
                 // Transform the PagedDemandsDto to DemandsWithNextPageToken
+
+                val userDemands = if(isDistributor){fetchedData.data.demands.filter { it.distributerId==uid }}else{
+                    fetchedData.data.demands.filter { it.userId==uid}
+                }
                 val demandsWithNextPageToken = DemandsWithNextPageToken(
-                    demands = a.data.demands.map { it.toDemand() },
-                    nextPageToken = a.data.nextPageToken
+                    demands = userDemands.map { it.toDemand() },
+                    nextPageToken = fetchedData.data.nextPageToken
                 )
                 Result.Success(demandsWithNextPageToken)
             }
@@ -67,8 +67,10 @@ class DemandsRepositoryImpl(
         demandsDao.deleteOldDemandsAndProducts(cutoffTimestamp)
     }
 
-    override suspend fun getDemands(status: Status): Flow<List<Demand>> {
-        return demandsDao.getDemandsWithProductsByStatusFlow(status.toString()).map { data->
+    override suspend fun getDemands(status: Status,uid: String,isDistributor: Boolean): Flow<List<Demand>> {
+        val theDaoFun = if(isDistributor){ demandsDao.getDDemandsWithProductsByStatusFlow(status.toString(),uid)
+        }else{ demandsDao.getUserDemandsWithProductsByStatusFlow(status.toString(),uid)}
+        return theDaoFun.map { data->
             data.map { obj->
                 Demand(
                     obj.demand.demandId,

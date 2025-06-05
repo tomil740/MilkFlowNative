@@ -59,10 +59,13 @@ interface DemandDao {
     suspend fun getDemandWithProductsById(demandIdA: String): DemandWithProductsE?
 
 
-    // Query all Demands + Products with specific status (for example "matched")
     @Transaction
-    @Query("SELECT * FROM demands WHERE status = :status ORDER BY updatedAt DESC")
-    fun getDemandsWithProductsByStatusFlow(status: String): Flow<List<DemandWithProductsE>>
+    @Query("SELECT * FROM demands WHERE status = :status AND uid = :uid ORDER BY updatedAt DESC")
+    fun getUserDemandsWithProductsByStatusFlow(status: String, uid: String): Flow<List<DemandWithProductsE>>
+
+    @Transaction
+    @Query("SELECT * FROM demands WHERE status = :status AND distributerId = :uid ORDER BY updatedAt DESC")
+    fun getDDemandsWithProductsByStatusFlow(status: String, uid: String): Flow<List<DemandWithProductsE>>
 
     @Transaction
     suspend fun deleteOldDemandsAndProducts(thresholdTime: Long) {

@@ -16,8 +16,8 @@ class GetAuthorizedProducts(
           authManager.userFlow(scope),
             productsRepo.getProducts()
         ) { user, products ->
+            println("the full ${products.size}")
             if (products.isEmpty()) return@combine emptyList()
-
             when {
                 user?.isDistributer == true -> products
                 user != null -> products.filter { it.id in user.productsCollection }

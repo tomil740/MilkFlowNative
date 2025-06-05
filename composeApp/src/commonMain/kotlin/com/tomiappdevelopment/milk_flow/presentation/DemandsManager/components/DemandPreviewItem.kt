@@ -73,8 +73,8 @@ fun DemandPreviewItem(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            val matchedName = if (isDistributer) demand.userName else demand.distributerName
-            AuthActionButton(matchedName,{}, isStatic = true)
+            val matchedName : String= (if (isDistributer) demand.userName else demand.distributerName) ?: ""
+            AuthActionButton(userName = matchedName, isStatic = true)
         }
 
 

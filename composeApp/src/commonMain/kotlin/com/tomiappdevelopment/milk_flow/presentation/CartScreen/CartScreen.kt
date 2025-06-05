@@ -1,5 +1,6 @@
 package com.tomiappdevelopment.milk_flow.presentation.CartScreen
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +31,7 @@ import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartP
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CheckoutButton
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.DemandPreviewItem
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.StatusMenuBar
+import com.tomiappdevelopment.milk_flow.presentation.core.components.EmptyDataMessage
 import com.tomiappdevelopment.milk_flow.presentation.core.components.LoadingSpinner
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.ProductDialog
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -75,6 +77,11 @@ fun CartScreen(cartSatesAndEvents: CartSatesAndEvents
 
             Column {
                 CartHeader(totalItems = uiState.cartProducts.size)
+
+                AnimatedVisibility(uiState.cartProducts.isEmpty()) {
+                    val mes = if(uiState.authState==null){"מתשתמש לא מחובר , התחבר לקבלת מידע"}else{""}
+                    EmptyDataMessage(message = mes)
+                }
 
                 LazyColumn(
                     modifier = Modifier
