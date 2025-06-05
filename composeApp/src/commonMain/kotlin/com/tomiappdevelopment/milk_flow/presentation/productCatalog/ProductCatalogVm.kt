@@ -2,20 +2,25 @@ package com.tomiappdevelopment.milk_flow.presentation.productCatalog
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.tomiappdevelopment.milk_flow.core.AuthManager
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
 import com.tomiappdevelopment.milk_flow.domain.models.Category
 import com.tomiappdevelopment.milk_flow.domain.models.Product
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
+import com.tomiappdevelopment.milk_flow.domain.repositories.CartRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
+import com.tomiappdevelopment.milk_flow.domain.usecase.GetAuthorizedProducts
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,8 +30,13 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 
-class ProductCatalogVm(productsRepo: ProductRepository,
-                       syncIfNeededUseCase:SyncIfNeededUseCase): ScreenModel{
+class ProductCatalogVm(
+    private val productsRepo: ProductRepository,
+    private val syncIfNeededUseCase:SyncIfNeededUseCase,
+    private val getAuthorizedProducts:GetAuthorizedProducts,
+    private val authManager: AuthManager,
+    private val cartRepository: CartRepository
+    ): ScreenModel{
 
     private val uiMessage = Channel<UiText>()
 
@@ -36,50 +46,50 @@ class ProductCatalogVm(productsRepo: ProductRepository,
             uiMessage = uiMessage
         )
     )
+    private var syncJob: Job? = null
+    private val fullCacheEmptyFlag = MutableStateFlow<Boolean>(false)
+
     //the observable stateflow ui state that is listening to the original ui state
     var uiState = _uiState.stateIn(screenModelScope, SharingStarted.WhileSubscribed(5000), _uiState.value)
 
     init {
         screenModelScope.launch {
-            withContext(Dispatchers.IO) {
-                _uiState.update { it.copy(isLoading = true) }
-                delay(500)
-                if(uiState.value.products.isEmpty()) {
-                    //demand a sync
-                    delay(500)
-                    if(uiState.value.products.isEmpty()){
-                        productsRepo.setProductLocalMetaData(ProductMetadata())
-                    }
+
+            launch {
+                authManager.authState.collect { authRes->
+                    _uiState.update { it.copy(authState=(authRes?.localId)) }
                 }
-
-
-
-                val a = syncIfNeededUseCase.invoke()
-                when (a) {
-                    is Result.Error<Error> -> {
-                        _uiState.update { it.copy(isLoading = false) }
-                        uiMessage.send(UiText.DynamicString(a.error.toString()))
-                    }
-                    is Result.Success<Boolean> -> {
-                        _uiState.update { it.copy(isLoading = false) }
-                        if (a.data) {
-                            uiMessage.send(UiText.DynamicString("Successfully synced"))
-                        }else{
-                            uiMessage.send(UiText.DynamicString("All products up to date no sync is needed"))
-                        }
-                    }
-                }
-
-
             }
-        }
+            launch {
+                launchInitialSync()
+            }
 
-        screenModelScope.launch {
-            productsRepo.getProducts().collect{ products->
-                _uiState.update { it.copy(products = products) }
-                filterByCategory(uiState.value.selectedCategory)
-                if (uiState.value.filteredProducts.isEmpty()){
-                    onEvent(ProductCatalogEvents.OnEmptyProducts)
+            launch {
+                fullCacheEmptyFlag.collectLatest { theFlag->
+                    if(theFlag){
+                        launchInitialSync(true)
+                    }
+                }
+            }
+
+
+
+            launch {
+                getAuthorizedProducts.invoke(this).collect { products ->
+                    var theProducts = products
+                    //flag of problem in all cached data
+                    if (products.size == 1 && products.first().id == -1) {
+                        fullCacheEmptyFlag.value = true
+                        theProducts = emptyList()
+                    } else {
+                        fullCacheEmptyFlag.value = false
+                    }
+
+                    _uiState.update { it.copy(products = theProducts) }
+                    filterByCategory(uiState.value.selectedCategory)
+                    if (uiState.value.filteredProducts.isEmpty()) {
+                        onEvent(ProductCatalogEvents.OnEmptyProducts)
+                    }
                 }
             }
         }
@@ -88,7 +98,23 @@ class ProductCatalogVm(productsRepo: ProductRepository,
 
     fun onEvent(event:ProductCatalogEvents) {
         when(event){
-            is ProductCatalogEvents.AddToCart -> TODO()
+            is ProductCatalogEvents.AddToCart -> {
+                screenModelScope.launch {
+                    _uiState.update { it.copy(isLoading =true) }
+                    var theMes = "item has been Add to cart"
+                    if (_uiState.value.authState!=null){
+                        cartRepository.addItemToCart(
+                            uid = _uiState.value.authState!!,
+                            item = event.cartItem
+                        )
+                    }else{
+                        theMes =  "Auth to get access to cart"
+                    }
+
+                    _uiState.update { it.copy(isLoading = false, emptyDataMes =theMes) }
+
+                }
+            }
             is ProductCatalogEvents.OnCategorySelected -> {
                 filterByCategory(event.category)
             }
@@ -103,6 +129,32 @@ class ProductCatalogVm(productsRepo: ProductRepository,
                 }
 
                 _uiState.update { it.copy(emptyDataMes =theMes) }
+            }
+        }
+    }
+
+    private fun launchInitialSync(forceResetMetaData: Boolean = false) {
+        if (syncJob?.isActive == true) return
+
+        syncJob = screenModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            if (forceResetMetaData) {
+                productsRepo.setProductLocalMetaData(ProductMetadata())
+            }
+
+            when (val result = syncIfNeededUseCase.invoke()) {
+                is Result.Error -> {
+                    _uiState.update { it.copy(isLoading = false) }
+                    uiMessage.send(UiText.DynamicString(result.error.toString()))
+                }
+
+                is Result.Success -> {
+                    _uiState.update { it.copy(isLoading = false) }
+                    if (result.data) {
+                        uiMessage.send(UiText.DynamicString("Successfully synced"))
+                    }
+                }
             }
         }
     }

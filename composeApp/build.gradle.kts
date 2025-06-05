@@ -71,12 +71,11 @@ kotlin {
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
 
-         //   implementation(libs.gitlive.firestore)
+            implementation(libs.gitlive.firestore)
 
             implementation(libs.kotlinx.serialization.json)
 
             implementation(libs.multiplatform.settings)
-
 
 
         }

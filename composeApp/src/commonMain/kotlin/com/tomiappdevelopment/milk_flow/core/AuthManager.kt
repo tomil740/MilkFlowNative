@@ -61,7 +61,8 @@ class AuthManager(
         }
     }
 
-    fun signOut() {
-        _authState.value = null
+    suspend fun signOut() {
+        _authState.emit(null)
+        authRepo.logout()
     }
 }

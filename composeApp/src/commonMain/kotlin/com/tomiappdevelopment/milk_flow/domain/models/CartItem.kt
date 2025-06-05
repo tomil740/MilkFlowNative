@@ -4,3 +4,8 @@ data class CartItem(
     val productId:Int,
     val amount:Int
 )
+
+data class CartProduct(
+    val product: Product,
+    val amount:Int
+)

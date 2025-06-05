@@ -1,13 +1,16 @@
 package com.tomiappdevelopment.milk_flow.presentation.productCatalog.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -15,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,10 +41,11 @@ import com.tomiappdevelopment.milk_flow.presentation.core.NumberWheelPicker
 fun ProductDialog(
     product: Product,
     onClose: () -> Unit,
-    addToCart: (productId: Int, amount: Int) -> Unit,
-    modifier: Modifier = Modifier
+    onAddOrUpdate: (productId: Int, amount: Int) -> Unit,
+    modifier: Modifier = Modifier,
+    initialAmount: Int? = null, // null = marketplace mode
 ) {
-    var amount by remember { mutableIntStateOf(1) }
+    var amount by remember { mutableIntStateOf(initialAmount ?: 1) }
 
     Dialog(onDismissRequest = onClose) {
         Box(
@@ -56,7 +61,7 @@ fun ProductDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
-                    model ="https://milkflow.netlify.app/productsImages/regular/${product.barcode}.webp",
+                    model = "https://milkflow.netlify.app/productsImages/regular/${product.barcode}.webp",
                     contentDescription = product.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -69,7 +74,7 @@ fun ProductDialog(
 
                 Text(
                     text = product.name,
-                    maxLines=1,
+                    maxLines = 1,
                     overflow = TextOverflow.Clip,
                     style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center
@@ -91,12 +96,10 @@ fun ProductDialog(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                // Wheel picker using KMP datetimewheelpicker
                 NumberWheelPicker(
                     rowCount = 3,
                     start = 1,
                     endInclusive = 300,
-                    //textStyle = MaterialTheme.typography.titleMedium,
                     selectedNumber = amount,
                     onValueChange = { amount = it }
                 )
@@ -115,19 +118,52 @@ fun ProductDialog(
 
                 Spacer(Modifier.height(24.dp))
 
-                Button(
-                    onClick = {
-                        addToCart(product.id, amount)
-                        onClose()
-                    },
-                    modifier = Modifier.fillMaxWidth(0.85f),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("הוסף לסל")
+                if (initialAmount == null) {
+                    // Marketplace mode
+                    Button(
+                        onClick = {
+                            onAddOrUpdate(product.id, amount)
+                            onClose()
+                        },
+                        modifier = Modifier.fillMaxWidth(0.85f),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("הוסף לסל")
+                    }
+                } else {
+                    // Cart Edit mode
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                //-1 flag to delete
+                                onAddOrUpdate?.invoke(product.id,-1)
+                                onClose()
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("הסר מהסל")
+                        }
+
+                        Spacer(Modifier.width(16.dp))
+
+                        Button(
+                            onClick = {
+                                onAddOrUpdate(product.id, amount)
+                                onClose()
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("עדכן כמות")
+                        }
+                    }
                 }
             }
 
-            // Close button top right
             IconButton(
                 onClick = onClose,
                 modifier = Modifier

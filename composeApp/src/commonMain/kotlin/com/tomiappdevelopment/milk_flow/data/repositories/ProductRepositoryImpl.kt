@@ -93,7 +93,6 @@ class ProductRepositoryImpl(private val productsDao: ProductDao,
     }
 
     override suspend fun setProductLocalMetaData(productMetadata: ProductMetadata) {
-        println("@@@@@@ updateLocal synconh @@@@@@@ ${productMetadata}")
 
         productsDao.setMetadata(
             ProductsMetadataEntity(
@@ -101,5 +100,18 @@ class ProductRepositoryImpl(private val productsDao: ProductDao,
                 lastSyncCheckDate = productMetadata.lastSyncCheckDate
             )
         )
+    }
+
+    override suspend fun getProductsByIds(ids: List<Int>): List<Product> {
+        return productsDao.getByIds(ids).map {
+            Product(
+                it.id,
+                it.barcode,
+                it.name,
+                it.imageUrl,
+                it.category,
+                it.itemsPerPackage
+            )
+        }
     }
 }
