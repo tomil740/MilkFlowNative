@@ -22,6 +22,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
 import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
 import com.tomiappdevelopment.milk_flow.domain.models.ProductSummaryItem
@@ -30,6 +32,7 @@ import com.tomiappdevelopment.milk_flow.presentation.CartScreen.CartSatesAndEven
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartHeader
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartPreviewItem
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CheckoutButton
+import com.tomiappdevelopment.milk_flow.presentation.DemandItem.DemandItemScreenClass
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.DemandPreviewItem
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.ProductSummaryItemView
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.StatusMenuBar
@@ -46,6 +49,9 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
     val uiState = demandsMangerSatesAndEvents.uiState
 
     val snackBarHostState = remember { SnackbarHostState() }
+
+    val navigator = LocalNavigator.currentOrThrow
+
 
     Box {
 
@@ -105,7 +111,8 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                         items(uiState.demandSummaryList) { item ->
                             DemandPreviewItem(
                                 demand = item,
-                                isDistributer = uiState.authState?.isDistributer ?: false
+                                isDistributer = uiState.authState?.isDistributer ?: false,
+                                onClick = {navigator.push(DemandItemScreenClass(theDemandId = item.id))}
                             )
                         }
                     }

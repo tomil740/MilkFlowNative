@@ -9,6 +9,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.core.SyncStatus
 import com.tomiappdevelopment.milk_flow.domain.core.allCategories
@@ -59,66 +61,72 @@ fun TwoWaySwitch(
     onToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val transition = updateTransition(targetState = isProductSummary, label = "SwitchTransition")
+    val transition = updateTransition(isProductSummary, label = "SwitchTransition")
 
-    val indicatorOffset by transition.animateDp(label = "IndicatorOffset") { state ->
-        if (state) 0.dp else 160.dp // Assuming total width is 320.dp
-    }
-
-    Surface(
+    BoxWithConstraints(
         modifier = modifier
-            .width(320.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
             .height(48.dp)
-            .clip(RoundedCornerShape(24.dp)),
-        tonalElevation = 1.dp,
-        shape = RoundedCornerShape(24.dp),
-        color = colorScheme.surface,
-        border = BorderStroke(1.dp, colorScheme.outline)
+            .clip(RoundedCornerShape(24.dp))
+            .background(colorScheme.surface)
+            .border(1.dp, colorScheme.outline, RoundedCornerShape(24.dp))
     ) {
-        Box {
-            // Background indicator
+        val fullWidth = maxWidth
+        val halfWidth = fullWidth / 2
+
+        val indicatorOffset by transition.animateDp(label = "IndicatorOffset") { state ->
+            if (state) halfWidth else 0.dp
+        }
+
+        // Sliding indicator background
+        Box(
+            modifier = Modifier
+                .offset(x = indicatorOffset)
+                .width(halfWidth)
+                .fillMaxHeight()
+                .background(
+                    MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(24.dp)
+                )
+        )
+
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Demand button (left)
             Box(
                 modifier = Modifier
-                    .offset(x = indicatorOffset)
-                    .width(160.dp)
-                    .fillMaxHeight()
-                    .background(
-                        color = colorScheme.primary,
-                        shape = RoundedCornerShape(24.dp)
-                    )
-            )
+                    .weight(1f)
+                    .clickable(enabled = isProductSummary) { onToggle(false) }
+                    .zIndex(if (!isProductSummary) 2f else 1f), // ensure text is above background
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "📝 סיכום הזמנות",
+                    color = if (!isProductSummary) MaterialTheme.colorScheme.onPrimary
+                    else MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Medium
+                )
+            }
 
-            Row(Modifier.fillMaxSize()) {
-                // Left button: Demand
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable(enabled = isProductSummary) { onToggle(false) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "📝 סיכום הזמנות",
-                        color = if (!isProductSummary) colorScheme.onSurface
-                        else colorScheme.onPrimary,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-
-                // Right button: Product
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable(enabled = !isProductSummary) { onToggle(true) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "🛍️ סיכום מוצרים",
-                        color = if (isProductSummary) MaterialTheme.colorScheme.onSurface
-                        else MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+            // Product button (right)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(enabled = !isProductSummary) { onToggle(true) }
+                    .zIndex(if (isProductSummary) 2f else 1f),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "🛍️ סיכום מוצרים",
+                    color = if (isProductSummary) MaterialTheme.colorScheme.onPrimary
+                    else MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
     }
 }
+

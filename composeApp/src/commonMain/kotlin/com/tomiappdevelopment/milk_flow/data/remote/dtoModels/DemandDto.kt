@@ -53,7 +53,7 @@ fun DemandDto.toDemand(): Demand{
     return Demand(
         id,
         userId,
-        distributerId,
+        distributerId?:"",
         status,
         createdAt = this.createdAt.toLocalDateTimeFromISOOrNull(),
         updatedAt = this.updatedAt.toLocalDateTimeFromISOOrNull(),

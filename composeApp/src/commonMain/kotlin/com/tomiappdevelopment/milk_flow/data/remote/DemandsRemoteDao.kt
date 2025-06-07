@@ -45,7 +45,7 @@ class DemandsRemoteDao(
         val thresholdInstant = now.minus(72.hours)
         val thresholdTimestamp = thresholdInstant.toLocalDateTime(TimeZone.UTC).toString() + "Z"
 
-        val limit = if(startAfterTimestamp!=null){50}else{20}
+        val limit = if(startAfterTimestamp!=null){50}else{2}
 
         val structuredQuery = buildJsonObject {
             putJsonObject("structuredQuery") {

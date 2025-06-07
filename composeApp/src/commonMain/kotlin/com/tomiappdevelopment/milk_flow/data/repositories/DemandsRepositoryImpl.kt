@@ -15,6 +15,7 @@ import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlin.collections.map
 
 class DemandsRepositoryImpl(
     private val demandsRemoteDao: DemandsRemoteDao,
@@ -41,16 +42,17 @@ class DemandsRepositoryImpl(
     }
 
     override suspend fun getDemandById(demandId: String): Demand? {
-        val a = demandsDao.getDemandById(demandId)
-        if (a!=null){
+        val b = demandsDao.getDemandWithProductsById(demandId)
+        if (b!=null){
+            val a = b.demand
            return Demand(
                 id = a.demandId,
                 userId = a.uid,
-                a.distributerId,
+                a.distributerId?: "",
                 Status.valueOf(a.status),
                 a.createdAt.toLocalDateTime(),
                 a.updatedAt.toLocalDateTime(),
-                products = listOf()
+               products = b.products.map { CartItem(it.productId,it.amount) }
             )
         }
 
@@ -75,7 +77,7 @@ class DemandsRepositoryImpl(
                 Demand(
                     obj.demand.demandId,
                     obj.demand.uid,
-                    obj.demand.distributerId,
+                    obj.demand.distributerId ?: "",
                     Status.valueOf(obj.demand.status),
                     createdAt = obj.demand.createdAt.toLocalDateTime(),
                     updatedAt = obj.demand.updatedAt.toLocalDateTime(),

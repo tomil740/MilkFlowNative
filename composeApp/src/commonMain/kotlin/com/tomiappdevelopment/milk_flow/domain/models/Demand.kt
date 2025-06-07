@@ -9,7 +9,7 @@ import network.chaintech.utils.now
 open class Demand(
     val id: String,
     val userId: String,
-    val distributerId: String?,
+    val distributerId: String,
     val status: Status,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,

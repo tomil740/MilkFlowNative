@@ -5,4 +5,5 @@ sealed class AppRoute {
     object ProductsCatalog : AppRoute()
     object Cart: AppRoute()
     object DemandsManger: AppRoute()
+    object DemandItem: AppRoute()
 }
