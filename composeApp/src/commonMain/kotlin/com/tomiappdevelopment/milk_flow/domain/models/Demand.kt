@@ -1,9 +1,7 @@
 package com.tomiappdevelopment.milk_flow.domain.models
 
-import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.toISO
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import kotlinx.datetime.LocalDateTime
-import network.chaintech.utils.now
 
 // Base Demand class
 open class Demand(

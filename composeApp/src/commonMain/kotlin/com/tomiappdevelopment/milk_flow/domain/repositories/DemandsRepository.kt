@@ -3,6 +3,7 @@ package com.tomiappdevelopment.milk_flow.domain.repositories
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.Demand
 import com.tomiappdevelopment.milk_flow.domain.models.DemandsWithNextPageToken
+import com.tomiappdevelopment.milk_flow.domain.models.subModels.DemandStatusUpdateEntry
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import kotlinx.coroutines.flow.Flow
@@ -24,5 +25,7 @@ interface DemandsRepository {
 
     // Get a single demand by its ID from local DB
     suspend fun getDemands(status: Status,uid: String,isDistributor: Boolean): Flow<List<Demand>>
+
+    suspend fun updateDemandsStatus(params: DemandStatusUpdateEntry): Result<Unit, DataError.Network>
 
 }

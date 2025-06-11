@@ -28,7 +28,7 @@ import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
 import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartHeader
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartPreviewItem
-import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CheckoutButton
+import com.tomiappdevelopment.milk_flow.presentation.core.components.CheckoutButton
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.DemandPreviewItem
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.StatusMenuBar
 import com.tomiappdevelopment.milk_flow.presentation.core.components.EmptyDataMessage
@@ -59,6 +59,8 @@ fun CartScreen(cartSatesAndEvents: CartSatesAndEvents
                 CheckoutButton(
                     loading = false,
                     onClick = { cartSatesAndEvents.onMakeDemand() },
+                    label = "בצע הזמנה",
+                    enabled = (cartSatesAndEvents.uiState.cartProducts.isNotEmpty()&&cartSatesAndEvents.uiState.authState!=null)
                 )
             }
 

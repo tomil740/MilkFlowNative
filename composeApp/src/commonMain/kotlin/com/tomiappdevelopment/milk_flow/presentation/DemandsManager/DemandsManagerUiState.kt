@@ -15,6 +15,6 @@ data class DemandsManagerUiState(
     val isProductView: Boolean = false,
     val isLoading: Boolean = false,                           // Loading state
     val uiMessage : Channel<UiText>,
-    val syncStatus: SyncStatus = SyncStatus.IDLE,
+    val syncStatus: SyncStatus = SyncStatus.INIT,
     val authState: User? = null,
 )

@@ -31,7 +31,7 @@ fun TopBar(
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .padding(top = 30.dp),
+            .padding(top = 15.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         ActionButton(

@@ -10,6 +10,7 @@ import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
 import com.tomiappdevelopment.milk_flow.domain.models.Demand
 import com.tomiappdevelopment.milk_flow.domain.models.DemandsWithNextPageToken
+import com.tomiappdevelopment.milk_flow.domain.models.subModels.DemandStatusUpdateEntry
 import com.tomiappdevelopment.milk_flow.domain.repositories.DemandsRepository
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.Result
@@ -86,6 +87,10 @@ class DemandsRepositoryImpl(
             }
 
         }
+    }
+
+    override suspend fun updateDemandsStatus(params: DemandStatusUpdateEntry): Result<Unit, DataError.Network> {
+        return demandsRemoteDao.updateDemandsStatus(params)
     }
 
 }

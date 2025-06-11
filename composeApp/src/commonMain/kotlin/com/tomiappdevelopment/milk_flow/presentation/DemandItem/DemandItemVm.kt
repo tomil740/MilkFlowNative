@@ -4,19 +4,23 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.tomiappdevelopment.milk_flow.core.AuthManager
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
+import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.core.SyncStatus
+import com.tomiappdevelopment.milk_flow.domain.core.getNextStatus
 import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
 import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
 import com.tomiappdevelopment.milk_flow.domain.models.ProductSummaryItem
 import com.tomiappdevelopment.milk_flow.domain.models.User
 import com.tomiappdevelopment.milk_flow.domain.models.UserProductDemand
+import com.tomiappdevelopment.milk_flow.domain.models.subModels.UpdateDemandsStatusParams
 import com.tomiappdevelopment.milk_flow.domain.repositories.AuthRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.DemandsRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
 import com.tomiappdevelopment.milk_flow.domain.usecase.GetDemandsWithUserNames
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncNewDemands
+import com.tomiappdevelopment.milk_flow.domain.usecase.UpdateDemandsStatusUseCase
 import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsManagerUiState
@@ -27,7 +31,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -37,12 +43,15 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.collections.map
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DemandItemVm(
     private val productsRepo: ProductRepository,
     private val demandsRepository: DemandsRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val authManager: AuthManager,
+    private val updateDemandsStatusUseCase:UpdateDemandsStatusUseCase
 ): ScreenModel {
 
     private val uiMessage = Channel<UiText>()
@@ -56,6 +65,59 @@ class DemandItemVm(
     var uiState =
         _uiState.stateIn(screenModelScope, SharingStarted.WhileSubscribed(5000), _uiState.value)
 
+
+    init {
+        screenModelScope.launch {
+            authManager.userFlow(this).collect{ authRes ->
+                _uiState.update { it.copy(authState = (authRes)) }
+            }
+        }
+
+    }
+
+    fun onUpdateDemandsStatus(){
+        val uiState = _uiState.value
+
+        // Pre-check: validate preconditions
+        if (!uiState.isLoading &&
+            uiState.demandItem.id.isNotEmpty() &&
+            uiState.demandItem.status != Status.completed
+        ) {
+            screenModelScope.launch {
+                _uiState.update { it.copy(isLoading = true) }
+
+                val result = updateDemandsStatusUseCase.invoke(
+                    UpdateDemandsStatusParams(
+                        listOf(uiState.demandItem.base),
+                        targetStatus = uiState.demandItem.status.getNextStatus()!!
+                    ),
+                    uiState.authState
+                )
+
+                when (result) {
+                    is Result.Error -> {
+                        _uiState.update { it.copy(isLoading = false) }
+                        uiMessage.send(UiText.DynamicString(result.error.toString()))
+                    }
+
+                    is Result.Success -> {
+                        _uiState.update { it.copy(showSuccessDialog = true,isLoading = false) }
+                    }
+                }
+            }
+        } else {
+            // Send feedback if validation fails
+            val errorMsg = when {
+                uiState.isLoading -> "Please wait, operation in progress"
+                uiState.demandItem.id.isEmpty() -> "No demands to update"
+                uiState.demandItem.status == Status.completed -> "Cant update status completed!"
+                else -> "Unknown validation error"
+            }
+            screenModelScope.launch {
+                uiMessage.send(UiText.DynamicString(errorMsg))
+            }
+        }
+    }
 
     fun initWithDemandId(demandId: String) {
         if (_uiState.value.demandItem.id == demandId) return

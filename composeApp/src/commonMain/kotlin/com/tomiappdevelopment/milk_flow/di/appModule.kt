@@ -25,6 +25,7 @@ import com.tomiappdevelopment.milk_flow.domain.usecase.GetDemandsWithUserNames
 import com.tomiappdevelopment.milk_flow.domain.usecase.MakeCartDemand
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncNewDemands
+import com.tomiappdevelopment.milk_flow.domain.usecase.UpdateDemandsStatusUseCase
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.CartScreenVm
 import com.tomiappdevelopment.milk_flow.presentation.DemandItem.DemandItemVm
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsMangerVm
@@ -79,6 +80,8 @@ val appModule = module {
     singleOf(::DemandsRepositoryImpl).bind(DemandsRepository::class)
 
     singleOf(::SyncIfNeededUseCase)
+
+    singleOf(::UpdateDemandsStatusUseCase)
 
     singleOf(::SyncNewDemands)
 

@@ -5,6 +5,7 @@ import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
 import com.tomiappdevelopment.milk_flow.domain.models.Demand
 import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
+import com.tomiappdevelopment.milk_flow.domain.models.User
 import kotlinx.coroutines.channels.Channel
 import kotlinx.datetime.LocalDateTime
 import network.chaintech.utils.now
@@ -14,7 +15,8 @@ data class DemandItemUiState(
         LocalDateTime.now(), LocalDateTime.now(),listOf()), userName = "", distributerName = ""
     ),
     val demandProducts: List<CartProduct> = listOf(),
-    val authState: String? = null,
+    val authState: User? = null,
     val isLoading: Boolean = false,
+    val showSuccessDialog: Boolean = false,
     val uiMessage : Channel<UiText>,
 )

@@ -29,10 +29,10 @@ class MakeCartDemand(
         try {
             // 1. Validate auth
             val userId = authState?.uid
-                ?: return@withContext Result.Error(DemandError.NotAuthenticated)
+                ?: return@withContext Error(DemandError.NotAuthenticated)
 
             if (authState.isDistributer) {
-                return@withContext Result.Error(DemandError.DistributerNotAllowed)
+                return@withContext Error(DemandError.DistributerNotAllowed)
             }
 
             // 2. Validate cart
@@ -43,7 +43,7 @@ class MakeCartDemand(
             // 3. Validate timeframe (8:00 to 12:00)
             val hour = LocalTime.now().hour
             if (hour < 8 || hour >= 22) {
-                return@withContext Result.Error(DemandError.InvalidTimeframe)
+                return@withContext Error(DemandError.InvalidTimeframe)
             }
 
             // 4. Optional: Check connectivity
@@ -64,8 +64,8 @@ class MakeCartDemand(
             )
 
             when (val result = cartRepository.makeDemand(demand)) {
-                is Success -> Result.Success(Unit)
-                is Error<DataError.Network> -> Result.Error(result.error.toDemandError())
+                is Success -> Success(Unit)
+                is Error<DataError.Network> -> Error(result.error.toDemandError())
             }
         } catch (e: Exception) {
             Result.Error(DemandError.Unknown)

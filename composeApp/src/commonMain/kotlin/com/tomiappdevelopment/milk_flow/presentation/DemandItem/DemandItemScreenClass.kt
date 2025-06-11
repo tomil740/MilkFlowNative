@@ -19,7 +19,7 @@ class DemandItemScreenClass(private val theDemandId: String):Screen {
         val state by a.uiState.collectAsState()
         val b = DemandsItemSatesAndEvents(
             uiState = state,
-            onUpdateDemandStatus = { }//a.onEvent(DemandsMangerEvents.OnUpdateDemandsStatus) },
+            onUpdateDemandStatus = {a.onUpdateDemandsStatus() },
         )
         DemandItemScreen(
             b

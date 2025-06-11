@@ -4,15 +4,19 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.tomiappdevelopment.milk_flow.core.AuthManager
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
+import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.core.SyncStatus
 import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
 import com.tomiappdevelopment.milk_flow.domain.models.ProductSummaryItem
 import com.tomiappdevelopment.milk_flow.domain.models.UserProductDemand
+import com.tomiappdevelopment.milk_flow.domain.models.subModels.UpdateDemandsStatusParams
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
 import com.tomiappdevelopment.milk_flow.domain.usecase.GetDemandsWithUserNames
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncNewDemands
+import com.tomiappdevelopment.milk_flow.domain.usecase.UpdateDemandsStatusUseCase
+import com.tomiappdevelopment.milk_flow.domain.util.DemandError
 import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,7 +42,8 @@ class DemandsMangerVm(
     syncIfNeededUseCase:SyncIfNeededUseCase,
     private val authManager: AuthManager,
     private val syncNewDemands:SyncNewDemands,
-    private val getDemandsWithUserNames: GetDemandsWithUserNames
+    private val getDemandsWithUserNames: GetDemandsWithUserNames,
+    private val updateDemandsStatusUseCase:UpdateDemandsStatusUseCase
 ): ScreenModel {
 
 
@@ -133,14 +138,64 @@ class DemandsMangerVm(
     fun onEvent(event: DemandsMangerEvents) {
         when (event) {
             is DemandsMangerEvents.OnDemandItemClick -> TODO()
+
             is DemandsMangerEvents.OnStatusSelected -> {
                 _uiState.update { it.copy(status = event.status) }
             }
             DemandsMangerEvents.OnToggleView -> {
                 _uiState.update { it.copy(isProductView = (!it.isProductView)) }
             }
-            DemandsMangerEvents.OnUpdateDemandsStatus -> TODO()
-            DemandsMangerEvents.Refresh -> TODO()
+            DemandsMangerEvents.OnUpdateDemandsStatus -> {
+                val uiState = _uiState.value
+
+                // Pre-check: validate preconditions
+                if (!uiState.isLoading &&
+                    uiState.demandSummaryList.isNotEmpty() &&
+                    uiState.syncStatus == SyncStatus.SUCCESS
+                ) {
+                    screenModelScope.launch {
+                        _uiState.update { it.copy(isLoading = true) }
+
+                        val result = updateDemandsStatusUseCase.invoke(
+                            UpdateDemandsStatusParams(
+                                uiState.demandSummaryList.map { it.base },
+                                targetStatus = Status.pending
+                            ),
+                            uiState.authState
+                        )
+
+                        when (result) {
+                            is Result.Error -> {
+                                _uiState.update { it.copy(isLoading = false) }
+                                uiMessage.send(UiText.DynamicString(result.error.toString()))
+                            }
+
+                            is Result.Success -> {
+                                _uiState.update { it.copy(isLoading = false) }
+                                uiMessage.send(UiText.DynamicString("Demands updated successfully"))
+                                syncNewDemandUseCase()
+                            }
+                        }
+                    }
+                } else {
+                    // Send feedback if validation fails
+                    val errorMsg = when {
+                        uiState.isLoading -> "Please wait, operation in progress"
+                        uiState.demandSummaryList.isEmpty() -> "No demands to update"
+                        uiState.syncStatus != SyncStatus.SUCCESS -> "Data not in sync, try again later"
+                        else -> "Unknown validation error"
+                    }
+                    screenModelScope.launch {
+                        uiMessage.send(UiText.DynamicString(errorMsg))
+                    }
+                }
+            }
+
+            DemandsMangerEvents.Refresh -> {
+                screenModelScope.launch {
+                    syncNewDemandUseCase()
+                }
+            }
         }
     }
 
