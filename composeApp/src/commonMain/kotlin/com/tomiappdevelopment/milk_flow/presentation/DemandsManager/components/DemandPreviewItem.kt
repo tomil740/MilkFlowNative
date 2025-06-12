@@ -41,7 +41,7 @@ import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
 import com.tomiappdevelopment.milk_flow.domain.util.toReadableString
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartHeader
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartPreviewItem
-import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CheckoutButton
+import com.tomiappdevelopment.milk_flow.presentation.core.components.CheckoutButton
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.StatusMenuBar
 import com.tomiappdevelopment.milk_flow.presentation.core.components.AuthActionButton
 import com.tomiappdevelopment.milk_flow.presentation.core.components.LoadingSpinner

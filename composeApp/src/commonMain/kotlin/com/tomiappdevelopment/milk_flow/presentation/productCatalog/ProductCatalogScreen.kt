@@ -58,20 +58,6 @@ fun ProductCatalogScreen(productCatalogStatesAndEvents:ProductCatalogStatesAndEv
         snackbarHost = {
             SnackbarHost(hostState = snackBarHostState)
         }
-        ,
-        floatingActionButton = {
-            SmallFloatingActionButton(
-                onClick = {
-                    //an UI local behovour to navigate onclick...
-                },
-                modifier = Modifier
-                    //todo need to test the use of offset in different hardware (can cause some problems)
-                    ,containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                Icon(Icons.Filled.Edit, "Small floating action button.")
-            }
-        }
     ) {
         LaunchedEffect(productCatalogStatesAndEvents.uiState.uiMessage) {
             productCatalogStatesAndEvents.uiState.uiMessage.consumeAsFlow()

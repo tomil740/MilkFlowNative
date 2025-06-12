@@ -1,5 +1,7 @@
 package com.tomiappdevelopment.milk_flow.data.remote.dtoModels
 
+import com.tomiappdevelopment.milk_flow.data.util.toISO
+import com.tomiappdevelopment.milk_flow.data.util.toLocalDateTimeFromISOOrNull
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
 import com.tomiappdevelopment.milk_flow.domain.models.Demand
@@ -22,21 +24,6 @@ data class DemandDto(
     val products: List<CartItem> // List of CartItem
 )
 
-fun LocalDateTime.toISO(): String {
-    // Convert LocalDateTime to Instant in UTC
-    val instant = this.toInstant(TimeZone.UTC)
-    return instant.toString() // This automatically formats it to ISO 8601
-}
-fun String.toLocalDateTimeFromISOOrNull(): LocalDateTime {
-    return try {
-        val instant = Instant.parse(this)
-        instant.toLocalDateTime(TimeZone.UTC)
-    } catch (e: Exception) {
-        println("Failed to parse ISO timestamp: \"$this\" — Error: ${e.message}")
-        LocalDateTime.now()
-    }
-}
-
 fun Demand.toDemandDto(): DemandDto{
     return DemandDto(
         id,
@@ -53,7 +40,7 @@ fun DemandDto.toDemand(): Demand{
     return Demand(
         id,
         userId,
-        distributerId,
+        distributerId?:"",
         status,
         createdAt = this.createdAt.toLocalDateTimeFromISOOrNull(),
         updatedAt = this.updatedAt.toLocalDateTimeFromISOOrNull(),

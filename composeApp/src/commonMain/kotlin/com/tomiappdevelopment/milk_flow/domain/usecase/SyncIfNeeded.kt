@@ -33,16 +33,16 @@ class SyncIfNeededUseCase(
     private val maxRetryAttempts = 3
     private val retryDelayMillis = 2000L // 2 seconds
 
-    suspend operator fun invoke(): Result<Boolean, Error> {
+    suspend operator fun invoke(): Result<Boolean, DataError> {
         return withContext(Dispatchers.IO) {
             // Retry logic to handle intermittent failures
             retryOperation { syncOperation() }
         }
     }
 
-    private suspend fun retryOperation(operation: suspend () -> Result<Boolean, Error>): Result<Boolean, Error> {
+    private suspend fun retryOperation(operation: suspend () -> Result<Boolean, DataError>): Result<Boolean, DataError> {
         var attempt = 0
-        var result: Result<Boolean, Error> = Result.Error(DataError.Network.SERVER_ERROR) // Default error value
+        var result: Result<Boolean, DataError> = Result.Error(DataError.Network.SERVER_ERROR) // Default error value
 
         while (attempt < maxRetryAttempts) {
             result = operation()  // Update result with the outcome of the operation
@@ -60,7 +60,7 @@ class SyncIfNeededUseCase(
         return result
     }
 
-    private suspend fun syncOperation(): Result<Boolean, Error> {
+    private suspend fun syncOperation(): Result<Boolean, DataError> {
         val localMetadata = try {
             repository.getLocalMetadata()
         } catch (e: Exception) {

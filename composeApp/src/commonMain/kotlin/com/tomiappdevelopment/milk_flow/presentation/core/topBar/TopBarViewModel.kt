@@ -4,6 +4,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.tomiappdevelopment.milk_flow.core.AuthManager
 import com.tomiappdevelopment.milk_flow.domain.repositories.CartRepository
+import com.tomiappdevelopment.milk_flow.domain.usecase.GetConnectionState
 import com.tomiappdevelopment.milk_flow.presentation.core.AppRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +14,8 @@ import kotlinx.coroutines.launch
 
 class TopBarViewModel(
     private val authManager: AuthManager,
-    private val cartRepository: CartRepository
+    private val cartRepository: CartRepository,
+    private val getConnectionState:GetConnectionState
 ) : ScreenModel {
 
     private val _uiState = MutableStateFlow(TopBarUiState())
@@ -60,9 +62,10 @@ class TopBarViewModel(
                     }
                 }
             }
-
             launch {
-
+                getConnectionState.invoke().collectLatest {  connectionState->
+                    _uiState.update { it.copy(connectionState = connectionState) }
+                }
             }
         }
     }

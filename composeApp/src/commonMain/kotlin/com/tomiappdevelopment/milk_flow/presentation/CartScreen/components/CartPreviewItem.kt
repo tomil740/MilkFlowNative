@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
@@ -35,6 +36,7 @@ import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
 fun CartPreviewItem(
     cartProduct: CartProduct,
     onEdit: (CartProduct) -> Unit,
+    isDemandItem: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val product = cartProduct.product
@@ -44,34 +46,37 @@ fun CartPreviewItem(
             .clickable { onEdit(cartProduct) }
             .fillMaxWidth()
             .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color =if(isDemandItem){MaterialTheme.colorScheme.surface}else{ MaterialTheme.colorScheme.surfaceVariant},
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(16.dp)
     ) {
         // Edit button (top right corner)
-        IconButton(
-            onClick = { onEdit(cartProduct) },
-            modifier = Modifier
-                .offset(x = -12.dp, y = -12.dp )
-                .align(Alignment.TopStart)
-                .size(24.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = CircleShape
+        if(!isDemandItem) {
+            IconButton(
+                onClick = { onEdit(cartProduct) },
+                modifier = Modifier
+                    .offset(x = -12.dp, y = -12.dp)
+                    .align(Alignment.TopStart)
+                    .size(24.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    )
+                    .zIndex(10f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit cart item",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(9.dp)
                 )
-                .zIndex(10f)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit cart item",
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(9.dp)
-            )
+            }
         }
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
             // Product image
@@ -89,11 +94,13 @@ fun CartPreviewItem(
             // Product name & amount
             Column(
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.weight(1f)
+                horizontalAlignment = Alignment.End,
+                modifier = Modifier
             ) {
                 Text(
                     text = product.name,
                     style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(4.dp))

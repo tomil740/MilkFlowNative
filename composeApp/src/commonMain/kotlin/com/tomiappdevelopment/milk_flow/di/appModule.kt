@@ -1,6 +1,5 @@
 package com.tomiappdevelopment.milk_flow.di
 
-import androidx.compose.ui.text.font.FontVariation.Settings
 import com.tomiappdevelopment.milk_flow.core.AuthManager
 import com.tomiappdevelopment.milk_flow.data.local.AuthStorage
 import com.tomiappdevelopment.milk_flow.data.local.MilkFlowDb
@@ -21,11 +20,14 @@ import com.tomiappdevelopment.milk_flow.domain.repositories.CartRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.DemandsRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
 import com.tomiappdevelopment.milk_flow.domain.usecase.GetAuthorizedProducts
+import com.tomiappdevelopment.milk_flow.domain.usecase.GetConnectionState
 import com.tomiappdevelopment.milk_flow.domain.usecase.GetDemandsWithUserNames
 import com.tomiappdevelopment.milk_flow.domain.usecase.MakeCartDemand
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncNewDemands
+import com.tomiappdevelopment.milk_flow.domain.usecase.UpdateDemandsStatusUseCase
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.CartScreenVm
+import com.tomiappdevelopment.milk_flow.presentation.DemandItem.DemandItemVm
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsMangerVm
 import com.tomiappdevelopment.milk_flow.presentation.LoginScreen.LoginViewModel
 import com.tomiappdevelopment.milk_flow.presentation.core.topBar.TopBarViewModel
@@ -79,6 +81,8 @@ val appModule = module {
 
     singleOf(::SyncIfNeededUseCase)
 
+    singleOf(::UpdateDemandsStatusUseCase)
+
     singleOf(::SyncNewDemands)
 
     singleOf(::MakeCartDemand)
@@ -86,6 +90,8 @@ val appModule = module {
     singleOf(::GetAuthorizedProducts)
 
     singleOf(::GetDemandsWithUserNames)
+
+    singleOf(::GetConnectionState)
 
     factoryOf(::ProductCatalogVm)
 
@@ -97,5 +103,6 @@ val appModule = module {
 
     factoryOf(::DemandsMangerVm)
 
+    factoryOf(::DemandItemVm)
 
 }

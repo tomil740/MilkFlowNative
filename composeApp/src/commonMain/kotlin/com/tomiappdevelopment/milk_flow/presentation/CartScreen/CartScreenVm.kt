@@ -4,10 +4,12 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.tomiappdevelopment.milk_flow.core.AuthManager
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
+import com.tomiappdevelopment.milk_flow.domain.core.ConnectionState
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
 import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
 import com.tomiappdevelopment.milk_flow.domain.repositories.CartRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
+import com.tomiappdevelopment.milk_flow.domain.usecase.GetConnectionState
 import com.tomiappdevelopment.milk_flow.domain.usecase.MakeCartDemand
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.util.Result
@@ -27,7 +29,8 @@ class CartScreenVm(
     private val cartRepository: CartRepository,
     private val authManager: AuthManager,
     syncIfNeededUseCase:SyncIfNeededUseCase,
-    private val makeCartDemand:MakeCartDemand
+    private val makeCartDemand:MakeCartDemand,
+    private val getConnectionState: GetConnectionState
     ): ScreenModel {
 
     private val uiMessage = Channel<UiText>()
@@ -50,6 +53,11 @@ class CartScreenVm(
             launch {
                 authManager.authState.collectLatest { authRes ->
                     _uiState.update { it.copy(authState = authRes?.localId) }
+                }
+            }
+            launch {
+                getConnectionState.invoke().collectLatest {  connectionState->
+                    _uiState.update { it.copy(connectionState = connectionState) }
                 }
             }
             launch {
@@ -116,6 +124,11 @@ class CartScreenVm(
                 makeDemandJob = screenModelScope.launch {
                     _uiState.update { it.copy(isLoading = true) }
                     delay(500)
+                    if (_uiState.value.connectionState != ConnectionState.Available) {
+                        _uiState.update { it.copy(isLoading = false) }
+                        uiMessage.send(UiText.DynamicString("Device is unConnect to the internet..."))
+                        return@launch
+                    }
                     val authState = authManager.userFlow(this).firstOrNull()
                     if (authState == null) {
                         _uiState.update { it.copy(isLoading = false) }

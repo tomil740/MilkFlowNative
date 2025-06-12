@@ -55,6 +55,7 @@ fun SyncStatusBadge(syncStatus: SyncStatus) {
         SyncStatus.IN_PROGRESS -> Triple("מסנכרן...", colorScheme.tertiary, colorScheme.onTertiary)
         SyncStatus.SUCCESS -> Triple("עודכן ✓", colorScheme.primary, colorScheme.onPrimary)
         SyncStatus.ERROR -> Triple("שגיאה ⚠️", colorScheme.error, colorScheme.onError)
+        SyncStatus.INIT -> Triple("דרוש אתחול ✓", colorScheme.secondary, colorScheme.onSecondary)
     }
 
     Surface(

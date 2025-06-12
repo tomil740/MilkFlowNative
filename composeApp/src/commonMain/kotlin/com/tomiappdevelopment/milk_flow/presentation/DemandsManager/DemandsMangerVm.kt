@@ -4,23 +4,31 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.tomiappdevelopment.milk_flow.core.AuthManager
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
+import com.tomiappdevelopment.milk_flow.domain.core.ConnectionState
+import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.core.SyncStatus
 import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
 import com.tomiappdevelopment.milk_flow.domain.models.ProductSummaryItem
 import com.tomiappdevelopment.milk_flow.domain.models.UserProductDemand
+import com.tomiappdevelopment.milk_flow.domain.models.subModels.UpdateDemandsStatusParams
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
+import com.tomiappdevelopment.milk_flow.domain.usecase.GetConnectionState
 import com.tomiappdevelopment.milk_flow.domain.usecase.GetDemandsWithUserNames
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncNewDemands
+import com.tomiappdevelopment.milk_flow.domain.usecase.UpdateDemandsStatusUseCase
+import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
+import com.tomiappdevelopment.milk_flow.presentation.util.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -31,14 +39,25 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import milkflow.composeapp.generated.resources.Res
+import milkflow.composeapp.generated.resources.error_no_connection
+import milkflow.composeapp.generated.resources.error_no_demands
+import milkflow.composeapp.generated.resources.error_not_synced
+import milkflow.composeapp.generated.resources.error_operation_in_progress
+import milkflow.composeapp.generated.resources.error_validation_unknown
+import milkflow.composeapp.generated.resources.success_demands_updated
+import milkflow.composeapp.generated.resources.success_products_synced
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, ExperimentalResourceApi::class)
 class DemandsMangerVm(
     private val productsRepo: ProductRepository,
     syncIfNeededUseCase:SyncIfNeededUseCase,
     private val authManager: AuthManager,
     private val syncNewDemands:SyncNewDemands,
-    private val getDemandsWithUserNames: GetDemandsWithUserNames
+    private val getDemandsWithUserNames: GetDemandsWithUserNames,
+    private val updateDemandsStatusUseCase:UpdateDemandsStatusUseCase,
+    private val getConnectionState: GetConnectionState
 ): ScreenModel {
 
 
@@ -51,6 +70,7 @@ class DemandsMangerVm(
         )
     )
 
+    private val connectionState: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Unavailable)
     private val fullCacheEmptyFlag = MutableStateFlow<Boolean>(false)
 
 
@@ -90,7 +110,12 @@ class DemandsMangerVm(
 
         screenModelScope.launch {
 
+            launch {
+                getConnectionState.invoke().collectLatest { connectionStateFlow->
+                    connectionState.update { connectionStateFlow }
+                }
 
+            }
             launch {
                 authManager.userFlow(this).collect{ authRes ->
                     _uiState.update { it.copy(authState = (authRes)) }
@@ -111,16 +136,16 @@ class DemandsMangerVm(
 
                 val a = syncIfNeededUseCase.invoke()
                 when (a) {
-                    is Result.Error<Error> -> {
+                    is Result.Error<DataError> -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        uiMessage.send(UiText.DynamicString(a.error.toString()))
+                        uiMessage.send((a.error.toUiText()))
                     }
 
                     is Result.Success<Boolean> -> {
                         _uiState.update { it.copy(isLoading = false) }
                         if (a.data) {
                             println("A full products replacement ${a.data}")
-                            uiMessage.send(UiText.DynamicString("Successfully synced"))
+                            uiMessage.send(UiText.StringResource(Res.string.success_products_synced))
                         }
                     }
                 }
@@ -132,31 +157,92 @@ class DemandsMangerVm(
 
     fun onEvent(event: DemandsMangerEvents) {
         when (event) {
-            is DemandsMangerEvents.OnDemandItemClick -> TODO()
             is DemandsMangerEvents.OnStatusSelected -> {
                 _uiState.update { it.copy(status = event.status) }
             }
             DemandsMangerEvents.OnToggleView -> {
                 _uiState.update { it.copy(isProductView = (!it.isProductView)) }
             }
-            DemandsMangerEvents.OnUpdateDemandsStatus -> TODO()
-            DemandsMangerEvents.Refresh -> TODO()
+            DemandsMangerEvents.OnUpdateDemandsStatus -> {
+                val uiState = _uiState.value
+
+                // Pre-check: validate preconditions
+                if (
+                    (!uiState.isLoading) &&
+                    uiState.demandSummaryList.isNotEmpty() &&
+                    uiState.syncStatus == SyncStatus.SUCCESS
+                    &&
+                    (connectionState.value == ConnectionState.Available)
+                ) {
+                    screenModelScope.launch {
+                        _uiState.update { it.copy(isLoading = true) }
+
+                        val result = updateDemandsStatusUseCase.invoke(
+                            UpdateDemandsStatusParams(
+                                uiState.demandSummaryList.map { it.base },
+                                targetStatus = Status.pending
+                            ),
+                            uiState.authState
+                        )
+
+                        when (result) {
+                            is Result.Error -> {
+                                _uiState.update { it.copy(isLoading = false) }
+                                uiMessage.send((result.error.toUiText()))
+                            }
+
+                            is Result.Success -> {
+                                _uiState.update { it.copy(isLoading = false) }
+                                uiMessage.send(UiText.StringResource(Res.string.success_demands_updated))
+                                syncNewDemandUseCase()
+                            }
+                        }
+                    }
+                } else {
+                    // Send feedback if validation fails
+                    val errorMsg = when {
+                        uiState.isLoading -> UiText.StringResource(Res.string.error_operation_in_progress)
+                        uiState.demandSummaryList.isEmpty() -> UiText.StringResource(Res.string.error_no_demands)
+                        uiState.syncStatus != SyncStatus.SUCCESS -> UiText.StringResource(Res.string.error_not_synced)
+                        connectionState.value != ConnectionState.Available -> UiText.StringResource(Res.string.error_no_connection)
+                        else -> UiText.StringResource(Res.string.error_validation_unknown)
+                    }
+                    screenModelScope.launch {
+                        uiMessage.send(errorMsg)
+                    }
+                }
+            }
+
+            DemandsMangerEvents.Refresh -> {
+                screenModelScope.launch {
+                    syncNewDemandUseCase()
+                }
+            }
         }
     }
 
     fun syncNewDemandUseCase() {
-        val auth = _uiState.value.authState ?: return  // prevent crash
+        val auth = _uiState.value.authState ?: return
         syncNewDemandJob?.cancel()
         syncNewDemandJob = screenModelScope.launch {
             _uiState.update { it.copy(syncStatus = SyncStatus.IN_PROGRESS) }
-            try {
-               syncNewDemands.invoke(
-                   uid = auth.uid,
-                   isDistributor = auth.isDistributer
-                )
-                _uiState.update { it.copy(syncStatus = SyncStatus.SUCCESS) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(syncStatus = SyncStatus.ERROR) }
+            val result = syncNewDemands.invoke(
+                uid = auth.uid,
+                isDistributor = auth.isDistributer
+            )
+            when (result) {
+                is Result.Success -> {
+                    val hasNewData = result.data
+                    _uiState.update {
+                        it.copy(
+                            syncStatus = SyncStatus.SUCCESS//if a sync ahs been made or not define by hasNewData
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update { it.copy(syncStatus = SyncStatus.ERROR) }
+                    // Optionally log: result.exception.message
+                }
             }
         }
     }

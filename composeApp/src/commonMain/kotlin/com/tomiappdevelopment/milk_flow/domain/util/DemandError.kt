@@ -16,6 +16,7 @@ sealed class DemandError:Error {
     object TooManyRequests : DemandError()
     object Serialization : DemandError()
     object Unknown : DemandError()
+    object InvalidStatus: DemandError()
 }
 fun DataError.Network.toDemandError(): DemandError = when (this) {
     DataError.Network.NO_INTERNET -> DemandError.NoInternet
@@ -27,4 +28,5 @@ fun DataError.Network.toDemandError(): DemandError = when (this) {
     DataError.Network.SERIALIZATION -> DemandError.Serialization
     DataError.Network.REQUEST_TIMEOUT -> DemandError.Timeout
     DataError.Network.UNKNOWN -> DemandError.Unknown
+    DataError.Network.NOT_FOUND -> DemandError.Unknown
 }

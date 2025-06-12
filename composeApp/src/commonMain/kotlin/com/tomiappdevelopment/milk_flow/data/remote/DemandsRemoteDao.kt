@@ -2,12 +2,16 @@ package com.tomiappdevelopment.milk_flow.data.remote
 
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.DemandDto
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.PagedDemandsDto
+import com.tomiappdevelopment.milk_flow.data.util.toISO
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
+import com.tomiappdevelopment.milk_flow.domain.models.subModels.DemandStatusUpdateEntry
+import com.tomiappdevelopment.milk_flow.domain.models.subModels.UpdateDemandsStatusParams
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.content.TextContent
@@ -15,13 +19,13 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -32,6 +36,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
+import network.chaintech.utils.now
 import kotlin.time.Duration.Companion.hours
 
 class DemandsRemoteDao(
@@ -45,7 +50,7 @@ class DemandsRemoteDao(
         val thresholdInstant = now.minus(72.hours)
         val thresholdTimestamp = thresholdInstant.toLocalDateTime(TimeZone.UTC).toString() + "Z"
 
-        val limit = if(startAfterTimestamp!=null){50}else{20}
+        val limit = if(startAfterTimestamp!=null){50}else{2}
 
         val structuredQuery = buildJsonObject {
             putJsonObject("structuredQuery") {
@@ -277,6 +282,53 @@ class DemandsRemoteDao(
             Result.Error(DataError.Network.UNKNOWN)
         }
     }
+
+    suspend fun updateDemandsStatus(params: DemandStatusUpdateEntry): Result<Unit, DataError.Network> {
+        for (demand in params.demandId) {
+            val documentId = demand ?: return Result.Error(DataError.Network.UNKNOWN)
+
+            val url =
+                "https://firestore.googleapis.com/v1/projects/milkflow-5c80c/databases/(default)/documents/Demands/$documentId?updateMask.fieldPaths=status&updateMask.fieldPaths=updateAt"
+
+            val jsonString = """
+            {
+              "fields": {
+                "status": { "stringValue": "${params.newStatus.name}" },
+                "updateAt": { "timestampValue":"${LocalDateTime.now().toISO()}" }
+              }
+            }
+        """.trimIndent()
+
+            try {
+                val response = httpClient.patch(url) {
+                    contentType(ContentType.Application.Json)
+                    setBody(TextContent(jsonString, ContentType.Application.Json))
+                }
+                println("ResponseCode ${response.status}")
+
+                if (response.status.value !in 200..299) {
+                    return when (response.status.value) {
+                        401 -> Result.Error(DataError.Network.UNAUTHORIZED)
+                        409 -> Result.Error(DataError.Network.CONFLICT)
+                        408 -> Result.Error(DataError.Network.REQUEST_TIMEOUT)
+                        413 -> Result.Error(DataError.Network.PAYLOAD_TOO_LARGE)
+                        404 -> Result.Error(DataError.Network.NOT_FOUND)
+                        in 500..599 -> Result.Error(DataError.Network.SERVER_ERROR)
+                        else -> Result.Error(DataError.Network.UNKNOWN)
+                    }
+                }
+
+            } catch (e: UnresolvedAddressException) {
+                return Result.Error(DataError.Network.NO_INTERNET)
+            } catch (e: Exception) {
+                println("@NetworkError: ${e.message}")
+                return Result.Error(DataError.Network.UNKNOWN)
+            }
+        }
+
+        return Result.Success(Unit)
+    }
+
 
 
 }

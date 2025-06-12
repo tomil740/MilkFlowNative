@@ -4,7 +4,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -12,15 +15,14 @@ import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
 import com.tomiappdevelopment.milk_flow.core.presentation.AppTheme
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.CartScreenClass
-import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsMangerScreen
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsMangerScreenClass
 import com.tomiappdevelopment.milk_flow.presentation.LoginScreen.LoginScreenClass
 import com.tomiappdevelopment.milk_flow.presentation.core.AppRoute
 import com.tomiappdevelopment.milk_flow.presentation.core.topBar.TopBar
+import com.tomiappdevelopment.milk_flow.presentation.core.topBar.TopBarEvent
 import com.tomiappdevelopment.milk_flow.presentation.core.topBar.TopBarViewModel
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.ProductCatalogScreenClass
 import org.koin.compose.rememberKoinInject
-import com.tomiappdevelopment.milk_flow.presentation.core.topBar.TopBarEvent
 
 
 object NavigationManager {
@@ -63,6 +65,8 @@ fun App(
                         AppRoute.ProductsCatalog -> navigator.replaceAll(ProductCatalogScreenClass())
                         AppRoute.Cart -> navigator.replaceAll(CartScreenClass())
                         AppRoute.DemandsManger -> navigator.replaceAll(DemandsMangerScreenClass())
+                        // handle in sub navigation stack only for item at a time not used thourgh here
+                        AppRoute.DemandItem -> navigator.replaceAll(DemandsMangerScreenClass())
                     }
                 }
             }
