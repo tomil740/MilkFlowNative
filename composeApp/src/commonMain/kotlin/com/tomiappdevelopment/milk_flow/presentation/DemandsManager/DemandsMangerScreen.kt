@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tomiappdevelopment.milk_flow.core.presentation.UiText
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.core.getNextStatus
 import com.tomiappdevelopment.milk_flow.domain.core.getStringName
@@ -31,7 +32,13 @@ import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.T
 import com.tomiappdevelopment.milk_flow.presentation.core.components.EmptyDataMessage
 import com.tomiappdevelopment.milk_flow.presentation.core.components.LoadingSpinner
 import kotlinx.coroutines.flow.consumeAsFlow
+import milkflow.composeapp.generated.resources.Res
+import milkflow.composeapp.generated.resources.label_update_status
+import milkflow.composeapp.generated.resources.msg_user_not_authenticated
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
 ) {
@@ -41,9 +48,6 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
 
     val navigator = LocalNavigator.currentOrThrow
 
-    LaunchedEffect(Unit){
-      // demandsMangerSatesAndEvents.refresh()
-    }
 
     Box {
 
@@ -55,7 +59,11 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                 CheckoutButton(
                     loading = false,
                     onClick = { demandsMangerSatesAndEvents.onUpdateDemandsStatus() },
-                    label = "עדכן סטטוס ל ${demandsMangerSatesAndEvents.uiState.status.getNextStatus()?.getStringName()}",
+                    label =  UiText.StringResource(
+                        Res.string.label_update_status,
+                        demandsMangerSatesAndEvents.uiState.status.getNextStatus()?.getStringName() ?: ""
+                            ).asString()
+                    ,
                     enabled = (demandsMangerSatesAndEvents.uiState.status != Status.completed &&
                             demandsMangerSatesAndEvents.uiState.authState!=null)
                 )
@@ -68,7 +76,7 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                     .collect {
                         snackBarHostState.showSnackbar(
                             it.asString2(),
-                            duration = SnackbarDuration.Long
+                            duration = SnackbarDuration.Short
                         )
                     }
             }
@@ -83,7 +91,11 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                 TwoWaySwitch(isProductSummary = uiState.isProductView, onToggle = {demandsMangerSatesAndEvents.onToggleView()})
 
                 AnimatedVisibility(uiState.productSummaryList.isEmpty() && uiState.demandSummaryList.isEmpty()) {
-                    val mes = if(uiState.authState==null){"מתשתמש לא מחובר , התחבר לקבלת מידע"}else{""}
+                    val mes = if (uiState.authState == null) {
+                        stringResource(Res.string.msg_user_not_authenticated)
+                    } else {
+                        ""
+                    }
                     EmptyDataMessage(message = mes)
                 }
                 LazyColumn(

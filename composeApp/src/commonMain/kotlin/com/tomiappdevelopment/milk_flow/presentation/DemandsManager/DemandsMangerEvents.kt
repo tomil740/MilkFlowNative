@@ -4,7 +4,6 @@ import com.tomiappdevelopment.milk_flow.domain.core.Status
 
 sealed interface DemandsMangerEvents {
     data class OnStatusSelected(val status: Status) : DemandsMangerEvents
-    data class OnDemandItemClick(val demandId: String) : DemandsMangerEvents
     data object OnToggleView : DemandsMangerEvents
     data object OnUpdateDemandsStatus: DemandsMangerEvents
     data object Refresh : DemandsMangerEvents

@@ -1,0 +1,40 @@
+<resources>
+    /* close collections */
+    //Demand errors
+    <string name="error_not_authenticated">יש להתחבר כדי להמשיך</string>
+    <string name="error_distributer_not_allowed">גישה נדחתה - רק מפיצים יכולים לבצע פעולה זו</string>
+    <string name="error_empty_cart">העגלה ריקה - אין מה לשלוח</string>
+    <string name="error_invalid_timeframe">טווח הזמן שנבחר אינו חוקי</string>
+    <string name="error_no_internet">אין חיבור לאינטרנט. בדוק את הרשת ונסה שוב</string>
+    <string name="error_timeout">הפעולה נמשכה יותר מדי זמן. נסה שוב</string>
+    <string name="error_unauthorized">אין לך הרשאה לבצע פעולה זו</string>
+    <string name="error_conflict">ישנה התנגשות בנתונים. טען מחדש ונסה שוב</string>
+    <string name="error_rate_limited">חרגת מהמגבלה. נסה שוב מאוחר יותר</string>
+    <string name="error_payload_too_large">הבקשה גדולה מדי. נסה לצמצם את הנתונים</string>
+    <string name="error_invalid_response">התקבלה תשובה לא תקינה מהשרת</string>
+    <string name="error_server_error">תקלה בשרת. נסה שוב מאוחר יותר</string>
+    <string name="error_too_many_requests">בוצעו יותר מדי בקשות בזמן קצר. המתן ונסה שוב</string>
+    <string name="error_serialization">שגיאת עיבוד נתונים. נסה שוב</string>
+    <string name="error_unknown">שגיאה לא ידועה התרחשה</string>
+    <string name="error_invalid_status">סטטוס הבקשה אינו תקף</string>
+
+    //Data error
+    //most are in the above
+    <string name="error_not_found">הפריט המבוקש לא נמצא.</string>
+    <string name="error_disk_full">אין מספיק מקום אחסון במכשיר. פנה מקום ונסה שוב.</string>
+
+
+    <string name="success_demands_updated">הדרישות עודכנו בהצלחה</string>
+    <string name="error_operation_in_progress">אנא המתן, הפעולה בעיצומה</string>
+    <string name="error_no_demands">אין דרישות לעדכון</string>
+    <string name="error_not_synced">הנתונים אינם מסונכרנים, נסה שוב מאוחר יותר</string>
+    <string name="error_no_connection">אין חיבור לאינטרנט</string>
+    <string name="error_validation_unknown">שגיאת אימות לא ידועה</string>
+    <string name="success_products_synced">רשימת המוצרים סונכרנה בהצלחה</string>
+
+    //hard code general
+    <string name="label_update_status">עדכן סטטוס ל %1$s</string>
+    <string name="msg_user_not_authenticated">משתמש לא מחובר, התחבר לקבלת מידע</string>
+
+
+</resources>

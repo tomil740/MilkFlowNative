@@ -2,6 +2,7 @@ package com.tomiappdevelopment.milk_flow.presentation.core.topBar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,7 @@ import androidx.compose.ui.zIndex
 import com.tomiappdevelopment.milk_flow.presentation.core.AppRoute
 import com.tomiappdevelopment.milk_flow.presentation.core.components.ActionButton
 import com.tomiappdevelopment.milk_flow.presentation.core.components.AuthActionButton
+import com.tomiappdevelopment.milk_flow.presentation.core.components.TopConnectionBanner
 
 @Composable
 fun TopBar(
@@ -26,54 +28,58 @@ fun TopBar(
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .padding(top = 15.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        ActionButton(
-            icon = "🛍️",
-            label = "כל המוצרים",
-            onClick = { onNavigate(AppRoute.ProductsCatalog) }
-        )
+    Box {
+       // TopConnectionBanner(connectionState = state.connectionState)
 
-        if (!state.isLoggedIn) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    "היי אורח",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Button(
-                    onClick = { onNavigate(AppRoute.Login) }, // Adjust route
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                ) {
-                    Text("🔐 התחבר כדי לצפות בנתונים שלך")
-                }
-            }
-        } else {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(top = 15.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
             ActionButton(
-                icon = "📋",
-                label = if (state.isDistributor) "מנהל הזמנות" else "ההזמנות שלי",
-                onClick = { onNavigate(AppRoute.DemandsManger) }
+                icon = "🛍️",
+                label = "כל המוצרים",
+                onClick = { onNavigate(AppRoute.ProductsCatalog) }
             )
 
-            if (!state.isDistributor) {
+            if (!state.isLoggedIn) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "היי אורח",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Button(
+                        onClick = { onNavigate(AppRoute.Login) }, // Adjust route
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                    ) {
+                        Text("🔐 התחבר כדי לצפות בנתונים שלך")
+                    }
+                }
+            } else {
                 ActionButton(
-                    icon = "🛒",
-                    label = "העגלה שלי",
-                    floatingLabel = state.cartItemCount,
-                    onClick = { onNavigate(AppRoute.Cart) }
+                    icon = "📋",
+                    label = if (state.isDistributor) "מנהל הזמנות" else "ההזמנות שלי",
+                    onClick = { onNavigate(AppRoute.DemandsManger) }
+                )
+
+                if (!state.isDistributor) {
+                    ActionButton(
+                        icon = "🛒",
+                        label = "העגלה שלי",
+                        floatingLabel = state.cartItemCount,
+                        onClick = { onNavigate(AppRoute.Cart) }
+                    )
+                }
+
+                AuthActionButton(
+                    userName = state.name ?: "",
+                    onClick = onLogout
                 )
             }
-
-            AuthActionButton(
-                userName = state.name ?: "",
-                onClick =  onLogout
-            )
         }
     }
 }

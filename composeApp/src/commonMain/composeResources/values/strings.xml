@@ -1,0 +1,42 @@
+<resources>
+    /* close collections */
+    //Demand errors
+    <string name="error_not_authenticated">You must be logged in to continue</string>
+    <string name="error_distributer_not_allowed">Access denied – only distributors can perform this action</string>
+    <string name="error_empty_cart">Cart is empty – nothing to send</string>
+    <string name="error_invalid_timeframe">The selected timeframe is invalid</string>
+    <string name="error_no_internet">No internet connection. Please check your network and try again</string>
+    <string name="error_timeout">The operation timed out. Please try again</string>
+    <string name="error_unauthorized">You are not authorized to perform this action</string>
+    <string name="error_conflict">There was a conflict in the data. Please refresh and try again</string>
+    <string name="error_rate_limited">You’ve exceeded the rate limit. Try again later</string>
+    <string name="error_payload_too_large">The request is too large. Try reducing the data</string>
+    <string name="error_invalid_response">Received an invalid response from the server</string>
+    <string name="error_server_error">Server error. Please try again later</string>
+    <string name="error_too_many_requests">Too many requests in a short time. Please wait and try again</string>
+    <string name="error_serialization">Data processing error. Please try again</string>
+    <string name="error_unknown">An unknown error occurred</string>
+    <string name="error_invalid_status">The request status is invalid</string>
+
+    //Data error
+    //most are in the above
+    <string name="error_not_found">The requested item was not found.</string>
+    <string name="error_disk_full">Your device storage is full. Free up space and try again.</string>
+
+
+    //hard code use
+    <string name="success_demands_updated">Demands updated successfully</string>
+    <string name="error_operation_in_progress">Please wait, operation in progress</string>
+    <string name="error_no_demands">No demands to update</string>
+    <string name="error_not_synced">Data not in sync, try again later</string>
+    <string name="error_no_connection">Device isn't connected to the internet</string>
+    <string name="error_validation_unknown">Unknown validation error</string>
+    <string name="success_products_synced">Product list synced successfully</string>
+
+
+    //hard code general
+    <string name="label_update_status">Update status to %1$s</string>
+    <string name="msg_user_not_authenticated">User not logged in. Please sign in to access information.</string>
+
+
+</resources>

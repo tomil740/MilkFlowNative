@@ -1,6 +1,5 @@
 package com.tomiappdevelopment.milk_flow.di
 
-import androidx.compose.ui.text.font.FontVariation.Settings
 import com.tomiappdevelopment.milk_flow.core.AuthManager
 import com.tomiappdevelopment.milk_flow.data.local.AuthStorage
 import com.tomiappdevelopment.milk_flow.data.local.MilkFlowDb
@@ -21,6 +20,7 @@ import com.tomiappdevelopment.milk_flow.domain.repositories.CartRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.DemandsRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
 import com.tomiappdevelopment.milk_flow.domain.usecase.GetAuthorizedProducts
+import com.tomiappdevelopment.milk_flow.domain.usecase.GetConnectionState
 import com.tomiappdevelopment.milk_flow.domain.usecase.GetDemandsWithUserNames
 import com.tomiappdevelopment.milk_flow.domain.usecase.MakeCartDemand
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
@@ -90,6 +90,8 @@ val appModule = module {
     singleOf(::GetAuthorizedProducts)
 
     singleOf(::GetDemandsWithUserNames)
+
+    singleOf(::GetConnectionState)
 
     factoryOf(::ProductCatalogVm)
 

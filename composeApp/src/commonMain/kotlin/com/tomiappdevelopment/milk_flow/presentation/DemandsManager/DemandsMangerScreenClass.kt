@@ -14,7 +14,6 @@ class DemandsMangerScreenClass():Screen {
         val state by a.uiState.collectAsState()
         val b = DemandsMangerSatesAndEvents(
             uiState = state,
-            onDemandItemClick = { demandId -> a.onEvent(DemandsMangerEvents.OnDemandItemClick(demandId)) },
             onStatusSelected = { status -> a.onEvent(DemandsMangerEvents.OnStatusSelected(status)) },
             onToggleView = { a.onEvent(DemandsMangerEvents.OnToggleView) },
             onUpdateDemandsStatus = { a.onEvent(DemandsMangerEvents.OnUpdateDemandsStatus) },
@@ -32,7 +31,6 @@ class DemandsMangerScreenClass():Screen {
 data class DemandsMangerSatesAndEvents(
     val uiState: DemandsManagerUiState,
     val onStatusSelected: (Status) -> Unit,
-    val onDemandItemClick: (String) -> Unit,
     val onToggleView: () -> Unit,
     val onUpdateDemandsStatus: () -> Unit,
     val refresh: () -> Unit
