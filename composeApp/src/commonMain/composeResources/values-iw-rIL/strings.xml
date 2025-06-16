@@ -35,6 +35,10 @@
     //hard code general
     <string name="label_update_status">עדכן סטטוס ל %1$s</string>
     <string name="msg_user_not_authenticated">משתמש לא מחובר, התחבר לקבלת מידע</string>
+    <string name="error_not_authenticated_no_data">המשתמש לא מחובר. התחבר כדי לצפות בנתונים.</string>
+    <string name="dialog_demand_update_success_title">הצלחה</string>
+    <string name="dialog_demand_update_success_message">הבקשות עודכנו בהצלחה.</string>
+    <string name="dialog_ok_button">בסדר</string>
 
 
 </resources>

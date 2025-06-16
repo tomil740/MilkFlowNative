@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tomiappdevelopment.milk_flow.core.presentation.UiText
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.core.getNextStatus
 import com.tomiappdevelopment.milk_flow.domain.core.getStringName
@@ -46,9 +47,16 @@ import com.tomiappdevelopment.milk_flow.presentation.core.components.LoadingSpin
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.ProductDialog
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.datetime.LocalDateTime
+import milkflow.composeapp.generated.resources.Res
+import milkflow.composeapp.generated.resources.dialog_demand_update_success_message
+import milkflow.composeapp.generated.resources.dialog_demand_update_success_title
+import milkflow.composeapp.generated.resources.dialog_ok_button
+import milkflow.composeapp.generated.resources.error_not_authenticated_no_data
+import milkflow.composeapp.generated.resources.label_update_status
 import network.chaintech.utils.now
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalResourceApi::class)
 @Composable
 fun DemandItemScreen(demandsItemSatesAndEvents: DemandsItemSatesAndEvents
 ) {
@@ -67,7 +75,10 @@ fun DemandItemScreen(demandsItemSatesAndEvents: DemandsItemSatesAndEvents
                 CheckoutButton(
                     loading = false,
                     onClick = { demandsItemSatesAndEvents.onUpdateDemandStatus() },
-                    label = "עדכן סטטוס ל ${demandsItemSatesAndEvents.uiState.demandItem.status.getNextStatus()?.getStringName()}",
+                    label =  UiText.StringResource(
+                        Res.string.label_update_status,
+                        demandsItemSatesAndEvents.uiState.demandItem.status.getNextStatus()?.getStringName() ?: ""
+                    ).asString(),
                     enabled = (demandsItemSatesAndEvents.uiState.demandItem.status != Status.completed &&
                             demandsItemSatesAndEvents.uiState.authState != null)
                 )
@@ -93,7 +104,7 @@ fun DemandItemScreen(demandsItemSatesAndEvents: DemandsItemSatesAndEvents
 
                 AnimatedVisibility(uiState.demandItem.userName.isEmpty()) {
                     val mes = if (uiState.authState == null) {
-                        "מתשתמש לא מחובר , התחבר לקבלת מידע"
+                       UiText.StringResource(Res.string.error_not_authenticated_no_data).asString()
                     } else {
                         ""
                     }
@@ -129,11 +140,11 @@ fun DemandItemScreen(demandsItemSatesAndEvents: DemandsItemSatesAndEvents
                     TextButton(onClick = {
                         navigator.replaceAll(DemandsMangerScreenClass())
                     }) {
-                        Text("בסדר")
+                        Text(UiText.StringResource(Res.string.dialog_ok_button).asString())
                     }
                 },
-                title = { Text("הצלחה") },
-                text = { Text("הבקשות עודכנו בהצלחה") }
+                title = { Text(UiText.StringResource(Res.string.dialog_demand_update_success_title).asString()) },
+                text = { Text(UiText.StringResource(Res.string.dialog_demand_update_success_message).asString()) }
             )
         }
     }

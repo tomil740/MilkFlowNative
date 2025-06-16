@@ -37,6 +37,10 @@
     //hard code general
     <string name="label_update_status">Update status to %1$s</string>
     <string name="msg_user_not_authenticated">User not logged in. Please sign in to access information.</string>
+    <string name="error_not_authenticated_no_data">User not logged in. Please sign in to view data.</string>
+    <string name="dialog_demand_update_success_title">Success</string>
+    <string name="dialog_demand_update_success_message">Demands were updated successfully.</string>
+    <string name="dialog_ok_button">OK</string>
 
 
 </resources>
