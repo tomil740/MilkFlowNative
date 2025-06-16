@@ -12,7 +12,7 @@ interface DemandsRepository {
 
     // Fetch a page of demands from remote API within last 72 hours,
     // ordered by updatedAt, paginated by page number
-    suspend fun fetchNewPage(pageToken: String?,uid: String,isDistributor: Boolean): Result<DemandsWithNextPageToken, DataError.Network>
+    suspend fun fetchNewPage(page: Int?,uid: String,isDistributor: Boolean): Result<DemandsWithNextPageToken, DataError.Network>
 
     // Get a single demand by its ID from local DB
     suspend fun getDemandById(demandId: String): Demand?

@@ -221,7 +221,7 @@ class DemandsMangerVm(
         }
     }
 
-    fun syncNewDemandUseCase() {
+    private fun syncNewDemandUseCase() {
         val auth = _uiState.value.authState ?: return
         syncNewDemandJob?.cancel()
         syncNewDemandJob = screenModelScope.launch {

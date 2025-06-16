@@ -6,7 +6,6 @@ import com.tomiappdevelopment.milk_flow.data.util.toISO
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
 import com.tomiappdevelopment.milk_flow.domain.models.subModels.DemandStatusUpdateEntry
-import com.tomiappdevelopment.milk_flow.domain.models.subModels.UpdateDemandsStatusParams
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import io.ktor.client.HttpClient
@@ -44,13 +43,13 @@ class DemandsRemoteDao(
 ) {
 
     suspend fun getDemandsPage(
-        startAfterTimestamp: String? = null,
+        pageSize: Int? = null,
     ): Result<PagedDemandsDto, DataError.Network> {
         val now = Clock.System.now()
         val thresholdInstant = now.minus(72.hours)
         val thresholdTimestamp = thresholdInstant.toLocalDateTime(TimeZone.UTC).toString() + "Z"
 
-        val limit = if(startAfterTimestamp!=null){50}else{2}
+        val limit = if(pageSize!=null){pageSize}else{12}
 
         val structuredQuery = buildJsonObject {
             putJsonObject("structuredQuery") {

@@ -2,12 +2,9 @@ package com.tomiappdevelopment.milk_flow.data.local.dao
 
 
 import androidx.room.*
-import com.tomiappdevelopment.milk_flow.data.local.entities.CartEntity
 import com.tomiappdevelopment.milk_flow.data.local.entities.DemandEntity
 import com.tomiappdevelopment.milk_flow.data.local.entities.DemandProductEntity
 import com.tomiappdevelopment.milk_flow.data.local.entities.DemandWithProductsE
-import com.tomiappdevelopment.milk_flow.data.local.entities.ProductEntity
-import com.tomiappdevelopment.milk_flow.data.local.entities.ProductsMetadataEntity
 import kotlinx.coroutines.flow.Flow
 
 
@@ -65,7 +62,7 @@ interface DemandDao {
 
     @Transaction
     @Query("SELECT * FROM demands WHERE status = :status AND distributerId = :uid ORDER BY updatedAt DESC")
-    fun getDDemandsWithProductsByStatusFlow(status: String, uid: String): Flow<List<DemandWithProductsE>>
+    fun getDemandsWithProductsByStatusFlow(status: String, uid: String): Flow<List<DemandWithProductsE>>
 
     @Transaction
     suspend fun deleteOldDemandsAndProducts(thresholdTime: Long) {
