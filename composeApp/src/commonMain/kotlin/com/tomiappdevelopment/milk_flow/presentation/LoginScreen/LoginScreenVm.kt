@@ -23,49 +23,47 @@ class LoginViewModel(private val authManager: AuthManager) : ScreenModel {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    private val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$")
-
     init {
         screenModelScope.launch {
             authManager.userFlow(screenModelScope)
         }
     }
 
-    fun onEmailChange(newEmail: String) {
-        _uiState.update { it.copy(email = newEmail, emailError = null, errorMessage = null) }
+    fun onPhoneChange(newPhone: String) {
+        _uiState.update { it.copy(phoneNumber = newPhone, phoneNumberError = null, errorMessage = null) }
         validateForm()
     }
 
-    fun onPasswordChange(newPassword: String) {
-        _uiState.update { it.copy(password = newPassword, passwordError = null, errorMessage = null) }
-        validateForm()
-    }
 
     private fun validateForm() {
-        val email = _uiState.value.email
-        val password = _uiState.value.password
+        val phone = _uiState.value.phoneNumber.trim()
 
-        val emailError = if (!emailRegex.matches(email)) "אימייל לא תקין" else null
-        val passwordError = if (password.isBlank()) "יש להזין סיסמה" else null
-
-        val isFormValid = emailError == null && passwordError == null
+        val phoneError = if (!isValidPhoneNumber(phone)) "מספר טלפון לא תקין" else null
+        val isFormValid = phoneError == null
 
         _uiState.update {
             it.copy(
-                emailError = emailError,
-                passwordError = passwordError,
+                phoneNumberError = phoneError,
                 isFormValid = isFormValid
             )
         }
     }
+
+    private fun isValidPhoneNumber(phone: String): Boolean {
+        return phone.length == 10 && phone.all { it.isDigit() } && phone.startsWith("05")
+    }
+
     fun onLoginClicked() {
         if (!_uiState.value.isFormValid || _uiState.value.isLoading) return
 
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
+            val email = "${_uiState.value.phoneNumber}@mail.com"
+            val password = _uiState.value.phoneNumber
+
             // You’d actually call your AuthRepository here.
-            val a = authManager.signIn(uiState.value.email,uiState.value.password)
+            val a = authManager.signIn(email,password)
 
             when(a){
                 is Result.Error<Error> ->  _uiState.update {

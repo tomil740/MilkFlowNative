@@ -48,6 +48,7 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
 
     val navigator = LocalNavigator.currentOrThrow
 
+    
 
     Box {
 

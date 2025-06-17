@@ -32,6 +32,13 @@ class TopBarViewModel(
                     authManager.signOut()
                 }
             }
+
+            TopBarEvent.CancelLogout -> {
+                _uiState.update { it.copy(showLogoutDialog = false) }
+            }
+            TopBarEvent.RequestLogout -> {
+                _uiState.update { it.copy(showLogoutDialog = true) }
+            }
         }
     }
 
