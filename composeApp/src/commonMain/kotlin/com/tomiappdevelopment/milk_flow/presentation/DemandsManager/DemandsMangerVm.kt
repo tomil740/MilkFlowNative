@@ -57,7 +57,6 @@ class DemandsMangerVm(
     private val syncNewDemands:SyncNewDemands,
     private val getDemandsWithUserNames: GetDemandsWithUserNames,
     private val updateDemandsStatusUseCase:UpdateDemandsStatusUseCase,
-    private val getConnectionState: GetConnectionState
 ): ScreenModel {
 
 
@@ -110,12 +109,6 @@ class DemandsMangerVm(
 
         screenModelScope.launch {
 
-            launch {
-                getConnectionState.invoke().collectLatest { connectionStateFlow->
-                    connectionState.update { connectionStateFlow }
-                }
-
-            }
             launch {
                 authManager.userFlow(this).collect{ authRes ->
                     _uiState.update { it.copy(authState = (authRes)) }
@@ -171,8 +164,6 @@ class DemandsMangerVm(
                     (!uiState.isLoading) &&
                     uiState.demandSummaryList.isNotEmpty() &&
                     uiState.syncStatus == SyncStatus.SUCCESS
-                    &&
-                    (connectionState.value == ConnectionState.Available)
                 ) {
                     screenModelScope.launch {
                         _uiState.update { it.copy(isLoading = true) }
@@ -204,7 +195,6 @@ class DemandsMangerVm(
                         uiState.isLoading -> UiText.StringResource(Res.string.error_operation_in_progress)
                         uiState.demandSummaryList.isEmpty() -> UiText.StringResource(Res.string.error_no_demands)
                         uiState.syncStatus != SyncStatus.SUCCESS -> UiText.StringResource(Res.string.error_not_synced)
-                        connectionState.value != ConnectionState.Available -> UiText.StringResource(Res.string.error_no_connection)
                         else -> UiText.StringResource(Res.string.error_validation_unknown)
                     }
                     screenModelScope.launch {

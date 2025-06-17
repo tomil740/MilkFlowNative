@@ -1,5 +1,6 @@
 package com.tomiappdevelopment.milk_flow.data.remote
 
+import com.tomiappdevelopment.milk_flow.data.remote.core.isOnline
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.DemandDto
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.PagedDemandsDto
 import com.tomiappdevelopment.milk_flow.data.util.toISO
@@ -221,6 +222,9 @@ class DemandsRemoteDao(
 
 
     suspend fun makeDemand(demand: DemandDto): Result<Unit, DataError.Network> {
+        if (!isOnline(httpClient)) {
+            return Result.Error(DataError.Network.NO_INTERNET)
+        }
         val url = "https://firestore.googleapis.com/v1/projects/milkflow-5c80c/databases/(default)/documents/Demands"
 
         val productItems = demand.products.joinToString(",") { product ->
@@ -283,6 +287,9 @@ class DemandsRemoteDao(
     }
 
     suspend fun updateDemandsStatus(params: DemandStatusUpdateEntry): Result<Unit, DataError.Network> {
+        if (!isOnline(httpClient)) {
+            return Result.Error(DataError.Network.NO_INTERNET)
+        }
         for (demand in params.demandId) {
             val documentId = demand ?: return Result.Error(DataError.Network.UNKNOWN)
 

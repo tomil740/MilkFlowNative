@@ -57,17 +57,19 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                 SnackbarHost(hostState = snackBarHostState)
             },
             bottomBar = {
-                CheckoutButton(
-                    loading = false,
-                    onClick = { demandsMangerSatesAndEvents.onUpdateDemandsStatus() },
-                    label =  UiText.StringResource(
-                        Res.string.label_update_status,
-                        demandsMangerSatesAndEvents.uiState.status.getNextStatus()?.getStringName() ?: ""
-                            ).asString()
-                    ,
-                    enabled = (demandsMangerSatesAndEvents.uiState.status != Status.completed &&
-                            demandsMangerSatesAndEvents.uiState.authState!=null)
-                )
+                if(demandsMangerSatesAndEvents.uiState.authState?.isDistributer == true) {
+                    CheckoutButton(
+                        loading = false,
+                        onClick = { demandsMangerSatesAndEvents.onUpdateDemandsStatus() },
+                        label = UiText.StringResource(
+                            Res.string.label_update_status,
+                            demandsMangerSatesAndEvents.uiState.status.getNextStatus()
+                                ?.getStringName() ?: ""
+                        ).asString(),
+                        enabled = (demandsMangerSatesAndEvents.uiState.status != Status.completed &&
+                                demandsMangerSatesAndEvents.uiState.authState != null)
+                    )
+                }
             }
 
         ) {
@@ -86,8 +88,11 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
             Column {
                 //header...
 
-                StatusMenuBar(currentStatus=uiState.status, onStatusChange = demandsMangerSatesAndEvents.onStatusSelected,
-                    syncStatus=uiState.syncStatus )
+                StatusMenuBar(
+                    currentStatus=uiState.status,
+                    onStatusChange = demandsMangerSatesAndEvents.onStatusSelected,
+                    syncStatus=uiState.syncStatus,
+                    onSyncClicked = demandsMangerSatesAndEvents.refresh)
 
                 TwoWaySwitch(isProductSummary = uiState.isProductView, onToggle = {demandsMangerSatesAndEvents.onToggleView()})
 

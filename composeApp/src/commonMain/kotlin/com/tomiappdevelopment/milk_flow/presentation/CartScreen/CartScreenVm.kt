@@ -13,6 +13,7 @@ import com.tomiappdevelopment.milk_flow.domain.usecase.GetConnectionState
 import com.tomiappdevelopment.milk_flow.domain.usecase.MakeCartDemand
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.util.Result
+import com.tomiappdevelopment.milk_flow.presentation.util.toUiText
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -123,12 +124,9 @@ class CartScreenVm(
                 makeDemandJob?.cancel()
                 makeDemandJob = screenModelScope.launch {
                     _uiState.update { it.copy(isLoading = true) }
-                    delay(500)
-                    if (_uiState.value.connectionState != ConnectionState.Available) {
-                        _uiState.update { it.copy(isLoading = false) }
-                        uiMessage.send(UiText.DynamicString("Device is unConnect to the internet..."))
-                        return@launch
-                    }
+                    //check live connection observer
+                    println("Lie observer: ${_uiState.value.connectionState}")
+
                     val authState = authManager.userFlow(this).firstOrNull()
                     if (authState == null) {
                         _uiState.update { it.copy(isLoading = false) }
@@ -146,7 +144,7 @@ class CartScreenVm(
                     when (result) {
                         is Result.Error -> {
                              _uiState.update { it.copy(isLoading = false) }
-                            uiMessage.send(UiText.DynamicString("Demand failed: ${result.error}"))
+                            uiMessage.send((result.error.toUiText()))
                         }
 
                         is Result.Success -> {

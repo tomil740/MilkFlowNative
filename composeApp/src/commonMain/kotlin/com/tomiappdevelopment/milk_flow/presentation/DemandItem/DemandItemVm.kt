@@ -25,6 +25,7 @@ import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsManagerUiState
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsMangerEvents
+import com.tomiappdevelopment.milk_flow.presentation.util.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -97,7 +98,7 @@ class DemandItemVm(
                 when (result) {
                     is Result.Error -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        uiMessage.send(UiText.DynamicString(result.error.toString()))
+                        uiMessage.send((result.error.toUiText()))
                     }
 
                     is Result.Success -> {

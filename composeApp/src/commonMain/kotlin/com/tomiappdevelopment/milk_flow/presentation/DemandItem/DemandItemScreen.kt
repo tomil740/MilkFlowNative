@@ -72,16 +72,20 @@ fun DemandItemScreen(demandsItemSatesAndEvents: DemandsItemSatesAndEvents
                 SnackbarHost(hostState = snackBarHostState)
             },
             bottomBar = {
-                CheckoutButton(
-                    loading = false,
-                    onClick = { demandsItemSatesAndEvents.onUpdateDemandStatus() },
-                    label =  UiText.StringResource(
-                        Res.string.label_update_status,
-                        demandsItemSatesAndEvents.uiState.demandItem.status.getNextStatus()?.getStringName() ?: ""
-                    ).asString(),
-                    enabled = (demandsItemSatesAndEvents.uiState.demandItem.status != Status.completed &&
-                            demandsItemSatesAndEvents.uiState.authState != null)
-                )
+                if (demandsItemSatesAndEvents.uiState.authState?.isDistributer == true) {
+
+                    CheckoutButton(
+                        loading = false,
+                        onClick = { demandsItemSatesAndEvents.onUpdateDemandStatus() },
+                        label = UiText.StringResource(
+                            Res.string.label_update_status,
+                            demandsItemSatesAndEvents.uiState.demandItem.status.getNextStatus()
+                                ?.getStringName() ?: ""
+                        ).asString(),
+                        enabled = (demandsItemSatesAndEvents.uiState.demandItem.status != Status.completed &&
+                                demandsItemSatesAndEvents.uiState.authState != null)
+                    )
+                }
             }
 
         ) {
