@@ -78,6 +78,7 @@ class AuthRepositoryImpl(
                 user
             }
             is Result.Error -> {
+                println("user by id fetch error ${remoteResult.error}")
                 // handle error or return null
                 null
             }

@@ -7,5 +7,6 @@ data class TopBarUiState(
     val isLoggedIn: Boolean = false,
     val isDistributor: Boolean = false,
     val cartItemCount: Int = 0,
+    val showLogoutDialog: Boolean = false,
     val connectionState:ConnectionState = ConnectionState.Unavailable
 )

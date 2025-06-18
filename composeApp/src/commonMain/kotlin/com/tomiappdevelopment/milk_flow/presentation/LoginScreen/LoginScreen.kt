@@ -59,34 +59,13 @@ fun LoginScreen(
             )
 
             OutlinedTextField(
-                value = uiState.email,
-                onValueChange = stateAndEvents.onEmailChange,
-                label = { Text("אימייל") },
-                isError = uiState.emailError != null,
+                value = uiState.phoneNumber,
+                onValueChange = stateAndEvents.onPhoneChange,
+                label = { Text("מספר טלפון") },
+                isError = uiState.phoneNumberError != null,
                 modifier = Modifier.fillMaxWidth()
             )
-            uiState.emailError?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(top = 4.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = uiState.password,
-                onValueChange = stateAndEvents.onPassWordChange,
-                label = { Text("סיסמה") },
-                isError = uiState.passwordError != null,
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth()
-            )
-            uiState.passwordError?.let {
+            uiState.phoneNumberError?.let {
                 Text(
                     text = it,
                     color = MaterialTheme.colorScheme.error,

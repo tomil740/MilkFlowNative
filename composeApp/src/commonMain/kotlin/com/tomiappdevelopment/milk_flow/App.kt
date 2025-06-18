@@ -3,7 +3,10 @@ package com.tomiappdevelopment.milk_flow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,6 +21,7 @@ import com.tomiappdevelopment.milk_flow.presentation.CartScreen.CartScreenClass
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsMangerScreenClass
 import com.tomiappdevelopment.milk_flow.presentation.LoginScreen.LoginScreenClass
 import com.tomiappdevelopment.milk_flow.presentation.core.AppRoute
+import com.tomiappdevelopment.milk_flow.presentation.core.components.LogoutDialog
 import com.tomiappdevelopment.milk_flow.presentation.core.topBar.TopBar
 import com.tomiappdevelopment.milk_flow.presentation.core.topBar.TopBarEvent
 import com.tomiappdevelopment.milk_flow.presentation.core.topBar.TopBarViewModel
@@ -46,8 +50,6 @@ fun App(
     darkTheme: Boolean = false,
     dynamicColor: Boolean = true,
 ) {
-
-
     AppTheme(
         darkTheme = darkTheme,
         dynamicColor = dynamicColor
@@ -65,8 +67,7 @@ fun App(
                         AppRoute.ProductsCatalog -> navigator.replaceAll(ProductCatalogScreenClass())
                         AppRoute.Cart -> navigator.replaceAll(CartScreenClass())
                         AppRoute.DemandsManger -> navigator.replaceAll(DemandsMangerScreenClass())
-                        // handle in sub navigation stack only for item at a time not used thourgh here
-                        AppRoute.DemandItem -> navigator.replaceAll(DemandsMangerScreenClass())
+                        else -> navigator.replaceAll(ProductCatalogScreenClass())
                     }
                 }
             }
@@ -76,8 +77,8 @@ fun App(
                 topBar = {
                     TopBar(
                         state = uiState,
-                        onNavigate = {viewModel.onEvent(TopBarEvent.Navigate(it))},
-                        onLogout = {viewModel.onEvent(TopBarEvent.Logout)}
+                        onNavigate = { viewModel.onEvent(TopBarEvent.Navigate(it)) },
+                        onLogout = { viewModel.onEvent(TopBarEvent.RequestLogout) } // trigger dialog
                     )
                 }
             ) { innerPadding ->
@@ -88,6 +89,14 @@ fun App(
                         .fillMaxSize()
                 ) {
                     CurrentScreen()
+
+                    // 👇 Logout Confirmation Dialog
+                    if (uiState.showLogoutDialog) {
+                        LogoutDialog(
+                            onConfirm = { viewModel.onEvent(TopBarEvent.Logout) },
+                            onDismiss = { viewModel.onEvent(TopBarEvent.CancelLogout) }
+                        )
+                    }
                 }
             }
         }

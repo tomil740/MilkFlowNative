@@ -14,6 +14,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -48,6 +49,7 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
 
     val navigator = LocalNavigator.currentOrThrow
 
+    val isDistributer = demandsMangerSatesAndEvents.uiState.authState?.isDistributer == true
 
     Box {
 
@@ -56,17 +58,19 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                 SnackbarHost(hostState = snackBarHostState)
             },
             bottomBar = {
-                CheckoutButton(
-                    loading = false,
-                    onClick = { demandsMangerSatesAndEvents.onUpdateDemandsStatus() },
-                    label =  UiText.StringResource(
-                        Res.string.label_update_status,
-                        demandsMangerSatesAndEvents.uiState.status.getNextStatus()?.getStringName() ?: ""
-                            ).asString()
-                    ,
-                    enabled = (demandsMangerSatesAndEvents.uiState.status != Status.completed &&
-                            demandsMangerSatesAndEvents.uiState.authState!=null)
-                )
+                if(isDistributer) {
+                    CheckoutButton(
+                        loading = false,
+                        onClick = { demandsMangerSatesAndEvents.onUpdateDemandsStatus() },
+                        label = UiText.StringResource(
+                            Res.string.label_update_status,
+                            demandsMangerSatesAndEvents.uiState.status.getNextStatus()
+                                ?.getStringName() ?: ""
+                        ).asString(),
+                        enabled = (demandsMangerSatesAndEvents.uiState.status != Status.completed &&
+                                demandsMangerSatesAndEvents.uiState.authState != null)
+                    )
+                }
             }
 
         ) {
@@ -85,8 +89,11 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
             Column {
                 //header...
 
-                StatusMenuBar(currentStatus=uiState.status, onStatusChange = demandsMangerSatesAndEvents.onStatusSelected,
-                    syncStatus=uiState.syncStatus )
+                StatusMenuBar(
+                    currentStatus=uiState.status,
+                    onStatusChange = demandsMangerSatesAndEvents.onStatusSelected,
+                    syncStatus=uiState.syncStatus,
+                    onSyncClicked = demandsMangerSatesAndEvents.refresh)
 
                 TwoWaySwitch(isProductSummary = uiState.isProductView, onToggle = {demandsMangerSatesAndEvents.onToggleView()})
 
@@ -100,7 +107,7 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                 }
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxHeight(0.85f)
+                        .fillMaxHeight(if(isDistributer){0.85f}else{1f})
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {

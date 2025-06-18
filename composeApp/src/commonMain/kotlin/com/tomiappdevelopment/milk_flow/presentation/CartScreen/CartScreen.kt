@@ -34,6 +34,7 @@ import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.S
 import com.tomiappdevelopment.milk_flow.presentation.core.components.EmptyDataMessage
 import com.tomiappdevelopment.milk_flow.presentation.core.components.LoadingSpinner
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.ProductDialog
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.datetime.LocalDateTime
 import network.chaintech.utils.now
@@ -68,7 +69,7 @@ fun CartScreen(cartSatesAndEvents: CartSatesAndEvents
 
             LaunchedEffect(cartSatesAndEvents.uiState.uiMessage) {
                 cartSatesAndEvents.uiState.uiMessage.consumeAsFlow()
-                    .collect {
+                    .collectLatest {
                         snackBarHostState.showSnackbar(
                             it.asString2(),
                             duration = SnackbarDuration.Long

@@ -11,7 +11,7 @@ class LoginScreenClass():Screen {
     override fun Content() {
         val a = getScreenModel<LoginViewModel>()
         val state by a.uiState.collectAsState()
-        val b = LoginStatesAndEvents(state, onLogin = {a.onLoginClicked()}, onEmailChange = {a.onEmailChange(it)}, onPassWordChange = {a.onPasswordChange(it)})
+        val b = LoginStatesAndEvents(state, onLogin = {a.onLoginClicked()}, onPhoneChange = {a.onPhoneChange(it)})
 
 
         LoginScreen(
@@ -25,7 +25,5 @@ class LoginScreenClass():Screen {
 data class LoginStatesAndEvents(
     val uiState: LoginUiState,
     val onLogin: ()-> Unit,
-    val onEmailChange: (String)-> Unit,
-    val onPassWordChange: (String)-> Unit
-
+    val onPhoneChange: (String)-> Unit,
 )

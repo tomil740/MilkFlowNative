@@ -39,7 +39,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose) // includes viewModel support
-
+            implementation(libs.koin.android.workmanager) // includes viewModel support
 
 
         }
