@@ -22,18 +22,15 @@ class DemandsRepositoryImpl(
     private val demandsRemoteDao: DemandsRemoteDao,
     private val demandsDao: DemandDao
 ): DemandsRepository {
-    override suspend fun fetchNewPage(pageToken: String?,uid: String,isDistributor: Boolean): Result<DemandsWithNextPageToken, DataError.Network> {
-         val fetchedData = demandsRemoteDao.getDemandsPage(pageToken)
+    override suspend fun fetchNewPage(page: Int?,uid: String,isDistributor: Boolean): Result<DemandsWithNextPageToken, DataError.Network> {
+         val fetchedData = demandsRemoteDao.getDemandsPage(page)
        return when(fetchedData){
             is Result.Error<DataError.Network> -> return fetchedData
             is Result.Success<PagedDemandsDto> -> {
                 // Transform the PagedDemandsDto to DemandsWithNextPageToken
 
-                val userDemands = if(isDistributor){fetchedData.data.demands.filter { it.distributerId==uid }}else{
-                    fetchedData.data.demands.filter { it.userId==uid}
-                }
                 val demandsWithNextPageToken = DemandsWithNextPageToken(
-                    demands = userDemands.map { it.toDemand() },
+                    demands = fetchedData.data.demands.map { it.toDemand() },
                     nextPageToken = fetchedData.data.nextPageToken
                 )
                 Result.Success(demandsWithNextPageToken)
@@ -70,24 +67,41 @@ class DemandsRepositoryImpl(
         demandsDao.deleteOldDemandsAndProducts(cutoffTimestamp)
     }
 
-    override suspend fun getDemands(status: Status,uid: String,isDistributor: Boolean): Flow<List<Demand>> {
-        val theDaoFun = if(isDistributor){ demandsDao.getDDemandsWithProductsByStatusFlow(status.toString(),uid)
-        }else{ demandsDao.getUserDemandsWithProductsByStatusFlow(status.toString(),uid)}
-        return theDaoFun.map { data->
-            data.map { obj->
-                Demand(
-                    obj.demand.demandId,
-                    obj.demand.uid,
-                    obj.demand.distributerId ?: "",
-                    Status.valueOf(obj.demand.status),
-                    createdAt = obj.demand.createdAt.toLocalDateTime(),
-                    updatedAt = obj.demand.updatedAt.toLocalDateTime(),
-                    products = obj.products.map { CartItem(it.productId,it.amount) }
-                )
-            }
+    override suspend fun getDemands(
+        status: Status,
+        uid: String,
+        isDistributor: Boolean
+    ): Flow<List<Demand>> {
+        val theDaoFun = if (isDistributor) {
+            demandsDao.getDemandsWithProductsByStatusFlow(status.toString(), uid)
+        } else {
+            demandsDao.getUserDemandsWithProductsByStatusFlow(status.toString(), uid)
+        }
 
+        return theDaoFun.map { data ->
+            data
+                // Add safety check: filter out objects with wrong UID/distributorId
+                .filter { obj ->
+                    if (isDistributor) {
+                        obj.demand.distributerId == uid
+                    } else {
+                        obj.demand.uid == uid
+                    }
+                }
+                .map { obj ->
+                    Demand(
+                        obj.demand.demandId,
+                        obj.demand.uid,
+                        obj.demand.distributerId ?: "",
+                        Status.valueOf(obj.demand.status),
+                        createdAt = obj.demand.createdAt.toLocalDateTime(),
+                        updatedAt = obj.demand.updatedAt.toLocalDateTime(),
+                        products = obj.products.map { CartItem(it.productId, it.amount) }
+                    )
+                }
         }
     }
+
 
     override suspend fun updateDemandsStatus(params: DemandStatusUpdateEntry): Result<Unit, DataError.Network> {
         return demandsRemoteDao.updateDemandsStatus(params)

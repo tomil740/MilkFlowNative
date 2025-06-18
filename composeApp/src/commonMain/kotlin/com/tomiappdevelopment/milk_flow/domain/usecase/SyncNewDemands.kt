@@ -12,14 +12,15 @@ class SyncNewDemands(
 ) {
 
     suspend fun invoke(uid: String, isDistributor: Boolean): Result<Boolean, DemandError> {
-        var nextPageToken: String? = null
-        var pagesFetched = 0
+        val basePageSize = 20
+        var currentPage = 0
         var anyNewData = false
 
         try {
-            do {
-                val result = repo.fetchNewPage(nextPageToken, uid, isDistributor)
+            while (currentPage < MAX_PAGES) {
+                val pageSize = basePageSize * (currentPage + 1)
 
+                val result = repo.fetchNewPage(pageSize, uid, isDistributor)
                 val page = when (result) {
                     is Result.Success -> result.data
                     is Result.Error -> return Result.Error(result.error.toDemandError())
@@ -34,14 +35,14 @@ class SyncNewDemands(
 
                 repo.upsertDemandsList(page.demands)
 
-                nextPageToken = page.nextPageToken
-                pagesFetched++
+                // Since no real pagination token, we rely purely on isNewData
+                if (!isMostlyNew) break
 
-            } while (isMostlyNew && nextPageToken != null && pagesFetched < MAX_PAGES)
+                currentPage++
+            }
 
             return Result.Success(anyNewData)
         } catch (e: Exception) {
-            //can be local cache fail(very rare)
             return Result.Error(DemandError.Unknown)
         }
     }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock.System
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
@@ -67,10 +68,11 @@ class SyncIfNeededUseCase(
             return Result.Error(DataError.Local.DISK_FULL) // Fallback error for DB issues
         }
 
+
         // 1. Check if sync has already occurred today
         val lastCheckDate = localMetadata.lastSyncCheckDate?.let {
             try {
-                LocalDate.parse(it)
+                LocalDateTime.parse(it)
             } catch (e: Exception) {
                 null // If the date is malformed, force a sync
             }

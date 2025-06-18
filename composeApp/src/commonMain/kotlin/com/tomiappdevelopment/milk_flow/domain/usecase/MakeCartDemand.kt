@@ -18,58 +18,61 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import network.chaintech.utils.now
 
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.withTimeout
+import kotlinx.datetime.*
+
 class MakeCartDemand(
     private val cartRepository: CartRepository,
-    // private val connectionChecker: ConnectionChecker
 ) {
     suspend operator fun invoke(
         authState: User?,
         cartItems: List<CartItem>
     ): Result<Unit, DemandError> = withContext(Dispatchers.IO) {
         try {
-            // 1. Validate auth
-            val userId = authState?.uid
-                ?: return@withContext Error(DemandError.NotAuthenticated)
+            withTimeout(5000) {
+                // 1. Validate auth
+                val userId = authState?.uid
+                    ?: return@withTimeout Error(DemandError.NotAuthenticated)
 
-            if (authState.isDistributer) {
-                return@withContext Error(DemandError.DistributerNotAllowed)
+                if (authState.isDistributer) {
+                    return@withTimeout Error(DemandError.DistributerNotAllowed)
+                }
+
+                // 2. Validate cart
+                if (cartItems.isEmpty()) {
+                    return@withTimeout Error(DemandError.EmptyCart)
+                }
+
+                // 3. Validate timeframe (8:00 to 18:00)
+                val hour = LocalTime.now().hour
+                if (hour < 8 || hour >= 18) {
+                    return@withTimeout Error(DemandError.InvalidTimeframe)
+                }
+
+                // 4. Build and send demand
+                val now = LocalDateTime.now()
+                val demand = Demand(
+                    userId = userId,
+                    distributerId = authState.distributerId.orEmpty(),
+                    status = Status.pending,
+                    createdAt = now,
+                    updatedAt = now,
+                    products = cartItems,
+                    id = ""
+                )
+
+                when (val result = cartRepository.makeDemand(demand)) {
+                    is Success -> Success(Unit)
+                    is Error<DataError.Network> -> Error(result.error.toDemandError())
+                }
             }
-
-            // 2. Validate cart
-            if (cartItems.isEmpty()) {
-                return@withContext Error(DemandError.EmptyCart)
-            }
-
-            // 3. Validate timeframe (8:00 to 12:00)
-            val hour = LocalTime.now().hour
-            if (hour < 8 || hour >= 22) {
-                return@withContext Error(DemandError.InvalidTimeframe)
-            }
-
-            // 4. Optional: Check connectivity
-            // if (!connectionChecker.isConnected()) {
-            //     return@withContext Result.Error(DemandError.NoInternet)
-            // }
-
-            // 5. Build and send demand
-            val now = LocalDateTime.now()
-            val demand = Demand(
-                userId = userId,
-                distributerId = authState.distributerId.orEmpty(),
-                status = Status.pending,
-                createdAt = now,
-                updatedAt = now,
-                products = cartItems,
-                id = ""
-            )
-
-            when (val result = cartRepository.makeDemand(demand)) {
-                is Success -> Success(Unit)
-                is Error<DataError.Network> -> Error(result.error.toDemandError())
-            }
+        } catch (e: TimeoutCancellationException) {
+            Error(DemandError.Timeout)
         } catch (e: Exception) {
-            Result.Error(DemandError.Unknown)
+            Error(DemandError.Unknown)
         }
     }
 }
+
 

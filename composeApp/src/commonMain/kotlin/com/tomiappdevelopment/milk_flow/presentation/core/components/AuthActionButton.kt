@@ -25,17 +25,10 @@ fun AuthActionButton(
     isStatic: Boolean = false,
     amount: Int = 0
 ) {
-    var showLogout by remember { mutableStateOf(false) }
 
-    LaunchedEffect(showLogout) {
-        if (showLogout) {
-            delay(3000L)
-            showLogout = false
-        }
-    }
 
-    val icon = if (showLogout) "🚪" else "👤"
-    val label = if (showLogout) "התנתקות" else userName ?: "משתמש"
+    val icon = "👤"
+    val label = userName ?: "משתמש"
 
     Box {
 
@@ -44,11 +37,7 @@ fun AuthActionButton(
             label = label,
             onClick = {
                 if (!isStatic) {
-                    if (showLogout) {
-                        onClick()
-                    } else {
-                        showLogout = true
-                    }
+                    onClick()
                 }
             }
         )
