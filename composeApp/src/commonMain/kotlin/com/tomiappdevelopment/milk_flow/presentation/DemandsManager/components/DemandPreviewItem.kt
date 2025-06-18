@@ -117,7 +117,7 @@ fun DemandPreviewItem(
                     color = onSurface.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = demand.products.sumOf { it.amount }.toString(),
+                    text = demand.products.size.toString(),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     color = onSurface

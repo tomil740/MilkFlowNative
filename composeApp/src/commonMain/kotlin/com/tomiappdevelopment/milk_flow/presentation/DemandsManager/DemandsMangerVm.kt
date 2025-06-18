@@ -69,7 +69,6 @@ class DemandsMangerVm(
         )
     )
 
-    private val connectionState: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Unavailable)
     private val fullCacheEmptyFlag = MutableStateFlow<Boolean>(false)
 
 

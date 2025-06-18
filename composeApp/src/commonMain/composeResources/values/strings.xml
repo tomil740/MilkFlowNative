@@ -42,5 +42,19 @@
     <string name="dialog_demand_update_success_message">Demands were updated successfully.</string>
     <string name="dialog_ok_button">OK</string>
 
+    <string name="message_products_synced_success">Products synced successfully</string>
+    <string name="message_demand_submitted_success">Demand submitted successfully</string>
+    <string name="message_cart_requires_auth">You need to log in to perform cart actions</string>
+
+    <string name="notification_permission_title">Notification Permission Needed</string>
+    <string name="notification_permission_message">To keep you updated, please allow notifications to receive important alerts and reminders.</string>
+    <string name="notification_permission_confirm">Next</string>
+    <string name="notif_title_alert">Overdue Demands</string>
+    <string name="notif_msg_alert">⚠️ You have demands pending for over 24 hours:\n%1$s</string>
+    <string name="notif_title_regular">Today’s Demands Summary</string>
+    <string name="notif_msg_regular">• Pending: %1$d\n• Placed: %2$d</string>
+    <string name="notif_title_customer">Don’t Forget!</string>
+    <string name="notif_msg_customer">You haven’t made a demand today. Tap here to do it now.</string>
+
 
 </resources>

@@ -14,6 +14,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -48,7 +49,7 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
 
     val navigator = LocalNavigator.currentOrThrow
 
-    
+    val isDistributer = demandsMangerSatesAndEvents.uiState.authState?.isDistributer == true
 
     Box {
 
@@ -57,7 +58,7 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                 SnackbarHost(hostState = snackBarHostState)
             },
             bottomBar = {
-                if(demandsMangerSatesAndEvents.uiState.authState?.isDistributer == true) {
+                if(isDistributer) {
                     CheckoutButton(
                         loading = false,
                         onClick = { demandsMangerSatesAndEvents.onUpdateDemandsStatus() },
@@ -106,7 +107,7 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                 }
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxHeight(0.85f)
+                        .fillMaxHeight(if(isDistributer){0.85f}else{1f})
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {

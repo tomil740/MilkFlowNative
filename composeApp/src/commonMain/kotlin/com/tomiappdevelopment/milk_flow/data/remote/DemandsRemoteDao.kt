@@ -1,5 +1,7 @@
 package com.tomiappdevelopment.milk_flow.data.remote
 
+import com.tomiappdevelopment.milk_flow.data.remote.core.FirebaseConfig
+import com.tomiappdevelopment.milk_flow.data.remote.core.FirebaseConfig.RUN_QUERY_URL
 import com.tomiappdevelopment.milk_flow.data.remote.core.isOnline
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.DemandDto
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.PagedDemandsDto
@@ -55,7 +57,7 @@ class DemandsRemoteDao(
         val structuredQuery = buildJsonObject {
             putJsonObject("structuredQuery") {
                 putJsonArray("from") {
-                    add(buildJsonObject { put("collectionId", "Demands") })
+                    add(buildJsonObject { put("collectionId", FirebaseConfig.Collections.Demand.COLLECTION_ID) })
                 }
                 putJsonObject("where") {
                     putJsonObject("compositeFilter") {
@@ -64,7 +66,7 @@ class DemandsRemoteDao(
                             // Filter by createdAt >= timestamp
                             addJsonObject {
                                 putJsonObject("fieldFilter") {
-                                    putJsonObject("field") { put("fieldPath", "createdAt") }
+                                    putJsonObject("field") { put("fieldPath",  FirebaseConfig.Collections.Demand.CREATED_AT) }
                                     put("op", "GREATER_THAN_OR_EQUAL")
                                     putJsonObject("value") { put("timestampValue", thresholdTimestamp) }
                                 }
@@ -86,7 +88,7 @@ class DemandsRemoteDao(
 
                 putJsonArray("orderBy") {
                     addJsonObject {
-                        putJsonObject("field") { put("fieldPath", "updateAt") }
+                        putJsonObject("field") { put("fieldPath",  FirebaseConfig.Collections.Demand.UPDATE_AT) }
                         put("direction", "DESCENDING")
                     }
                 }
@@ -103,8 +105,8 @@ class DemandsRemoteDao(
             }
         }
 
-        val url =
-            "https://firestore.googleapis.com/v1/projects/milkflow-5c80c/databases/(default)/documents:runQuery"
+        val url = RUN_QUERY_URL
+
 
         val jsonBodyString = structuredQuery.toString()
 
@@ -151,18 +153,27 @@ class DemandsRemoteDao(
 
                         val fields = docObj["fields"]?.jsonObject ?: continue
 
-                        val userId =
-                            fields["userId"]?.jsonObject?.get("stringValue")?.jsonPrimitive?.content.orEmpty()
-                        val distributerId =
-                            fields["distributerId"]?.jsonObject?.get("stringValue")?.jsonPrimitive?.contentOrNull
-                        val statusStr =
-                            fields["status"]?.jsonObject?.get("stringValue")?.jsonPrimitive?.content.orEmpty()
-                        val createdAt =
-                            fields["createdAt"]?.jsonObject?.get("timestampValue")?.jsonPrimitive?.content.orEmpty()
-                        val updatedAt =
-                            fields["updateAt"]?.jsonObject?.get("timestampValue")?.jsonPrimitive?.content.orEmpty()
+                        val userId = fields[FirebaseConfig.Collections.Demand.USER_ID]
+                            ?.jsonObject?.get("stringValue")
+                            ?.jsonPrimitive?.content.orEmpty()
 
-                        val productValues = fields["products"]
+                        val distributerId = fields[FirebaseConfig.Collections.Demand.DISTRIBUTER_ID]
+                            ?.jsonObject?.get("stringValue")
+                            ?.jsonPrimitive?.contentOrNull
+
+                        val statusStr = fields[FirebaseConfig.Collections.Demand.STATUS]
+                            ?.jsonObject?.get("stringValue")
+                            ?.jsonPrimitive?.content.orEmpty()
+
+                        val createdAt = fields[FirebaseConfig.Collections.Demand.CREATED_AT]
+                            ?.jsonObject?.get("timestampValue")
+                            ?.jsonPrimitive?.content.orEmpty()
+
+                        val updatedAt = fields[FirebaseConfig.Collections.Demand.UPDATE_AT]
+                            ?.jsonObject?.get("timestampValue")
+                            ?.jsonPrimitive?.content.orEmpty()
+
+                        val productValues = fields[FirebaseConfig.Collections.Demand.PRODUCTS]
                             ?.jsonObject?.get("arrayValue")
                             ?.jsonObject?.get("values")
                             ?.jsonArray ?: JsonArray(emptyList())
@@ -173,11 +184,11 @@ class DemandsRemoteDao(
                                     ?.jsonObject?.get("fields")
                                     ?.jsonObject ?: return@mapNotNull null
 
-                                val productId = itemFields["productId"]
+                                val productId = itemFields[FirebaseConfig.Collections.Demand.ProductFields.PRODUCT_ID]
                                     ?.jsonObject?.get("integerValue")
                                     ?.jsonPrimitive?.intOrNull ?: 0
 
-                                val quantity = itemFields["amount"]
+                                val quantity = itemFields[FirebaseConfig.Collections.Demand.ProductFields.AMOUNT]
                                     ?.jsonObject?.get("integerValue")
                                     ?.jsonPrimitive?.intOrNull ?: 0
 
@@ -225,7 +236,7 @@ class DemandsRemoteDao(
         if (!isOnline(httpClient)) {
             return Result.Error(DataError.Network.NO_INTERNET)
         }
-        val url = "https://firestore.googleapis.com/v1/projects/milkflow-5c80c/databases/(default)/documents/Demands"
+        val url = FirebaseConfig.Collections.Demand.POST_DEMAND_URL
 
         val productItems = demand.products.joinToString(",") { product ->
             """
@@ -293,8 +304,14 @@ class DemandsRemoteDao(
         for (demand in params.demandId) {
             val documentId = demand ?: return Result.Error(DataError.Network.UNKNOWN)
 
-            val url =
-                "https://firestore.googleapis.com/v1/projects/milkflow-5c80c/databases/(default)/documents/Demands/$documentId?updateMask.fieldPaths=status&updateMask.fieldPaths=updateAt"
+
+            val url = FirebaseConfig.Collections.Demand.updateUrl(
+                documentId = documentId,
+                fieldsToUpdate = listOf(
+                    FirebaseConfig.Collections.Demand.STATUS,
+                    FirebaseConfig.Collections.Demand.UPDATE_AT
+                )
+            )
 
             val jsonString = """
             {

@@ -24,7 +24,14 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import milkflow.composeapp.generated.resources.Res
+import milkflow.composeapp.generated.resources.error_not_authenticated_no_data
+import milkflow.composeapp.generated.resources.message_cart_requires_auth
+import milkflow.composeapp.generated.resources.message_demand_submitted_success
+import milkflow.composeapp.generated.resources.message_products_synced_success
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 
+@OptIn(ExperimentalResourceApi::class)
 class CartScreenVm(
     productsRepo: ProductRepository,
     private val cartRepository: CartRepository,
@@ -76,7 +83,8 @@ class CartScreenVm(
                         _uiState.update { it.copy(isLoading = false) }
                         if (syncResult.data) {
 
-                            uiMessage.send(UiText.DynamicString("Successfully synced"))
+                            uiMessage.send(UiText.StringResource(Res.string.message_products_synced_success))
+
                         }
                     }
                 }
@@ -108,7 +116,7 @@ class CartScreenVm(
                         _uiState.update {
                             it.copy(cartProducts = listOf())
                         }
-                        uiMessage.send(UiText.DynamicString("Auth to view your cart..."))
+                        uiMessage.send(UiText.StringResource(Res.string.error_not_authenticated_no_data))
 
                     }
                 }
@@ -118,6 +126,7 @@ class CartScreenVm(
 
 
 
+    @OptIn(ExperimentalResourceApi::class)
     fun onEvent(event: CartScreenEvents) {
         when (event) {
             CartScreenEvents.OnMakeDemand -> {
@@ -130,7 +139,7 @@ class CartScreenVm(
                     val authState = authManager.userFlow(this).firstOrNull()
                     if (authState == null) {
                         _uiState.update { it.copy(isLoading = false) }
-                        uiMessage.send(UiText.DynamicString("User not authenticated"))
+                        uiMessage.send(UiText.StringResource(Res.string.message_cart_requires_auth))
                         return@launch
                     }
 
@@ -154,7 +163,7 @@ class CartScreenVm(
                                     isLoading = false,
                                 )
                             }
-                            uiMessage.send(UiText.DynamicString("Demand submitted successfully"))
+                            uiMessage.send(UiText.StringResource(Res.string.message_demand_submitted_success))
                         }
                     }
                 }
@@ -179,7 +188,7 @@ class CartScreenVm(
                             )
                         }
                     }else{
-                        uiMessage.send(UiText.DynamicString("Auth to make cart actions..."))
+                        uiMessage.send(UiText.StringResource(Res.string.message_cart_requires_auth))
                     }
                     _uiState.update { it.copy(isLoading = false) }
                 }

@@ -40,5 +40,21 @@
     <string name="dialog_demand_update_success_message">הבקשות עודכנו בהצלחה.</string>
     <string name="dialog_ok_button">בסדר</string>
 
+    <string name="message_products_synced_success">המוצרים סונכרנו בהצלחה</string>
+    <string name="message_demand_submitted_success">הבקשה נשלחה בהצלחה</string>
+    <string name="message_cart_requires_auth">התחבר כדי לבצע פעולות בעגלה</string>
+
+
+    <string name="notification_permission_title">נדרשת הרשאת התראות</string>
+    <string name="notification_permission_message">כדי לעדכן אותך, נא לאפשר התראות לקבלת התראות ותזכורות חשובות.</string>
+    <string name="notification_permission_confirm">המשך</string>
+    <string name="notif_title_alert">דרישות לא מעודכנות</string>
+    <string name="notif_msg_alert">⚠️ יש דרישות שממתינות מעל 24 שעות:\n%1$s</string>
+    <string name="notif_title_regular">סיכום דרישות להיום</string>
+    <string name="notif_msg_regular">• ממתינות: %1$d\n• התקבלו: %2$d</string>
+    <string name="notif_title_customer">אל תשכח!</string>
+    <string name="notif_msg_customer">לא שלחת דרישה היום. לחץ כאן כדי לשלוח.</string>
+
+
 
 </resources>

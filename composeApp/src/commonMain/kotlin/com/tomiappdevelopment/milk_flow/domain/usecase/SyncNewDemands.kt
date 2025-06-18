@@ -12,7 +12,7 @@ class SyncNewDemands(
 ) {
 
     suspend fun invoke(uid: String, isDistributor: Boolean): Result<Boolean, DemandError> {
-        val basePageSize = 2
+        val basePageSize = 20
         var currentPage = 0
         var anyNewData = false
 

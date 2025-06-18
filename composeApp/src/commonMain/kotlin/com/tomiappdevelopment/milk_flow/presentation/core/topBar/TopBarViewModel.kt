@@ -31,6 +31,7 @@ class TopBarViewModel(
                 screenModelScope.launch {
                     authManager.signOut()
                 }
+                _uiState.update { it.copy(showLogoutDialog = false) }
             }
 
             TopBarEvent.CancelLogout -> {

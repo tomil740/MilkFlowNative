@@ -66,13 +66,16 @@ fun DemandItemScreen(demandsItemSatesAndEvents: DemandsItemSatesAndEvents
 
     val navigator = LocalNavigator.currentOrThrow
 
+    val isDistributer = demandsItemSatesAndEvents.uiState.authState?.isDistributer == true
+
+
     Box {
         Scaffold(
             snackbarHost = {
                 SnackbarHost(hostState = snackBarHostState)
             },
             bottomBar = {
-                if (demandsItemSatesAndEvents.uiState.authState?.isDistributer == true) {
+                if (isDistributer) {
 
                     CheckoutButton(
                         loading = false,
@@ -117,7 +120,7 @@ fun DemandItemScreen(demandsItemSatesAndEvents: DemandsItemSatesAndEvents
 
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxHeight(0.85f)
+                        .fillMaxHeight(if(isDistributer){0.85f}else{1f})
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
