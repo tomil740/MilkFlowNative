@@ -11,23 +11,34 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.material3.Icon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import com.tomiappdevelopment.milk_flow.core.presentation.UiText
+import com.tomiappdevelopment.milk_flow.presentation.productCatalog.ProductCatalogScreenClass
+import milkflow.composeapp.generated.resources.Res
+import milkflow.composeapp.generated.resources.dialog_login_success_button
+import milkflow.composeapp.generated.resources.dialog_login_success_message
+import milkflow.composeapp.generated.resources.dialog_login_success_title
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun LoginScreen(
     stateAndEvents: LoginStatesAndEvents
@@ -35,6 +46,9 @@ fun LoginScreen(
     val uiState = stateAndEvents.uiState
 
     val focusManager = LocalFocusManager.current
+
+    val navigator = LocalNavigator.currentOrThrow
+
 
     Box(
         modifier = Modifier
@@ -106,6 +120,50 @@ fun LoginScreen(
                     Text("התחבר")
                 }
             }
+        }
+        if (uiState.showSuccessDialog) {
+            AlertDialog(
+                onDismissRequest = {},
+                confirmButton = {
+                    Button(
+                        onClick = { navigator.replaceAll(ProductCatalogScreenClass()) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text(
+                            text = UiText.StringResource(Res.string.dialog_login_success_button).asString(),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
+                ,
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                title = {
+                    Text(
+                        text =  UiText.StringResource(Res.string.dialog_login_success_title).asString(),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                text = {
+                    Text(
+                        text = UiText.StringResource(Res.string.dialog_login_success_message).asString(),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                containerColor = MaterialTheme.colorScheme.surface,
+                tonalElevation = 6.dp
+            )
+
         }
     }
 }

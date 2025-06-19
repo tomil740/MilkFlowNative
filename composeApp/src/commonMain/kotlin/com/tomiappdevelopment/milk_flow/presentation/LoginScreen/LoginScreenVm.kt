@@ -73,12 +73,8 @@ class LoginViewModel(private val authManager: AuthManager) : ScreenModel {
                     )
                 }
                 is Result.Success<Boolean> -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = "התחבר בהצלחה! ${a.data}"
-                        )
-                    }
+                    _uiState.update { it.copy(showSuccessDialog = true,isLoading = false) }
+
                 }
             }
 

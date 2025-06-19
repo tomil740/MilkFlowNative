@@ -95,11 +95,10 @@ class DemandsMangerVm(
             }
             .onEach { (demands, status, isProductView) ->
                 if (isProductView) {
-                    // update UI for product view here if needed
                     val a = buildProductSummaryItems(demands)
-                    _uiState.update { it.copy(productSummaryList = a) }
+                    _uiState.update { it.copy(productSummaryList = a, demandSummaryList = demands) }
                 } else {
-                    _uiState.update { it.copy(demandSummaryList = demands) }
+                    _uiState.update { it.copy(productSummaryList = emptyList(), demandSummaryList = demands) }
                 }
             }
             .launchIn(screenModelScope)
