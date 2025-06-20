@@ -56,5 +56,14 @@
     <string name="notif_title_customer">Don’t Forget!</string>
     <string name="notif_msg_customer">You haven’t made a demand today. Tap here to do it now.</string>
 
+    <string name="dialog_login_success_title">Login Successful</string>
+    <string name="dialog_login_success_message">Welcome back! You’re now signed in.</string>
+    <string name="dialog_login_success_button">Continue</string>
+
+    <string name="dialog_logout_title">Log Out</string>
+    <string name="dialog_logout_message">Are you sure you want to sign out of your account?</string>
+    <string name="dialog_logout_confirm">Log Out</string>
+    <string name="dialog_logout_cancel">Cancel</string>
+
 
 </resources>

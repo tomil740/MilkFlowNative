@@ -7,6 +7,7 @@ import com.tomiappdevelopment.milk_flow.core.presentation.UiText
 import com.tomiappdevelopment.milk_flow.domain.core.ConnectionState
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.core.SyncStatus
+import com.tomiappdevelopment.milk_flow.domain.core.getNextStatus
 import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
 import com.tomiappdevelopment.milk_flow.domain.models.ProductSummaryItem
@@ -95,11 +96,10 @@ class DemandsMangerVm(
             }
             .onEach { (demands, status, isProductView) ->
                 if (isProductView) {
-                    // update UI for product view here if needed
                     val a = buildProductSummaryItems(demands)
-                    _uiState.update { it.copy(productSummaryList = a) }
+                    _uiState.update { it.copy(productSummaryList = a, demandSummaryList = demands) }
                 } else {
-                    _uiState.update { it.copy(demandSummaryList = demands) }
+                    _uiState.update { it.copy(productSummaryList = emptyList(), demandSummaryList = demands) }
                 }
             }
             .launchIn(screenModelScope)
@@ -170,7 +170,7 @@ class DemandsMangerVm(
                         val result = updateDemandsStatusUseCase.invoke(
                             UpdateDemandsStatusParams(
                                 uiState.demandSummaryList.map { it.base },
-                                targetStatus = Status.pending
+                                targetStatus = uiState.status.getNextStatus()!!
                             ),
                             uiState.authState
                         )

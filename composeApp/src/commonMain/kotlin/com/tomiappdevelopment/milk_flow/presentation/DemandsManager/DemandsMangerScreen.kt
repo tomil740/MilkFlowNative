@@ -97,7 +97,9 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
 
                 TwoWaySwitch(isProductSummary = uiState.isProductView, onToggle = {demandsMangerSatesAndEvents.onToggleView()})
 
-                AnimatedVisibility(uiState.productSummaryList.isEmpty() && uiState.demandSummaryList.isEmpty()) {
+                //its set to on the condition (|| or ) becasue we lazyly calcualte the
+                //summary
+                AnimatedVisibility(uiState.demandSummaryList.isEmpty()) {
                     val mes = if (uiState.authState == null) {
                         stringResource(Res.string.msg_user_not_authenticated)
                     } else {

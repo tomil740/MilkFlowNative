@@ -23,12 +23,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,8 +40,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.tomiappdevelopment.milk_flow.domain.models.ProductSummaryItem
+import com.tomiappdevelopment.milk_flow.presentation.core.components.AsyncImageWithFallback
 import com.tomiappdevelopment.milk_flow.presentation.core.components.AuthActionButton
 
 @Composable
@@ -71,9 +67,9 @@ fun ProductSummaryItemView(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
-                // Image
-                AsyncImage(
-                    model = "https://milkflow.netlify.app/productsImages/regular/${item.barcode}.webp",// or full URL if needed
+                // Image with fallback
+                AsyncImageWithFallback(
+                    imageUrl = item.effectiveImageUrl(),
                     contentDescription = item.productName,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

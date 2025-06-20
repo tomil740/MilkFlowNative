@@ -33,9 +33,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import coil3.compose.AsyncImage
 import com.tomiappdevelopment.milk_flow.domain.models.Product
 import com.tomiappdevelopment.milk_flow.presentation.core.NumberWheelPicker
+import com.tomiappdevelopment.milk_flow.presentation.core.components.AsyncImageWithFallback
 
 @Composable
 fun ProductDialog(
@@ -60,8 +60,8 @@ fun ProductDialog(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AsyncImage(
-                    model = "https://milkflow.netlify.app/productsImages/regular/${product.barcode}.webp",
+                AsyncImageWithFallback(
+                    imageUrl = product.effectiveImageUrl(),
                     contentDescription = product.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -69,7 +69,6 @@ fun ProductDialog(
                         .aspectRatio(16f / 9f)
                         .clip(RoundedCornerShape(16.dp))
                 )
-
                 Spacer(Modifier.height(16.dp))
 
                 Text(

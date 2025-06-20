@@ -32,11 +32,7 @@ fun TopBar(
        // TopConnectionBanner(connectionState = state.connectionState)
 
         Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .padding(top = 15.dp),
+            modifier = modifier,
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             ActionButton(

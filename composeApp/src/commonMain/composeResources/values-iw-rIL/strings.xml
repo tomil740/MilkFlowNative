@@ -55,6 +55,16 @@
     <string name="notif_title_customer">אל תשכח!</string>
     <string name="notif_msg_customer">לא שלחת דרישה היום. לחץ כאן כדי לשלוח.</string>
 
+    <string name="dialog_login_success_title">התחברת בהצלחה</string>
+    <string name="dialog_login_success_message">ברוך שובך! אתה מחובר כעת.</string>
+    <string name="dialog_login_success_button">המשך</string>
+
+    <string name="dialog_logout_title">התנתקות</string>
+    <string name="dialog_logout_message">האם אתה בטוח שברצונך להתנתק מהחשבון שלך?</string>
+    <string name="dialog_logout_confirm">התנתק</string>
+    <string name="dialog_logout_cancel">בטל</string>
+
+
 
 
 </resources>

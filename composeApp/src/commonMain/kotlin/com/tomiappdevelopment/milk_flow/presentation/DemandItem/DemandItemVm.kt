@@ -152,7 +152,7 @@ class DemandItemVm(
                     )
                 }
             } catch (e: Exception) {
-                uiMessage.send(UiText.DynamicString("שגיאה בטעינת הביקוש: ${e.message}"))
+                uiMessage.send(UiText.DynamicString("שגיאה בטעינת הדרישה: ${e.message}"))
                 _uiState.update { it.copy(isLoading = false) }
             }
         }
