@@ -29,8 +29,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import coil3.compose.AsyncImage
 import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
+import com.tomiappdevelopment.milk_flow.presentation.core.components.AsyncImageWithFallback
 
 @Composable
 fun CartPreviewItem(
@@ -79,9 +79,9 @@ fun CartPreviewItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Product image
-            AsyncImage(
-                model = "https://milkflow.netlify.app/productsImages/regular/${product.imageUrl}.webp" ,// or full URL if needed
+            // Product image with fallback
+            AsyncImageWithFallback(
+                imageUrl = product.effectiveImageUrl(),
                 contentDescription = product.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

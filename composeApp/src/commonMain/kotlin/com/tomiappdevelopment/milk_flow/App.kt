@@ -1,9 +1,12 @@
 package com.tomiappdevelopment.milk_flow
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,8 +51,11 @@ object NavigationManager {
 @Composable
 fun App(
     darkTheme: Boolean = false,
-    dynamicColor: Boolean = true,
+    //will be flag to the platform on android set dynamicColor to true
+    dynamicColor: Boolean = false,
 ) {
+    val topBarPadding = if(dynamicColor){8.dp}else{45.dp}
+
     AppTheme(
         darkTheme = darkTheme,
         dynamicColor = dynamicColor
@@ -78,7 +84,12 @@ fun App(
                     TopBar(
                         state = uiState,
                         onNavigate = { viewModel.onEvent(TopBarEvent.Navigate(it)) },
-                        onLogout = { viewModel.onEvent(TopBarEvent.RequestLogout) } // trigger dialog
+                        onLogout = { viewModel.onEvent(TopBarEvent.RequestLogout) } ,// trigger dialog
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .padding(top = topBarPadding)
                     )
                 }
             ) { innerPadding ->

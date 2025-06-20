@@ -5,6 +5,7 @@ import com.tomiappdevelopment.milk_flow.data.remote.core.FirebaseConfig.RUN_QUER
 import com.tomiappdevelopment.milk_flow.data.remote.core.isOnline
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.DemandDto
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.PagedDemandsDto
+import com.tomiappdevelopment.milk_flow.data.util.getUtcTimestamp
 import com.tomiappdevelopment.milk_flow.data.util.toISO
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
@@ -76,11 +77,15 @@ class DemandsRemoteDao(
                                 putJsonObject("fieldFilter") {
                                     putJsonObject("field") { put("fieldPath", "distributerId") }
                                     put("op", "EQUAL")
-                                    putJsonObject("value") { put("stringValue", uid) }
+                                    putJsonObject("value") { put("stringValue", "3ZVdiB3TUBZWYXT164Iex2P5Ov32") }
                                 }
                             }
 
+
  */
+
+
+
 
                         }
                     }
@@ -317,7 +322,7 @@ class DemandsRemoteDao(
             {
               "fields": {
                 "status": { "stringValue": "${params.newStatus.name}" },
-                "updateAt": { "timestampValue":"${LocalDateTime.now().toISO()}" }
+                "updateAt": { "timestampValue":"${getUtcTimestamp()}" }
               }
             }
         """.trimIndent()

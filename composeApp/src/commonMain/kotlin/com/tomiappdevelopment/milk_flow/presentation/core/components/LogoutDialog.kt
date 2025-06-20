@@ -8,9 +8,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -18,7 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tomiappdevelopment.milk_flow.core.presentation.UiText
+import milkflow.composeapp.generated.resources.Res
+import milkflow.composeapp.generated.resources.dialog_login_success_button
+import milkflow.composeapp.generated.resources.dialog_logout_cancel
+import milkflow.composeapp.generated.resources.dialog_logout_confirm
+import milkflow.composeapp.generated.resources.dialog_logout_message
+import milkflow.composeapp.generated.resources.dialog_logout_title
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun LogoutDialog(
     onConfirm: () -> Unit,
@@ -27,28 +41,52 @@ fun LogoutDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("כן", style = MaterialTheme.typography.labelLarge)
+            Button(
+                onClick = onConfirm,
+                modifier = Modifier.padding(horizontal = 16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                )
+            ) {
+                Text(
+                    text = UiText.StringResource(Res.string.dialog_logout_confirm).asString(),
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("לא", style = MaterialTheme.typography.labelLarge)
+            OutlinedButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text(
+                    text = UiText.StringResource(Res.string.dialog_logout_cancel).asString(),
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         },
+        icon = {
+            Icon(
+                imageVector = Icons.Default.ExitToApp,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
         title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text("🚪", fontSize = 20.sp)
-                Text("התנתקות", style = MaterialTheme.typography.titleLarge)
-            }
+            Text(
+                text = UiText.StringResource(Res.string.dialog_logout_title).asString(),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         },
         text = {
             Text(
-                "האם אתה בטוח שברצונך להתנתק מהחשבון שלך?",
-                style = MaterialTheme.typography.bodyMedium
+                text =   UiText.StringResource(Res.string.dialog_logout_message).asString(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
         shape = RoundedCornerShape(16.dp),

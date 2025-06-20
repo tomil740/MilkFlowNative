@@ -19,13 +19,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.tomiappdevelopment.milk_flow.domain.models.Product
+import com.tomiappdevelopment.milk_flow.presentation.core.components.AsyncImageWithFallback
 
 @Composable
 fun ProductPreviewItem(
@@ -48,15 +47,15 @@ fun ProductPreviewItem(
             modifier = modifier
                 .fillMaxSize()
         ) {
-            AsyncImage(
-                model ="https://milkflow.netlify.app/productsImages/regular/${product.barcode}.webp",
+            AsyncImageWithFallback(
+                imageUrl = product.effectiveImageUrl(),
                 contentDescription = product.name,
-                contentScale = ContentScale.Crop,
-                modifier = modifier.padding(16.dp ,16.dp,16.dp,0.dp)
-                    //.fillMaxWidth()
+                modifier = modifier
+                    .padding(16.dp, 16.dp, 16.dp, 0.dp)
                     .aspectRatio(4f / 3f)
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
             )
+
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             Text(
                 text = product.name,

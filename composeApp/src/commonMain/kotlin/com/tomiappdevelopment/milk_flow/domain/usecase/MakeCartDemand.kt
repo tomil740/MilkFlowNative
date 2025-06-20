@@ -13,14 +13,12 @@ import com.tomiappdevelopment.milk_flow.domain.util.Result.Success
 import com.tomiappdevelopment.milk_flow.domain.util.toDemandError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.LocalTime
-import network.chaintech.utils.now
-
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import kotlinx.datetime.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 class MakeCartDemand(
     private val cartRepository: CartRepository,
@@ -44,20 +42,21 @@ class MakeCartDemand(
                     return@withTimeout Error(DemandError.EmptyCart)
                 }
 
+                val currentTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+
                 // 3. Validate timeframe (8:00 to 18:00)
-                val hour = LocalTime.now().hour
+                val hour = currentTime.hour
                 if (hour < 8 || hour >= 18) {
                     return@withTimeout Error(DemandError.InvalidTimeframe)
                 }
 
                 // 4. Build and send demand
-                val now = LocalDateTime.now()
                 val demand = Demand(
                     userId = userId,
                     distributerId = authState.distributerId.orEmpty(),
                     status = Status.pending,
-                    createdAt = now,
-                    updatedAt = now,
+                    createdAt = currentTime,
+                    updatedAt = currentTime,
                     products = cartItems,
                     id = ""
                 )
