@@ -1,7 +1,7 @@
 package com.tomiappdevelopment.milk_flow.data.remote.core
 
 object FirebaseConfig {
-    const val PROJECT_ID = "milkflow-5c80c"
+    const val PROJECT_ID = "milkflowproduction"//"milkflow-5c80c"
     const val DATABASE_ID = "(default)"
     const val FIRESTORE_BASE_URL = "https://firestore.googleapis.com/v1"
 

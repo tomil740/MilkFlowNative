@@ -60,7 +60,7 @@ class LoginViewModel(private val authManager: AuthManager) : ScreenModel {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             val email = "${_uiState.value.phoneNumber}@mail.com"
-            val password = _uiState.value.phoneNumber
+            val password =_uiState.value.phoneNumber
 
             // You’d actually call your AuthRepository here.
             val a = authManager.signIn(email,password)

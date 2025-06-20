@@ -7,6 +7,7 @@ import com.tomiappdevelopment.milk_flow.core.presentation.UiText
 import com.tomiappdevelopment.milk_flow.domain.core.ConnectionState
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.core.SyncStatus
+import com.tomiappdevelopment.milk_flow.domain.core.getNextStatus
 import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
 import com.tomiappdevelopment.milk_flow.domain.models.ProductSummaryItem
@@ -169,7 +170,7 @@ class DemandsMangerVm(
                         val result = updateDemandsStatusUseCase.invoke(
                             UpdateDemandsStatusParams(
                                 uiState.demandSummaryList.map { it.base },
-                                targetStatus = Status.pending
+                                targetStatus = uiState.status.getNextStatus()!!
                             ),
                             uiState.authState
                         )

@@ -1,5 +1,6 @@
 package com.tomiappdevelopment.milk_flow.data.remote
 
+import com.tomiappdevelopment.milk_flow.data.remote.core.FirebaseConfig
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.AuthResponse
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.ProductDto
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.UserDto
@@ -74,7 +75,7 @@ class AuthService(
     }
 
     suspend fun getUserById(uid: String): Result<User, DataError> {
-        val url = "https://firestore.googleapis.com/v1/projects/milkflow-5c80c/databases/(default)/documents/users/$uid"
+        val url = "https://firestore.googleapis.com/v1/projects/${FirebaseConfig.PROJECT_ID}/databases/(default)/documents/users/$uid"
 
         val response = try {
             client.get(url)

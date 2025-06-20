@@ -118,8 +118,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+
       //  buildConfigField("String", "FIREBASE_API_KEY", AIzaSyDbmxhBoZHY0H5MJSzz5idhrC6FbFQSSI)
-        buildConfigField("String", "FIREBASE_API_KEY", "\"${"AIzaSyDbmxh-BoZHY0H5MJSzz5idhrC6FbFQSSI"}\"")
+        buildConfigField("String", "FIREBASE_API_KEY", "\"${"AIzaSyATeHZfcXHubUpHmwmnLJmUQ-NsVb7bGSk"}\"")
 
 
 

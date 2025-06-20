@@ -1,5 +1,6 @@
 package com.tomiappdevelopment.milk_flow.data.remote
 
+import com.tomiappdevelopment.milk_flow.data.remote.core.FirebaseConfig
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.ProductDto
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.Result
@@ -30,7 +31,7 @@ class ProductsRemoteDataSource(
 
         do {
             val url = buildString {
-                append("https://firestore.googleapis.com/v1/projects/milkflow-5c80c/databases/(default)/documents/products")
+                append("https://firestore.googleapis.com/v1/projects/${FirebaseConfig.PROJECT_ID}/databases/(default)/documents/products")
                 if (pageToken != null) append("?pageToken=$pageToken")
             }
 
@@ -89,7 +90,7 @@ class ProductsRemoteDataSource(
 
     suspend fun getProductsMetadata(): Result<Long, DataError.Network> {
         val response = try {
-            httpClient.get("https://firestore.googleapis.com/v1/projects/milkflow-5c80c/databases/(default)/documents/metadata/productSync") {
+            httpClient.get("https://firestore.googleapis.com/v1/projects/${FirebaseConfig.PROJECT_ID}/databases/(default)/documents/metadata/productSync") {
 
             }
         } catch (e: UnresolvedAddressException) {
