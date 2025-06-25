@@ -1,4 +1,15 @@
+import java.util.Properties
+import java.io.FileInputStream
 
+
+val keystoreProperties = Properties().apply {
+    load(FileInputStream(rootProject.file("composeApp/src/androidMain/keystore.properties")))
+}
+
+
+val localProps = rootProject.file("local.properties").reader().use {
+    Properties().apply { load(it) }
+}
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -89,6 +100,18 @@ kotlin {
 
 android {
 
+
+    signingConfigs {
+        create("release") {
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+        }
+    }
+
+
+
     namespace = "com.tomiappdevelopment.milk_flow"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
@@ -100,6 +123,7 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -118,9 +142,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField("String", "FIREBASE_API_KEY", "\"${localProps["FIREBASE_API_KEY"]}\"")
 
-      //  buildConfigField("String", "FIREBASE_API_KEY", AIzaSyDbmxhBoZHY0H5MJSzz5idhrC6FbFQSSI)
-        buildConfigField("String", "FIREBASE_API_KEY", "\"${"AIzaSyATeHZfcXHubUpHmwmnLJmUQ-NsVb7bGSk"}\"")
 
 
 
