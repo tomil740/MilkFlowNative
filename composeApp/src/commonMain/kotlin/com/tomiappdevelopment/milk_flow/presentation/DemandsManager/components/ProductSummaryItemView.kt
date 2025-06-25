@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -40,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tomiappdevelopment.milk_flow.domain.core.ImageDefaults
 import com.tomiappdevelopment.milk_flow.domain.models.ProductSummaryItem
 import com.tomiappdevelopment.milk_flow.presentation.core.components.AsyncImageWithFallback
 import com.tomiappdevelopment.milk_flow.presentation.core.components.AuthActionButton
@@ -49,7 +51,6 @@ fun ProductSummaryItemView(
     item: ProductSummaryItem,
     modifier: Modifier = Modifier
 ) {
-    var showBarcode by remember { mutableStateOf(false) }
 
     ElevatedCard(
         modifier = modifier
@@ -99,33 +100,16 @@ fun ProductSummaryItemView(
             }
 
         }
-
-        // Barcode Animated Container
-        AnimatedVisibility(
-            visible = showBarcode,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            Box(
-                modifier = Modifier.padding(horizontal = 4.dp)
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
-                    .padding(16.dp)
-                    .clickable { showBarcode = !showBarcode }
-                ,
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "🔖 ברקוד: ${item.barcode}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-            }
-        }
+        AsyncImageWithFallback(
+            imageUrl = "${ImageDefaults.barcodeBaseUrl}${item.barcode}.png",
+            contentDescription = "Barcode ${item.barcode}",
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(2f) // ~wide barcode ratio, adjust as needed
+                .padding(horizontal = 8.dp)
+                .clip(RoundedCornerShape(8.dp))
+        )
 
 
         Spacer(modifier = Modifier.height(12.dp))
