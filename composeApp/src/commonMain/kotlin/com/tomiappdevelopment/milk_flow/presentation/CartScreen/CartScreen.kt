@@ -98,7 +98,7 @@ fun CartScreen(cartSatesAndEvents: CartSatesAndEvents
                         LoadingSpinner(isLoading = uiState.isLoading)
                     }
 
-                    items(uiState.cartProducts) { item ->
+                    items(uiState.cartProducts, key = {it.product.id}) { item ->
                         CartPreviewItem(
                             cartProduct = item,
                             onEdit = { selectedProduct = it }

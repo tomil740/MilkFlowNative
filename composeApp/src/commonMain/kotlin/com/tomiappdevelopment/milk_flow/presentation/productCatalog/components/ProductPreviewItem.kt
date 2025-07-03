@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -20,6 +21,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -80,9 +82,18 @@ fun ProductPreviewItem(
                 Button(
                     onClick = onAddToCartClick,
                     shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    contentPadding = PaddingValues(
+                         horizontal = 16.dp,
+                      //   vertical = MaterialTheme.typography.bodySmall.fontSize.value.dp * 0.5f
+                    ),
+                    modifier = Modifier.heightIn(min = MaterialTheme.typography.bodySmall.fontSize.value.dp * 4.2f)
                 ) {
-                    Text("הוסף")
+                    Text(
+                        lineHeight = MaterialTheme.typography.bodySmall.fontSize,
+                        textAlign = TextAlign.Center,
+                        text = "הוסף",
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         }

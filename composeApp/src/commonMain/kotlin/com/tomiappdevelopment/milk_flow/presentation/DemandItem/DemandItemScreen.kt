@@ -90,39 +90,39 @@ fun DemandItemScreen(demandsItemSatesAndEvents: DemandsItemSatesAndEvents
             }
 
 
-            Column {
-                DemandInfo(
-                    demand = uiState.demandItem
-                )
-
-                AnimatedVisibility(uiState.demandItem.userName.isEmpty()) {
-                    val mes = if (uiState.authState == null) {
-                       UiText.StringResource(Res.string.error_not_authenticated_no_data).asString()
-                    } else {
-                        ""
-                    }
-                    EmptyDataMessage(message = mes)
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight(if(isDistributer){0.85f}else{1f})
+                //    .padding(16.dp),
+                    ,verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    DemandInfo(
+                        demand = uiState.demandItem
+                    )
                 }
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxHeight(if(isDistributer){0.85f}else{1f})
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-
-
-                    item {
-                        LoadingSpinner(isLoading = uiState.isLoading)
+                item {
+                    AnimatedVisibility(uiState.demandItem.userName.isEmpty()) {
+                        val mes = if (uiState.authState == null) {
+                            UiText.StringResource(Res.string.error_not_authenticated_no_data)
+                                .asString()
+                        } else {
+                            ""
+                        }
+                        EmptyDataMessage(message = mes)
                     }
+                }
+                item {
+                    LoadingSpinner(isLoading = uiState.isLoading)
+                }
 
-                    items(uiState.demandProducts) { item ->
-                        CartPreviewItem(
-                            cartProduct = item,
-                            onEdit = {},
-                            isDemandItem = true
-                        )
-                    }
+                items(uiState.demandProducts, key = {it.product.id}) { item ->
+                    CartPreviewItem(
+                        cartProduct = item,
+                        onEdit = {},
+                        isDemandItem = true
+                    )
                 }
             }
         }

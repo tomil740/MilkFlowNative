@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,55 +27,67 @@ fun ActionButton(
     floatingLabel: Int? = null,
     onClick: () -> Unit
 ) {
+    val baseFontSize = MaterialTheme.typography.titleMedium.fontSize
+    val iconFontSize = baseFontSize * 2.0f   // Adjust for visual weight
+    val badgeFontSize = baseFontSize * 0.7f
+    val circleSize = baseFontSize.value.dp * 4.6f  // = ~56.dp at 12.sp
+    val badgeHeight = baseFontSize.value.dp * 1.8f // = ~21.dp
+    val badgeWidth = baseFontSize.value.dp * 2.5f  // = ~30.dp
+    val badgeOffset = baseFontSize.value.dp * 0.5f // ~6.dp offset
+    val verticalSpacing = baseFontSize.value.dp * 0.5f // spacing below icon
+
     Column(
-        horizontalAlignment = Alignment.Companion.CenterHorizontally,
-        modifier = Modifier.Companion
-            .padding(8.dp)
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .padding(all = baseFontSize.value.dp * 0.7f)
             .clickable { onClick() }
     ) {
         Box(
-            modifier = Modifier.Companion
-                .size(56.dp)
-                ,
-            contentAlignment = Alignment.Companion.Center
+            modifier = Modifier.size(circleSize),
+            contentAlignment = Alignment.Center
         ) {
             Box(
-                modifier = Modifier.Companion
-                    .size(56.dp)
-                     .clip(CircleShape)
+                modifier = Modifier
+                    .size(circleSize)
+                    .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surface),
-                contentAlignment = Alignment.Companion.Center
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = icon,
-                    fontSize = 24.sp
+                    fontSize = iconFontSize
                 )
-
             }
+
             if (floatingLabel != null && floatingLabel > 0) {
                 Box(
-                    modifier = Modifier.Companion
-                        .align(Alignment.Companion.TopEnd)
-                        .offset(x = 6.dp, y = (-6).dp)
-                        .size(height = 21.dp, width = 30.dp)
-                        .clip(CircleShape).zIndex(100f)
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Companion.TopCenter
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .offset(x = badgeOffset, y = -badgeOffset)
+                        .size(width = badgeWidth, height = badgeHeight)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .zIndex(100f),
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = floatingLabel.toString(),
-                        fontSize = 12.sp,
+                        fontSize = badgeFontSize,
+                        lineHeight = badgeFontSize, // eliminate excess vertical space
                         color = MaterialTheme.colorScheme.onPrimary,
-                      //  modifier = Modifier.offset(y=-2.dp)
-                    )
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.zIndex(110f),
+                        )
                 }
             }
         }
+
         Text(
             text = label,
+            maxLines = 1,
             style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.Companion.padding(top = 4.dp),
-            textAlign = TextAlign.Companion.Center
+            modifier = Modifier.padding(top = verticalSpacing),
+            textAlign = TextAlign.Center
         )
     }
 }

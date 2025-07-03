@@ -51,10 +51,10 @@ fun DemandInfo(
             ) {
                 // Status Text
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("סטטוס: ", style = MaterialTheme.typography.titleMedium)
+                    Text("סטטוס: ", style = MaterialTheme.typography.titleSmall)
                     Text(
                         demand.status.label(),
-                        style = MaterialTheme.typography.titleMedium.copy(
+                        style = MaterialTheme.typography.titleSmall.copy(
                             color = getStatusColor(demand.status),
                             fontWeight = FontWeight.Bold
                         )

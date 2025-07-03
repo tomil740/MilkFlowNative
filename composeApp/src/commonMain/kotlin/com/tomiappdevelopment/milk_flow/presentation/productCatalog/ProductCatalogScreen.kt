@@ -110,7 +110,7 @@ fun ProductCatalogScreen(productCatalogStatesAndEvents:ProductCatalogStatesAndEv
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(uiState.filteredProducts) { product ->
+                        items(uiState.filteredProducts, key = {it.id}) { product ->
                             ProductPreviewItem(
                                 product = product,
                                 onAddToCartClick = { selectedProduct = product },

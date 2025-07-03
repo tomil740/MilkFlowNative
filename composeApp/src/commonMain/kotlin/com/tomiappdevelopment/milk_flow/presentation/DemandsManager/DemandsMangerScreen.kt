@@ -120,11 +120,11 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                     }
 
                     if (uiState.isProductView) {
-                        items(uiState.productSummaryList) { item ->
+                        items(uiState.productSummaryList, key = {it.productId}) { item ->
                             ProductSummaryItemView(item)
                         }
                     } else {
-                        items(uiState.demandSummaryList) { item ->
+                        items(uiState.demandSummaryList, key = {it.id}) { item ->
                             DemandPreviewItem(
                                 demand = item,
                                 isDistributer = uiState.authState?.isDistributer ?: false,

@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.tomiappdevelopment.milk_flow.theme.DarkColors
 import com.tomiappdevelopment.milk_flow.theme.LightColors
+import com.tomiappdevelopment.milk_flow.theme.clampedTypography
 
 @Composable
 actual fun AppTheme(
@@ -44,6 +45,7 @@ actual fun AppTheme(
 
 
     MaterialTheme(
+        typography = clampedTypography(),
         colorScheme = colors,
         content = content,
     )

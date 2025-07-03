@@ -95,12 +95,12 @@ fun DemandPreviewItem(
             ) {
                 Text(
                     text = "סטטוס:",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     color = onSurface.copy(alpha = 0.7f)
                 )
                 Text(
                     text = demand.status.label(),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = onSurface
                 )
