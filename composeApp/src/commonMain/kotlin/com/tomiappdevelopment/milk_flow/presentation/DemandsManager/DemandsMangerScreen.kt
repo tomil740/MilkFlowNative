@@ -128,7 +128,7 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                             DemandPreviewItem(
                                 demand = item,
                                 isDistributer = uiState.authState?.isDistributer ?: false,
-                                onClick = {navigator.replaceAll(DemandItemScreenClass(theDemandId = item.id))}
+                                onClick = {navigator.replaceAll(DemandItemScreenClass(theDemandId = item.id))},
                             )
                         }
                     }

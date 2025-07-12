@@ -107,7 +107,8 @@ fun TwoWaySwitch(
                     text = "📝 סיכום הזמנות",
                     color = if (!isProductSummary) MaterialTheme.colorScheme.onPrimary
                     else MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
                 )
             }
 
@@ -123,7 +124,8 @@ fun TwoWaySwitch(
                     text = "🛍️ סיכום מוצרים",
                     color = if (isProductSummary) MaterialTheme.colorScheme.onPrimary
                     else MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
                 )
             }
         }

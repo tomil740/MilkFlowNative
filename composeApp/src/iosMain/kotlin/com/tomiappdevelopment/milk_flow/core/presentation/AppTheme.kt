@@ -4,7 +4,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import com.tomiappdevelopment.milk_flow.theme.DarkColors
 import com.tomiappdevelopment.milk_flow.theme.LightColors
-import com.tomiappdevelopment.milk_flow.theme.clampedTypography
 
 
 @Composable
@@ -15,7 +14,6 @@ actual fun AppTheme(
 ){
     MaterialTheme(
         colorScheme = if(darkTheme) DarkColors else LightColors,
-        typography = clampedTypography(),
         content = content
     )
 }
