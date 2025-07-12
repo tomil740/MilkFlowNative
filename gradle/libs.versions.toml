@@ -107,6 +107,8 @@ room-runtime-android = { module = "androidx.room:room-runtime-android", version.
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 
+sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqlite" }
+
 
 firebase-gitLive-database = { module = "dev.gitlive:firebase-database", version.ref = "gitlive-firebase" }
 firebase-gitLive-auth = { module = "dev.gitlive:firebase-auth", version.ref = "gitlive-firebase" }

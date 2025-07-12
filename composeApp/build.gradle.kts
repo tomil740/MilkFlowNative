@@ -81,7 +81,8 @@ kotlin {
             implementation(libs.dateTimePicker)
 
             implementation(libs.room.runtime)
-            implementation(libs.sqlite.bundled)
+
+            // implementation(libs.sqlite.bundled)
 
             implementation(libs.kotlinx.serialization.json)
 
@@ -91,6 +92,9 @@ kotlin {
         }
         iosMain.dependencies{
             implementation(libs.ktor.client.darwin)
+             implementation(libs.sqlite.bundled)
+
+
 
         }
     }
@@ -143,8 +147,9 @@ android {
         buildConfigField("String", "FIREBASE_API_KEY", "\"${localProps["FIREBASE_API_KEY"]}\"")
 
 
-
-
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+        }
     }
 
 }
@@ -154,6 +159,7 @@ room {
 }
 
 dependencies {
+    implementation(libs.sqlite)
     debugImplementation(compose.uiTooling)
     implementation(libs.ktor.client.okhttp)
 
