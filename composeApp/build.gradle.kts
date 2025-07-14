@@ -141,8 +141,8 @@ android {
         applicationId = "com.tomiappdevelopment.milk_flow"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 5
+        versionName = "1.04"
 
         buildConfigField("String", "FIREBASE_API_KEY", "\"${localProps["FIREBASE_API_KEY"]}\"")
 

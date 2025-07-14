@@ -77,6 +77,7 @@ fun ActionButton(
                         color = MaterialTheme.colorScheme.onPrimary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.zIndex(110f),
+                        maxLines = 1
                         )
                 }
             }

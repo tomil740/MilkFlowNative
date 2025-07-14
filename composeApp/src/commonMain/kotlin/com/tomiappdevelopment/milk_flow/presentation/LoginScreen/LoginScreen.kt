@@ -26,6 +26,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.material3.Icon
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
@@ -33,7 +38,10 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
+import com.tomiappdevelopment.milk_flow.presentation.core.components.LoadingSpinner
+import com.tomiappdevelopment.milk_flow.presentation.core.components.LoginLoadingSplash
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.ProductCatalogScreenClass
+import kotlinx.coroutines.delay
 import milkflow.composeapp.generated.resources.Res
 import milkflow.composeapp.generated.resources.dialog_login_success_button
 import milkflow.composeapp.generated.resources.dialog_login_success_message
@@ -51,6 +59,16 @@ fun LoginScreen(
 
     val navigator = LocalNavigator.currentOrThrow
 
+    var triggerNav by remember { mutableStateOf(false) }
+
+    // LaunchedEffect to delay + navigate
+    if (triggerNav) {
+        LaunchedEffect(Unit) {
+
+            delay(1500L)
+            navigator.replaceAll(ProductCatalogScreenClass())
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -124,12 +142,16 @@ fun LoginScreen(
                 }
             }
         }
-        if (uiState.showSuccessDialog) {
+        LoginLoadingSplash(isVisible = uiState.isLoading)
+
+        if (uiState.showSuccessDialog && (!triggerNav)) {
             AlertDialog(
                 onDismissRequest = {},
                 confirmButton = {
                     Button(
-                        onClick = { navigator.replaceAll(ProductCatalogScreenClass()) },
+                        onClick = {
+                            triggerNav = true
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -168,5 +190,8 @@ fun LoginScreen(
             )
 
         }
+
+        LoadingSpinner(triggerNav)
+
     }
 }

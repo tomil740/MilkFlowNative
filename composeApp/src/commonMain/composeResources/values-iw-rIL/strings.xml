@@ -64,6 +64,9 @@
     <string name="dialog_logout_confirm">התנתק</string>
     <string name="dialog_logout_cancel">בטל</string>
 
+    <string name="splash_loading_message">
+    כמעט סיימנו... הטעינה הראשונית עשויה להימשך עד דקה.
+    </string>
 
 
 
