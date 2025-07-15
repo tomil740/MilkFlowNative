@@ -68,6 +68,10 @@
     כמעט סיימנו... הטעינה הראשונית עשויה להימשך עד דקה.
     </string>
 
+    <string name="splash_loading_user_data">
+    ההתחברות הצליחה. טוען את החשבון שלך...
+</string>
+
 
 
 </resources>

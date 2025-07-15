@@ -14,6 +14,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,7 +27,10 @@ class LoginViewModel(private val authManager: AuthManager) : ScreenModel {
 
     init {
         screenModelScope.launch {
-            authManager.userFlow(screenModelScope)
+            authManager.userFlow(screenModelScope).collectLatest { theAuth ->
+                delay(2500)
+                _uiState.update { it.copy(authState = (theAuth!=null)) }
+            }
         }
     }
 

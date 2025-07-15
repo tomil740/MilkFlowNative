@@ -69,5 +69,9 @@
     Almost done... Initial setup may take up to a minute.
 </string>
 
+    <string name="splash_loading_user_data">
+    Signed in successfully. Loading your account...
+</string>
+
 
 </resources>

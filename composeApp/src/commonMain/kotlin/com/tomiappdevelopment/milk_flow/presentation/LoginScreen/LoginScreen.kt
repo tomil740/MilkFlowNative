@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,6 +47,8 @@ import milkflow.composeapp.generated.resources.Res
 import milkflow.composeapp.generated.resources.dialog_login_success_button
 import milkflow.composeapp.generated.resources.dialog_login_success_message
 import milkflow.composeapp.generated.resources.dialog_login_success_title
+import milkflow.composeapp.generated.resources.splash_loading_message
+import milkflow.composeapp.generated.resources.splash_loading_user_data
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 @OptIn(ExperimentalResourceApi::class)
@@ -64,7 +67,6 @@ fun LoginScreen(
     // LaunchedEffect to delay + navigate
     if (triggerNav) {
         LaunchedEffect(Unit) {
-
             delay(1500L)
             navigator.replaceAll(ProductCatalogScreenClass())
         }
@@ -142,9 +144,14 @@ fun LoginScreen(
                 }
             }
         }
-        LoginLoadingSplash(isVisible = uiState.isLoading)
 
-        if (uiState.showSuccessDialog && (!triggerNav)) {
+        LoginLoadingSplash(isVisible = (uiState.isLoading || uiState.showSuccessDialog || triggerNav),
+            message = if(uiState.authState){
+                UiText.StringResource(Res.string.splash_loading_user_data).asString()
+            }else{UiText.StringResource(Res.string.splash_loading_message).asString()}
+        )
+
+        if (uiState.showSuccessDialog && uiState.authState && (!triggerNav)) {
             AlertDialog(
                 onDismissRequest = {},
                 confirmButton = {
@@ -190,8 +197,6 @@ fun LoginScreen(
             )
 
         }
-
-        LoadingSpinner(triggerNav)
 
     }
 }
