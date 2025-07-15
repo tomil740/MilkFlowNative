@@ -7,5 +7,6 @@ data class LoginUiState(
     val isFormValid: Boolean = false,
     val errorMessage: String? = null,
     val showSuccessDialog: Boolean = false,
+    val authState: Boolean =false
 
     )

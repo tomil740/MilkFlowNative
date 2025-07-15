@@ -2,7 +2,7 @@ package com.tomiappdevelopment.milk_flow.data.local
 
 import android.content.Context
 import androidx.room.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+//import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
 
 actual class DatabaseFactory(
@@ -14,7 +14,7 @@ actual class DatabaseFactory(
             context = context.applicationContext,
             name = dbFile.absolutePath
         )
-            .setDriver(BundledSQLiteDriver())
+            //.setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
             .fallbackToDestructiveMigration(true)
             .build()

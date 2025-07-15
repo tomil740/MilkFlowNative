@@ -144,7 +144,12 @@ fun StatusMenuBar(
                         .scale(scale)
                         .height(48.dp)
                 ) {
-                    Text(text = status.label())
+                    Text(
+                        text = status.label(),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1
+                        )
                 }
             }
         }

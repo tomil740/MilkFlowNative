@@ -47,18 +47,47 @@ import com.tomiappdevelopment.milk_flow.presentation.core.components.AuthActionB
 import com.tomiappdevelopment.milk_flow.presentation.core.components.LoadingSpinner
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.ProductDialog
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+import network.chaintech.utils.now
+import kotlin.time.Duration
 
 @Composable
 fun DemandPreviewItem(
     demand: DemandWithNames,
     isDistributer: Boolean,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
-    val containerColor = MaterialTheme.colorScheme.surfaceVariant
-    val innerContainerColor = MaterialTheme.colorScheme.surface
+
+    val nowInstant = Clock.System.now()
+    val createdAtInstant = demand.createdAt.toInstant(TimeZone.currentSystemDefault())
+
+    val isOldDemand = (demand.status != Status.completed) && (nowInstant - createdAtInstant).inWholeHours > 24
+
+    val containerColor = if (isOldDemand) {
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+
+    val innerContainerColor = if (isOldDemand) {
+        MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
     val onSurface = MaterialTheme.colorScheme.onSurface
     val outline = MaterialTheme.colorScheme.outline
+
+    val dateContainerColor =if (isOldDemand) { MaterialTheme.colorScheme.errorContainer
+    }else{innerContainerColor}
+    val dateColor = if (isOldDemand) { MaterialTheme.colorScheme.error
+    }else{onSurface}
+
 
     Column(
         modifier = modifier
@@ -95,12 +124,12 @@ fun DemandPreviewItem(
             ) {
                 Text(
                     text = "סטטוס:",
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     color = onSurface.copy(alpha = 0.7f)
                 )
                 Text(
                     text = demand.status.label(),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = onSurface
                 )
@@ -127,18 +156,19 @@ fun DemandPreviewItem(
             // Updated At Row
             Row(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = modifier.background(dateContainerColor)
             ) {
                 Text(
                     text = "עודכן לאחרונה:",
                     style = MaterialTheme.typography.labelMedium,
-                    color = onSurface.copy(alpha = 0.7f)
+                    color = dateColor.copy(alpha = 0.7f)
                 )
                 Text(
                     text = demand.updatedAt.toReadableString(),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
-                    color = onSurface
+                    color = dateColor
                 )
             }
         }

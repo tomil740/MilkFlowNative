@@ -5,18 +5,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
 import com.tomiappdevelopment.milk_flow.core.presentation.AppTheme
@@ -67,16 +67,26 @@ fun App(
             val uiState by viewModel.uiState.collectAsState()
 
             LaunchedEffect(Unit) {
+
                 viewModel.setNavigationHandler { route: AppRoute ->
-                    when (route) {
-                        AppRoute.Login -> navigator.replaceAll(LoginScreenClass())
-                        AppRoute.ProductsCatalog -> navigator.replaceAll(ProductCatalogScreenClass())
-                        AppRoute.Cart -> navigator.replaceAll(CartScreenClass())
-                        AppRoute.DemandsManger -> navigator.replaceAll(DemandsMangerScreenClass())
-                        else -> navigator.replaceAll(ProductCatalogScreenClass())
+                    val currentScreen = navigator.lastItemOrNull?.key
+                    val loginRoute ="com.tomiappdevelopment.milk_flow.presentation.LoginScreen.LoginScreenClass"
+                    if(currentScreen != loginRoute ){
+                        when (route) {
+                            AppRoute.Login -> navigator.replaceAll(LoginScreenClass())
+                            AppRoute.ProductsCatalog -> navigator.replaceAll(
+                                ProductCatalogScreenClass()
+                            )
+
+                            AppRoute.Cart -> navigator.replaceAll(CartScreenClass())
+                            AppRoute.DemandsManger -> navigator.replaceAll(DemandsMangerScreenClass())
+                            else -> navigator.replaceAll(ProductCatalogScreenClass())
+                        }
                     }
                 }
             }
+
+
 
             Scaffold(
                 modifier = Modifier.fillMaxSize(),

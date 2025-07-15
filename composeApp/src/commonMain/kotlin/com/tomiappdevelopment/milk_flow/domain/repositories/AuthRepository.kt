@@ -12,4 +12,5 @@ interface AuthRepository {
     suspend fun logout()
     fun getAuthState(): AuthData?
    suspend fun getUserObjById(uid: String): User?
+   suspend fun authPing()
 }
