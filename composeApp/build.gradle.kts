@@ -81,9 +81,8 @@ kotlin {
             implementation(libs.dateTimePicker)
 
             implementation(libs.room.runtime)
-            implementation(libs.sqlite.bundled)
 
-            implementation(libs.gitlive.firestore)
+            // implementation(libs.sqlite.bundled)
 
             implementation(libs.kotlinx.serialization.json)
 
@@ -93,6 +92,9 @@ kotlin {
         }
         iosMain.dependencies{
             implementation(libs.ktor.client.darwin)
+             implementation(libs.sqlite.bundled)
+
+
 
         }
     }
@@ -139,14 +141,15 @@ android {
         applicationId = "com.tomiappdevelopment.milk_flow"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 10
+        versionName = "1.r "
 
         buildConfigField("String", "FIREBASE_API_KEY", "\"${localProps["FIREBASE_API_KEY"]}\"")
 
 
-
-
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+        }
     }
 
 }
@@ -156,6 +159,7 @@ room {
 }
 
 dependencies {
+    implementation(libs.sqlite)
     debugImplementation(compose.uiTooling)
     implementation(libs.ktor.client.okhttp)
 

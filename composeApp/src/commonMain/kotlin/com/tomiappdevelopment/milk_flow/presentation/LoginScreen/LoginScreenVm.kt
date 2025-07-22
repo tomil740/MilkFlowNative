@@ -14,9 +14,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 
 class LoginViewModel(private val authManager: AuthManager) : ScreenModel {
 
@@ -25,7 +27,10 @@ class LoginViewModel(private val authManager: AuthManager) : ScreenModel {
 
     init {
         screenModelScope.launch {
-            authManager.userFlow(screenModelScope)
+            authManager.userFlow(screenModelScope).collectLatest { theAuth ->
+                delay(2500)
+                _uiState.update { it.copy(authState = (theAuth!=null)) }
+            }
         }
     }
 
@@ -54,16 +59,19 @@ class LoginViewModel(private val authManager: AuthManager) : ScreenModel {
     }
 
     fun onLoginClicked() {
+        println("LoginProcess[0] : Login clicked Start!!: ${Clock.System.now()}")
         if (!_uiState.value.isFormValid || _uiState.value.isLoading) return
 
         screenModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             val email = "${_uiState.value.phoneNumber}@mail.com"
-            val password =_uiState.value.phoneNumber
+            val password = _uiState.value.phoneNumber
 
-            // You’d actually call your AuthRepository here.
-            val a = authManager.signIn(email,password)
+            val a = withContext(Dispatchers.IO) {
+                authManager.signIn(email, password)
+            }
+            println("TOMI_TRACE SignIn result:$a  ${Clock.System.now()}")
 
             when(a){
                 is Result.Error<Error> ->  _uiState.update {
@@ -74,10 +82,9 @@ class LoginViewModel(private val authManager: AuthManager) : ScreenModel {
                 }
                 is Result.Success<Boolean> -> {
                     _uiState.update { it.copy(showSuccessDialog = true,isLoading = false) }
-
                 }
             }
-
         }
     }
+
 }

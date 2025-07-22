@@ -3,14 +3,18 @@ package com.tomiappdevelopment.milk_flow.core.presentation
 
 import android.app.Activity
 import android.os.Build
+import android.util.Log
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Density
 import androidx.core.view.WindowCompat
 import com.tomiappdevelopment.milk_flow.theme.DarkColors
 import com.tomiappdevelopment.milk_flow.theme.LightColors
@@ -41,10 +45,20 @@ actual fun AppTheme(
                 .isAppearanceLightStatusBars = darkTheme
         }
     }
+    val current = LocalDensity.current
+    Log.i("fontScale 1",current.toString())
 
+    val clampedFontScale = current.fontScale.coerceIn(1f, 1.3f) // ✅ Set safe bounds
 
-    MaterialTheme(
-        colorScheme = colors,
-        content = content,
-    )
+    CompositionLocalProvider(
+        LocalDensity provides Density(current.density, clampedFontScale)
+    ) {
+        val fontScale = LocalDensity.current.fontScale
+        Log.i("fontScale 2",fontScale.toString())
+
+        MaterialTheme(
+            colorScheme = colors,
+            content = content,
+        )
+    }
 }

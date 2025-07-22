@@ -51,7 +51,8 @@ fun AuthActionButton(
             ) {
                 Text(
                     text = amount.toString(),
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1
                 )
             }
         }

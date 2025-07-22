@@ -9,4 +9,5 @@ import kotlinx.coroutines.flow.StateFlow
 interface AuthStateProvider {
     val authState: StateFlow<AuthData?>
     fun userFlow(scope: CoroutineScope):  StateFlow<User?>
+    suspend fun authPing()
 }

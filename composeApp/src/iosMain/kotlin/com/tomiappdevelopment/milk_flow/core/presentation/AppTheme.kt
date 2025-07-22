@@ -6,7 +6,6 @@ import com.tomiappdevelopment.milk_flow.theme.DarkColors
 import com.tomiappdevelopment.milk_flow.theme.LightColors
 
 
-
 @Composable
 actual fun AppTheme(
     darkTheme: Boolean,
@@ -15,7 +14,6 @@ actual fun AppTheme(
 ){
     MaterialTheme(
         colorScheme = if(darkTheme) DarkColors else LightColors,
-        typography = MaterialTheme.typography,
         content = content
     )
 }
