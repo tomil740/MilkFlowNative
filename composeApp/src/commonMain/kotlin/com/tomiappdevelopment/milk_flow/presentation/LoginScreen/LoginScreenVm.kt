@@ -2,10 +2,7 @@ package com.tomiappdevelopment.milk_flow.presentation.LoginScreen
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.tomiappdevelopment.milk_flow.core.AuthManager
-import com.tomiappdevelopment.milk_flow.data.remote.AuthService
-import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.AuthResponse
-import com.tomiappdevelopment.milk_flow.domain.util.DataError
+import com.tomiappdevelopment.milk_flow.core.AuthManagerVm
 import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import kotlinx.coroutines.Dispatchers
@@ -20,14 +17,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 
-class LoginViewModel(private val authManager: AuthManager) : ScreenModel {
+class LoginViewModel(private val authManagerVm: AuthManagerVm) : ScreenModel {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
     init {
         screenModelScope.launch {
-            authManager.userFlow(screenModelScope).collectLatest { theAuth ->
+            authManagerVm.userState.collectLatest { theAuth ->
                 delay(2500)
                 _uiState.update { it.copy(authState = (theAuth!=null)) }
             }
@@ -69,7 +66,7 @@ class LoginViewModel(private val authManager: AuthManager) : ScreenModel {
             val password = _uiState.value.phoneNumber
 
             val a = withContext(Dispatchers.IO) {
-                authManager.signIn(email, password)
+                authManagerVm.signIn(email, password)
             }
             println("TOMI_TRACE SignIn result:$a  ${Clock.System.now()}")
 

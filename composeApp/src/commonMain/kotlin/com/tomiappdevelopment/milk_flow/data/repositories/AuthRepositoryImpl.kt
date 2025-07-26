@@ -1,6 +1,5 @@
 package com.tomiappdevelopment.milk_flow.data.repositories
 
-import com.tomiappdevelopment.milk_flow.data.local.AuthStorage
 import com.tomiappdevelopment.milk_flow.data.local.dao.UserDao
 import com.tomiappdevelopment.milk_flow.data.remote.AuthService
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.AuthResponse
@@ -9,17 +8,19 @@ import com.tomiappdevelopment.milk_flow.data.util.toUserDomain
 import com.tomiappdevelopment.milk_flow.domain.models.User
 import com.tomiappdevelopment.milk_flow.domain.models.subModels.AuthData
 import com.tomiappdevelopment.milk_flow.domain.repositories.AuthRepository
+import com.tomiappdevelopment.milk_flow.domain.repositories.AuthStorage
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import com.tomiappdevelopment.milk_flow.domain.util.mapHttpResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 
 class AuthRepositoryImpl(
     private val authService: AuthService,
-    private val authStorage: AuthStorage,
+    private val authStorageImpl: AuthStorage,
     private val userDao: UserDao
 ) : AuthRepository {
 
@@ -31,10 +32,11 @@ class AuthRepositoryImpl(
 
                     is Result.Success<AuthResponse> -> {
                         println("LoginProcess[1] : first service response : ${Clock.System.now()}")
-                        authStorage.saveAuth(
+                        authStorageImpl.setAuthInfo(
+                            AuthData(
                             idToken = response.data.idToken,
                             refreshToken = response.data.refreshToken,
-                            localId = response.data.localId
+                            localId = response.data.localId)
                         )
                         Result.Success(true)
                     }
@@ -51,19 +53,15 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun logout() {
-        withContext(Dispatchers.IO) {
-            authStorage.clearAuth()
-        }
+        authStorageImpl.clearAuthInfo()
+
     }
 
-    override fun getAuthState(): AuthData? {
-        println("LoginProcess[3] : get the auth state from authStorage(local) : ${Clock.System.now()}")
+    override fun getAuthState(): Flow<AuthData?> {
+        println("LoginProcess[3] : get the auth state from authStorageImpl(local) : ${Clock.System.now()}")
         // Fast and safe enough to keep on main thread (likely just SharedPreferences or memory)
-        val a = authStorage.getAuth()
-        return if (a != null) {
-            println("LoginProcess[4] : authStorage upadate : ${Clock.System.now()}")
-            AuthData(idToken = a.idToken, refreshToken = a.refreshToken, localId = a.localId)
-        } else null
+        return  authStorageImpl.observeAuthInfo()
+
     }
 
     override suspend fun getUserObjById(uid: String): User? {

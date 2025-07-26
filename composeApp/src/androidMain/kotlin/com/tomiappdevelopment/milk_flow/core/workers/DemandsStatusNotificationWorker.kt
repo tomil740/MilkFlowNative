@@ -31,7 +31,7 @@ class DemandsStatusNotificationWorker(
     override suspend fun doWork(): Result {
 
         return try {
-            val a = authRepo.getAuthState()?.localId ?: return Result.success()
+            val a = authRepo.getAuthState()?.firstOrNull()?.idToken  ?: return Result.success()
 
             val user: User = authRepo.getUserObjById(a)?: return Result.success()
             val syncResult = syncNewDemands.invoke(uid = user.uid, isDistributor = user.isDistributer)

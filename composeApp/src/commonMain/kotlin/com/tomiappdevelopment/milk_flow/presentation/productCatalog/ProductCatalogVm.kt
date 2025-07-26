@@ -2,39 +2,30 @@ package com.tomiappdevelopment.milk_flow.presentation.productCatalog
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.tomiappdevelopment.milk_flow.core.AuthManager
+import com.tomiappdevelopment.milk_flow.core.AuthManagerVm
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
 import com.tomiappdevelopment.milk_flow.domain.models.Category
-import com.tomiappdevelopment.milk_flow.domain.models.Product
 import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
 import com.tomiappdevelopment.milk_flow.domain.repositories.CartRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
 import com.tomiappdevelopment.milk_flow.domain.usecase.GetAuthorizedProducts
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
-import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 
 class ProductCatalogVm(
     private val productsRepo: ProductRepository,
     private val syncIfNeededUseCase:SyncIfNeededUseCase,
     private val getAuthorizedProducts:GetAuthorizedProducts,
-    private val authManager: AuthManager,
+    private val authManagerVm: AuthManagerVm,
     private val cartRepository: CartRepository
     ): ScreenModel{
 
@@ -56,7 +47,7 @@ class ProductCatalogVm(
         screenModelScope.launch {
 
             launch {
-                authManager.authState.collect { authRes->
+                authManagerVm.authState.collect { authRes->
                     _uiState.update { it.copy(authState=(authRes?.localId)) }
                 }
             }
@@ -75,7 +66,7 @@ class ProductCatalogVm(
 
 
             launch {
-                getAuthorizedProducts.invoke(this).collect { products ->
+                getAuthorizedProducts.invoke().collect { products ->
                     var theProducts = products
                     //flag of problem in all cached data
                     if (products.size == 1 && products.first().id == -1) {

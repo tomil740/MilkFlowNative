@@ -1,7 +1,7 @@
 package com.tomiappdevelopment.milk_flow.di
 
-import com.tomiappdevelopment.milk_flow.core.AuthManager
-import com.tomiappdevelopment.milk_flow.data.local.AuthStorage
+import com.tomiappdevelopment.milk_flow.core.AuthManagerVm
+import com.tomiappdevelopment.milk_flow.data.local.AuthStorageImpl
 import com.tomiappdevelopment.milk_flow.data.local.MilkFlowDb
 import com.tomiappdevelopment.milk_flow.data.local.SettingsProvider
 import com.tomiappdevelopment.milk_flow.data.local.dao.CartDao
@@ -64,10 +64,11 @@ val appModule = module {
 
     single<DemandDao> { get<MilkFlowDb>().demandDao() }
 
-    single<com.russhwolf.settings.Settings> { SettingsProvider.settings }
-    single { AuthStorage(get()) }
+    //single<com.russhwolf.settings.Settings> { SettingsProvider.settings }
 
-    singleOf(::AuthManager)
+    //single { AuthStorageImpl(get()) }
+
+    singleOf(::AuthManagerVm)
 
     singleOf(::AuthService)
 

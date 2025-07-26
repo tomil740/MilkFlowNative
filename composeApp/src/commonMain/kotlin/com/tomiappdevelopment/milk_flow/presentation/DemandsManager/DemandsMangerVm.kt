@@ -2,10 +2,8 @@ package com.tomiappdevelopment.milk_flow.presentation.DemandsManager
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.tomiappdevelopment.milk_flow.core.AuthManager
+import com.tomiappdevelopment.milk_flow.core.AuthManagerVm
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
-import com.tomiappdevelopment.milk_flow.domain.core.ConnectionState
-import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.core.SyncStatus
 import com.tomiappdevelopment.milk_flow.domain.core.getNextStatus
 import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
@@ -14,13 +12,11 @@ import com.tomiappdevelopment.milk_flow.domain.models.ProductSummaryItem
 import com.tomiappdevelopment.milk_flow.domain.models.UserProductDemand
 import com.tomiappdevelopment.milk_flow.domain.models.subModels.UpdateDemandsStatusParams
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
-import com.tomiappdevelopment.milk_flow.domain.usecase.GetConnectionState
 import com.tomiappdevelopment.milk_flow.domain.usecase.GetDemandsWithUserNames
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncNewDemands
 import com.tomiappdevelopment.milk_flow.domain.usecase.UpdateDemandsStatusUseCase
 import com.tomiappdevelopment.milk_flow.domain.util.DataError
-import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import com.tomiappdevelopment.milk_flow.presentation.util.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,7 +25,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -41,7 +36,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import milkflow.composeapp.generated.resources.Res
-import milkflow.composeapp.generated.resources.error_no_connection
 import milkflow.composeapp.generated.resources.error_no_demands
 import milkflow.composeapp.generated.resources.error_not_synced
 import milkflow.composeapp.generated.resources.error_operation_in_progress
@@ -54,7 +48,7 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 class DemandsMangerVm(
     private val productsRepo: ProductRepository,
     syncIfNeededUseCase:SyncIfNeededUseCase,
-    private val authManager: AuthManager,
+    private val authManagerVm: AuthManagerVm,
     private val syncNewDemands:SyncNewDemands,
     private val getDemandsWithUserNames: GetDemandsWithUserNames,
     private val updateDemandsStatusUseCase:UpdateDemandsStatusUseCase,
@@ -109,7 +103,7 @@ class DemandsMangerVm(
         screenModelScope.launch {
 
             launch {
-                authManager.userFlow(this).collect{ authRes ->
+                authManagerVm.userState.collect{ authRes ->
                     _uiState.update { it.copy(authState = (authRes)) }
                 }
             }

@@ -1,15 +1,19 @@
 import java.util.Properties
 import java.io.FileInputStream
 
-
+/*
 val keystoreProperties = Properties().apply {
     load(FileInputStream(rootProject.file("composeApp/src/androidMain/keystore.properties")))
 }
+
+ */
 
 
 val localProps = rootProject.file("local.properties").reader().use {
     Properties().apply { load(it) }
 }
+
+
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -101,7 +105,7 @@ kotlin {
 }
 
 android {
-
+/*
 
     signingConfigs {
         create("release") {
@@ -111,6 +115,8 @@ android {
             keyPassword = keystoreProperties["keyPassword"] as String
         }
     }
+
+ */
 
 
 
@@ -122,12 +128,15 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    /*
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("release")
         }
     }
+
+     */
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -164,6 +173,8 @@ dependencies {
     implementation(libs.ktor.client.okhttp)
 
     ksp(libs.room.compiler)
+
+    implementation(libs.datastore.preferences)
 
 }
 

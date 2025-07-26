@@ -2,9 +2,8 @@ package com.tomiappdevelopment.milk_flow.presentation.core.topBar
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.tomiappdevelopment.milk_flow.core.AuthManager
+import com.tomiappdevelopment.milk_flow.core.AuthManagerVm
 import com.tomiappdevelopment.milk_flow.domain.repositories.CartRepository
-import com.tomiappdevelopment.milk_flow.domain.usecase.GetConnectionState
 import com.tomiappdevelopment.milk_flow.presentation.core.AppRoute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -15,7 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TopBarViewModel(
-    private val authManager: AuthManager,
+    private val authManagerVm: AuthManagerVm,
     private val cartRepository: CartRepository,
 ) : ScreenModel {
 
@@ -30,7 +29,7 @@ class TopBarViewModel(
             is TopBarEvent.Logout -> {
                 // Handle logout action here
                 screenModelScope.launch {
-                    authManager.signOut()
+                    authManagerVm.signOut()
                 }
                 _uiState.update { it.copy(showLogoutDialog = false) }
             }
@@ -54,12 +53,12 @@ class TopBarViewModel(
 
             // Add this Firebase warm-up ping
             launch(Dispatchers.IO) {
-                authManager.authPing()
+                authManagerVm.authPing()
             }
 
             launch {
 
-                authManager.userFlow(this).collectLatest { user ->
+                authManagerVm.userState.collectLatest { user ->
 
                     _uiState.update {
                         it.copy(

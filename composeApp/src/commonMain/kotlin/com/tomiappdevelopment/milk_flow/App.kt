@@ -13,12 +13,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.core.screen.uniqueScreenKey
-import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
+import com.tomiappdevelopment.milk_flow.core.AuthManagerVm
 import com.tomiappdevelopment.milk_flow.core.presentation.AppTheme
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.CartScreenClass
 import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsMangerScreenClass
@@ -62,6 +60,9 @@ fun App(
     ) {
         Navigator(ProductCatalogScreenClass()) { navigator ->
             NavigationManager.navigator = navigator
+
+
+            val authViewModel = rememberKoinInject<AuthManagerVm>()
 
             val viewModel = rememberKoinInject<TopBarViewModel>()
             val uiState by viewModel.uiState.collectAsState()

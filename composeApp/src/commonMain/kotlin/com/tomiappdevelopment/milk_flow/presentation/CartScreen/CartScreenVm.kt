@@ -2,9 +2,8 @@ package com.tomiappdevelopment.milk_flow.presentation.CartScreen
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.tomiappdevelopment.milk_flow.core.AuthManager
+import com.tomiappdevelopment.milk_flow.core.AuthManagerVm
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
-import com.tomiappdevelopment.milk_flow.domain.core.ConnectionState
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
 import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
 import com.tomiappdevelopment.milk_flow.domain.repositories.CartRepository
@@ -16,7 +15,6 @@ import com.tomiappdevelopment.milk_flow.domain.util.Result
 import com.tomiappdevelopment.milk_flow.presentation.util.toUiText
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
@@ -35,7 +33,7 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 class CartScreenVm(
     productsRepo: ProductRepository,
     private val cartRepository: CartRepository,
-    private val authManager: AuthManager,
+    private val authManagerVm: AuthManagerVm,
     syncIfNeededUseCase:SyncIfNeededUseCase,
     private val makeCartDemand:MakeCartDemand,
     private val getConnectionState: GetConnectionState
@@ -59,7 +57,7 @@ class CartScreenVm(
         screenModelScope.launch {
 
             launch {
-                authManager.authState.collectLatest { authRes ->
+                authManagerVm.authState.collectLatest { authRes ->
                     _uiState.update { it.copy(authState = authRes?.localId) }
                 }
             }
@@ -92,7 +90,7 @@ class CartScreenVm(
             launch {
 
                 // Start listening to the user & cart only after sync
-                authManager.authState.collectLatest { autState->
+                authManagerVm.authState.collectLatest { autState->
                     if (autState != null) {
                         cartRepository.getCart(_uiState.value.authState!!).collect { cartItems ->
                             val cartProducts = productsRepo.getProductsByIds(
@@ -136,7 +134,7 @@ class CartScreenVm(
                     //check live connection observer
                     println("Lie observer: ${_uiState.value.connectionState}")
 
-                    val authState = authManager.userFlow(this).firstOrNull()
+                    val authState = authManagerVm.userState.firstOrNull()
                     if (authState == null) {
                         _uiState.update { it.copy(isLoading = false) }
                         uiMessage.send(UiText.StringResource(Res.string.message_cart_requires_auth))

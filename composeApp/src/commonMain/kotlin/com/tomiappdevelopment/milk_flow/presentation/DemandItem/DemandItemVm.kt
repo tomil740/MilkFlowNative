@@ -2,45 +2,23 @@ package com.tomiappdevelopment.milk_flow.presentation.DemandItem
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
-import com.tomiappdevelopment.milk_flow.core.AuthManager
+import com.tomiappdevelopment.milk_flow.core.AuthManagerVm
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
 import com.tomiappdevelopment.milk_flow.domain.core.Status
-import com.tomiappdevelopment.milk_flow.domain.core.SyncStatus
 import com.tomiappdevelopment.milk_flow.domain.core.getNextStatus
 import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
 import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
-import com.tomiappdevelopment.milk_flow.domain.models.ProductMetadata
-import com.tomiappdevelopment.milk_flow.domain.models.ProductSummaryItem
-import com.tomiappdevelopment.milk_flow.domain.models.User
-import com.tomiappdevelopment.milk_flow.domain.models.UserProductDemand
 import com.tomiappdevelopment.milk_flow.domain.models.subModels.UpdateDemandsStatusParams
 import com.tomiappdevelopment.milk_flow.domain.repositories.AuthRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.DemandsRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
-import com.tomiappdevelopment.milk_flow.domain.usecase.GetDemandsWithUserNames
-import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
-import com.tomiappdevelopment.milk_flow.domain.usecase.SyncNewDemands
 import com.tomiappdevelopment.milk_flow.domain.usecase.UpdateDemandsStatusUseCase
-import com.tomiappdevelopment.milk_flow.domain.util.Error
 import com.tomiappdevelopment.milk_flow.domain.util.Result
-import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsManagerUiState
-import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsMangerEvents
 import com.tomiappdevelopment.milk_flow.presentation.util.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -51,7 +29,7 @@ class DemandItemVm(
     private val productsRepo: ProductRepository,
     private val demandsRepository: DemandsRepository,
     private val authRepository: AuthRepository,
-    private val authManager: AuthManager,
+    private val authManagerVm: AuthManagerVm,
     private val updateDemandsStatusUseCase:UpdateDemandsStatusUseCase
 ): ScreenModel {
 
@@ -69,7 +47,7 @@ class DemandItemVm(
 
     init {
         screenModelScope.launch {
-            authManager.userFlow(this).collect{ authRes ->
+            authManagerVm.userState.collect{ authRes ->
                 _uiState.update { it.copy(authState = (authRes)) }
             }
         }

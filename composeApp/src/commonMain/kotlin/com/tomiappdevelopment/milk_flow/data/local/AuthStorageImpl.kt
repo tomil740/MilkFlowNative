@@ -3,12 +3,15 @@ package com.tomiappdevelopment.milk_flow.data.local
 
 import com.russhwolf.settings.Settings
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.AuthResponse
+import com.tomiappdevelopment.milk_flow.domain.models.subModels.AuthData
+import com.tomiappdevelopment.milk_flow.domain.repositories.AuthStorage
+import kotlinx.coroutines.flow.Flow
 
 expect object SettingsProvider {
     val settings: Settings
 }
 
-class AuthStorage(settings1: Settings) {
+class AuthStorageImpl(settings1: Settings): AuthStorage {
     private val settings = settings1
     private  val KEY_ID_TOKEN = "auth_id_token"
     private  val KEY_REFRESH_TOKEN = "auth_refresh_token"
@@ -29,7 +32,16 @@ class AuthStorage(settings1: Settings) {
         } else null
     }
 
-    fun clearAuth() {
+    override fun observeAuthInfo(): Flow<AuthData?> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun setAuthInfo(authInfo: AuthData) {
+        TODO("Not yet implemented")
+
+    }
+
+    override suspend fun clearAuthInfo() {
         settings.remove(KEY_ID_TOKEN)
         settings.remove(KEY_REFRESH_TOKEN)
         settings.remove(KEY_LOCAL_ID)
