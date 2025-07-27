@@ -13,6 +13,8 @@ import com.tomiappdevelopment.milk_flow.data.core.ConnectionObserverImpl
 import com.tomiappdevelopment.milk_flow.data.local.AuthStorageImplAndroid
 import com.tomiappdevelopment.milk_flow.data.local.DatabaseFactory
 import com.tomiappdevelopment.milk_flow.data.local.MilkFlowDb
+import com.tomiappdevelopment.milk_flow.data.local.crypto.CryptoManager
+import com.tomiappdevelopment.milk_flow.data.local.crypto.SecureKeyManager
 import com.tomiappdevelopment.milk_flow.data.remote.AuthService
 import com.tomiappdevelopment.milk_flow.data.remote.ProductsRemoteDataSource
 import com.tomiappdevelopment.milk_flow.data.remote.createHttpClient
@@ -41,7 +43,9 @@ actual fun platformModule() = module {
         )
     }
 
-    single { AuthStorageImplAndroid(get()) }.bind(AuthStorage::class)
+    single { CryptoManager(SecureKeyManager.getOrCreateSecretKey()) }
+
+    single { AuthStorageImplAndroid(get(),get()) }.bind(AuthStorage::class)
 
     single<AuthService> {AuthService(client = get(), firebaseApiKey = apiKey) }
 
