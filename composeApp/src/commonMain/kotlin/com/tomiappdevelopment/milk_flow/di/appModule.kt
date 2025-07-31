@@ -64,9 +64,9 @@ val appModule = module {
 
     single<DemandDao> { get<MilkFlowDb>().demandDao() }
 
-    //single<com.russhwolf.settings.Settings> { SettingsProvider.settings }
+   // single<com.russhwolf.settings.Settings> { SettingsProvider.settings }
 
-    //single { AuthStorageImpl(get()) }
+   // single { AuthStorageImpl(get()) }
 
     singleOf(::AuthManagerVm)
 

@@ -1,6 +1,7 @@
 package com.tomiappdevelopment.milk_flow.di
 
 import com.tomiappdevelopment.milk_flow.data.core.ConnectionObserverImpl
+import com.tomiappdevelopment.milk_flow.data.local.AuthStorageImpl
 import com.tomiappdevelopment.milk_flow.data.local.DatabaseFactory
 import com.tomiappdevelopment.milk_flow.data.local.MilkFlowDb
 import com.tomiappdevelopment.milk_flow.data.local.SettingsProvider
@@ -27,4 +28,7 @@ actual fun platformModule() = module {
      single<ConnectionObserver> {ConnectionObserverImpl(get())}
 
      single<com.russhwolf.settings.Settings> { SettingsProvider.settings }
+
+     single { AuthStorageImpl(get()) }
+
 }

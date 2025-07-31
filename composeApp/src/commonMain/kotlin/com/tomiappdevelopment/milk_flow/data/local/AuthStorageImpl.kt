@@ -6,45 +6,49 @@ import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.AuthResponse
 import com.tomiappdevelopment.milk_flow.domain.models.subModels.AuthData
 import com.tomiappdevelopment.milk_flow.domain.repositories.AuthStorage
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 expect object SettingsProvider {
     val settings: Settings
 }
 
-class AuthStorageImpl(settings1: Settings): AuthStorage {
-    private val settings = settings1
-    private  val KEY_ID_TOKEN = "auth_id_token"
-    private  val KEY_REFRESH_TOKEN = "auth_refresh_token"
-    private  val KEY_LOCAL_ID = "auth_local_id"
+class AuthStorageImpl(
+    private val settings: Settings
+) : AuthStorage {
 
-    fun saveAuth(idToken: String, refreshToken: String, localId: String) {
-        settings.putString(KEY_ID_TOKEN, idToken)
-        settings.putString(KEY_REFRESH_TOKEN, refreshToken)
-        settings.putString(KEY_LOCAL_ID, localId)
+    private companion object {
+        const val KEY_TOKEN = "auth_token"
+        const val KEY_REFRESH_TOKEN = "auth_refresh_token"
+        const val KEY_USER_ID = "user_id"
     }
 
-    fun getAuth(): AuthResponse? {
-        val idToken = settings.getStringOrNull(KEY_ID_TOKEN)
-        val refreshToken = settings.getStringOrNull(KEY_REFRESH_TOKEN)
-        val localId = settings.getStringOrNull(KEY_LOCAL_ID)
-        return if (idToken != null && refreshToken != null && localId != null) {
-            AuthResponse(idToken, refreshToken, localId)
-        } else null
-    }
+    private val authFlow = MutableStateFlow(loadAuthData())
 
-    override fun observeAuthInfo(): Flow<AuthData?> {
-        TODO("Not yet implemented")
-    }
+    override fun observeAuthInfo(): Flow<AuthData?> = authFlow
 
     override suspend fun setAuthInfo(authInfo: AuthData) {
-        TODO("Not yet implemented")
-
+        authInfo.idToken?.let { settings.putString(KEY_TOKEN, it) }
+        authInfo.refreshToken?.let { settings.putString(KEY_REFRESH_TOKEN, it) }
+        authInfo.localId?.let { settings.putString(KEY_USER_ID, it) }
+        authFlow.value = authInfo
     }
 
     override suspend fun clearAuthInfo() {
-        settings.remove(KEY_ID_TOKEN)
+        settings.remove(KEY_TOKEN)
         settings.remove(KEY_REFRESH_TOKEN)
-        settings.remove(KEY_LOCAL_ID)
+        settings.remove(KEY_USER_ID)
+        authFlow.value = null
+    }
+
+    private fun loadAuthData(): AuthData? {
+        val token = settings.getStringOrNull(KEY_TOKEN)
+        val refreshToken = settings.getStringOrNull(KEY_REFRESH_TOKEN)
+        val userId = settings.getStringOrNull(KEY_USER_ID)
+
+        return if (token != null && refreshToken != null && userId != null) {
+            AuthData(idToken = token, refreshToken = refreshToken, localId = userId)
+        } else {
+            null
+        }
     }
 }
-
