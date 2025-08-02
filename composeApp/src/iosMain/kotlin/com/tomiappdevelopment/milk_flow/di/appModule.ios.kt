@@ -8,9 +8,11 @@ import com.tomiappdevelopment.milk_flow.data.local.SettingsProvider
 import com.tomiappdevelopment.milk_flow.data.remote.AuthService
 import com.tomiappdevelopment.milk_flow.data.remote.ProductsRemoteDataSource
 import com.tomiappdevelopment.milk_flow.data.remote.createHttpClient
+import com.tomiappdevelopment.milk_flow.domain.repositories.AuthStorage
 import com.tomiappdevelopment.milk_flow.domain.repositories.ConnectionObserver
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import platform.Foundation.NSBundle
 
@@ -29,6 +31,6 @@ actual fun platformModule() = module {
 
      single<com.russhwolf.settings.Settings> { SettingsProvider.settings }
 
-     single { AuthStorageImpl(get()) }
+     single { AuthStorageImpl(get()) }.bind(AuthStorage::class)
 
 }

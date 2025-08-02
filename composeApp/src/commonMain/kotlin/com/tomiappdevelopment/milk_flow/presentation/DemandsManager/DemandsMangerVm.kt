@@ -4,6 +4,8 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.tomiappdevelopment.milk_flow.core.AuthManagerVm
 import com.tomiappdevelopment.milk_flow.core.presentation.UiText
+import com.tomiappdevelopment.milk_flow.core.presentation.UiText.*
+import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.core.SyncStatus
 import com.tomiappdevelopment.milk_flow.domain.core.getNextStatus
 import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
@@ -40,6 +42,7 @@ import milkflow.composeapp.generated.resources.error_no_demands
 import milkflow.composeapp.generated.resources.error_not_synced
 import milkflow.composeapp.generated.resources.error_operation_in_progress
 import milkflow.composeapp.generated.resources.error_validation_unknown
+import milkflow.composeapp.generated.resources.notification_demand_deleted
 import milkflow.composeapp.generated.resources.success_demands_updated
 import milkflow.composeapp.generated.resources.success_products_synced
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -149,7 +152,7 @@ class DemandsMangerVm(
             DemandsMangerEvents.OnToggleView -> {
                 _uiState.update { it.copy(isProductView = (!it.isProductView)) }
             }
-            DemandsMangerEvents.OnUpdateDemandsStatus -> {
+            is DemandsMangerEvents.OnUpdateDemandsStatus -> {
                 val uiState = _uiState.value
 
                 // Pre-check: validate preconditions
@@ -164,7 +167,8 @@ class DemandsMangerVm(
                         val result = updateDemandsStatusUseCase.invoke(
                             UpdateDemandsStatusParams(
                                 uiState.demandSummaryList.map { it.base },
-                                targetStatus = uiState.status.getNextStatus()!!
+                                targetStatus = if(!event.isToDel){uiState.status.getNextStatus()!!}else{
+                                    Status.deleted}
                             ),
                             uiState.authState
                         )
@@ -177,7 +181,7 @@ class DemandsMangerVm(
 
                             is Result.Success -> {
                                 _uiState.update { it.copy(isLoading = false) }
-                                uiMessage.send(UiText.StringResource(Res.string.success_demands_updated))
+                                uiMessage.send(StringResource(Res.string.success_demands_updated))
                                 syncNewDemandUseCase()
                             }
                         }
@@ -185,10 +189,10 @@ class DemandsMangerVm(
                 } else {
                     // Send feedback if validation fails
                     val errorMsg = when {
-                        uiState.isLoading -> UiText.StringResource(Res.string.error_operation_in_progress)
-                        uiState.demandSummaryList.isEmpty() -> UiText.StringResource(Res.string.error_no_demands)
-                        uiState.syncStatus != SyncStatus.SUCCESS -> UiText.StringResource(Res.string.error_not_synced)
-                        else -> UiText.StringResource(Res.string.error_validation_unknown)
+                        uiState.isLoading -> StringResource(Res.string.error_operation_in_progress)
+                        uiState.demandSummaryList.isEmpty() -> StringResource(Res.string.error_no_demands)
+                        uiState.syncStatus != SyncStatus.SUCCESS -> StringResource(Res.string.error_not_synced)
+                        else -> StringResource(Res.string.error_validation_unknown)
                     }
                     screenModelScope.launch {
                         uiMessage.send(errorMsg)
@@ -201,6 +205,7 @@ class DemandsMangerVm(
                     syncNewDemandUseCase()
                 }
             }
+
         }
     }
 
@@ -215,7 +220,10 @@ class DemandsMangerVm(
             )
             when (result) {
                 is Result.Success -> {
-                    val hasNewData = result.data
+                    val isNewDelete = result.data
+                    if (isNewDelete){
+                        uiMessage.send(UiText.StringResource(Res.string.notification_demand_deleted))
+                    }
                     _uiState.update {
                         it.copy(
                             syncStatus = SyncStatus.SUCCESS//if a sync ahs been made or not define by hasNewData

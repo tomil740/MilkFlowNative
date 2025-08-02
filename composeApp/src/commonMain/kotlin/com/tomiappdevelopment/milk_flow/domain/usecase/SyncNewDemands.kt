@@ -1,5 +1,6 @@
 package com.tomiappdevelopment.milk_flow.domain.usecase
 
+import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.Demand
 import com.tomiappdevelopment.milk_flow.domain.repositories.DemandsRepository
 import com.tomiappdevelopment.milk_flow.domain.util.DemandError
@@ -29,14 +30,14 @@ class SyncNewDemands(
                 if (page.demands.isEmpty()) break
 
                 val isMostlyNew = isNewData(page.demands)
-                if (isMostlyNew) {
+                if (isMostlyNew > 0) {
                     anyNewData = true
                 }
 
                 repo.upsertDemandsList(page.demands)
 
                 // Since no real pagination token, we rely purely on isNewData
-                if (!isMostlyNew) break
+                if (isMostlyNew==-1) break
 
                 currentPage++
             }
@@ -47,18 +48,26 @@ class SyncNewDemands(
         }
     }
 
-    private suspend fun isNewData(newData: List<Demand>): Boolean {
+    private suspend fun isNewData(newData: List<Demand>): Int {
         var newCount = 0
+        var isNewDelete = 0
 
         for (item in newData) {
             val local = repo.getDemandById(item.id)
             if (local == null || local.status != item.status) {
                 newCount++
+                if(local?.status != Status.deleted && item.status == Status.deleted){
+                    isNewDelete++
+                }
             }
         }
 
         val ratio = newCount.toDouble() / newData.size
-        return ratio >= 0.3
+        return if(ratio >= 0.3){
+            isNewDelete
+        }else{
+            -1
+        }
     }
 
     companion object {

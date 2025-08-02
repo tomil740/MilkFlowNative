@@ -70,7 +70,18 @@
 
     <string name="splash_loading_user_data">
     ההתחברות הצליחה. טוען את החשבון שלך...
-</string>
+    </string>
+
+    <string name="notification_demand_deleted">
+        דרישה נמחקה מהרשימה שלך! בדוק את ארכיון המחיקות כדי לראות מה נמחק.
+    </string>
+
+    <string name="delete_dialog_title">מחק דרישה</string>
+    <string name="delete_dialog_text">האם אתה בטוח שברצונך למחוק את הדרישה הזו? פעולה זו אינה ניתנת לביצוע מחדש.</string>
+    <string name="delete_confirm">מחק</string>
+    <string name="cancel">ביטול</string>
+
+
 
 
 

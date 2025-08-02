@@ -73,5 +73,14 @@
     Signed in successfully. Loading your account...
 </string>
 
+    <string name="notification_demand_deleted">
+        A demand was deleted from your list! Check your Delete Archive to see what was removed.
+    </string>
+
+    <string name="delete_dialog_title">Delete Demand</string>
+    <string name="delete_dialog_text">Are you sure you want to delete this demand? This action cannot be undone.</string>
+    <string name="delete_confirm">Delete</string>
+    <string name="cancel">Cancel</string>
+
 
 </resources>

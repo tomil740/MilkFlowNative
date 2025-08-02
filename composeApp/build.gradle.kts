@@ -1,12 +1,11 @@
 import java.util.Properties
 import java.io.FileInputStream
 
-/*
+
 val keystoreProperties = Properties().apply {
     load(FileInputStream(rootProject.file("composeApp/src/androidMain/keystore.properties")))
 }
 
- */
 
 
 val localProps = rootProject.file("local.properties").reader().use {
@@ -105,7 +104,7 @@ kotlin {
 }
 
 android {
-/*
+
 
     signingConfigs {
         create("release") {
@@ -116,7 +115,7 @@ android {
         }
     }
 
- */
+
 
 
 
@@ -128,7 +127,7 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    /*
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
@@ -136,7 +135,7 @@ android {
         }
     }
 
-     */
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -150,8 +149,8 @@ android {
         applicationId = "com.tomiappdevelopment.milk_flow"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 10
-        versionName = "1.r "
+        versionCode = 13
+        versionName = "1.77"
 
         buildConfigField("String", "FIREBASE_API_KEY", "\"${localProps["FIREBASE_API_KEY"]}\"")
 

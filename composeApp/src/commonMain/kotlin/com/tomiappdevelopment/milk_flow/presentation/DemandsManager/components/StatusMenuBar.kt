@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.core.SyncStatus
 import com.tomiappdevelopment.milk_flow.domain.core.allCategories
+import com.tomiappdevelopment.milk_flow.domain.core.getStringName
 import com.tomiappdevelopment.milk_flow.domain.models.Category
 
 @Composable
@@ -122,7 +123,7 @@ fun StatusMenuBar(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Status.values().forEach { status ->
+            Status.entries.filter{it.name != "deleted"}.forEach { status ->
                 val isSelected = status == currentStatus
                 val backgroundColor = if (isSelected) colorScheme.primary else colorScheme.surface
                 val contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
@@ -145,7 +146,7 @@ fun StatusMenuBar(
                         .height(48.dp)
                 ) {
                     Text(
-                        text = status.label(),
+                        text = status.getStringName(),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Medium,
                         maxLines = 1
@@ -162,10 +163,5 @@ fun statusIcon(status: Status): ImageVector = when (status) {
     Status.pending -> Icons.Default.CheckCircle
     Status.placed -> Icons.Default.CheckCircle
     Status.completed -> Icons.Default.Check
-}
-
-fun Status.label(): String = when (this) {
-    Status.pending -> "ממתין"
-    Status.placed -> "שודר"
-    Status.completed -> "סופק"
+    Status.deleted -> Icons.Default.Check
 }

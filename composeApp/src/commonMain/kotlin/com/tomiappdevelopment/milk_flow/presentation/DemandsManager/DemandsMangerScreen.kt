@@ -61,7 +61,7 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                 if(isDistributer) {
                     CheckoutButton(
                         loading = false,
-                        onClick = { demandsMangerSatesAndEvents.onUpdateDemandsStatus() },
+                        onClick = { demandsMangerSatesAndEvents.onUpdateDemandsStatus(false) },
                         label = UiText.StringResource(
                             Res.string.label_update_status,
                             demandsMangerSatesAndEvents.uiState.status.getNextStatus()
@@ -129,6 +129,7 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                                 demand = item,
                                 isDistributer = uiState.authState?.isDistributer ?: false,
                                 onClick = {navigator.replaceAll(DemandItemScreenClass(theDemandId = item.id))},
+                                onDemandDel = {demandsMangerSatesAndEvents.onUpdateDemandsStatus(true)}
                             )
                         }
                     }

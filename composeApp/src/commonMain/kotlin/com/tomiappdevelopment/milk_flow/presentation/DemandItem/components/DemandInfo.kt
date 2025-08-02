@@ -21,9 +21,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tomiappdevelopment.milk_flow.domain.core.Status
+import com.tomiappdevelopment.milk_flow.domain.core.getStringName
 import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
 import com.tomiappdevelopment.milk_flow.domain.util.toReadableString
-import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.label
 import com.tomiappdevelopment.milk_flow.presentation.core.components.AuthActionButton
 
 @Composable
@@ -53,7 +53,7 @@ fun DemandInfo(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("סטטוס: ", style = MaterialTheme.typography.titleSmall)
                     Text(
-                        demand.status.label(),
+                        demand.status.getStringName(),
                         style = MaterialTheme.typography.titleSmall.copy(
                             color = getStatusColor(demand.status),
                             fontWeight = FontWeight.Bold
@@ -117,5 +117,6 @@ fun getStatusColor(status: Status): Color {
         Status.pending -> colorScheme.error        // standard error red
         Status.placed -> colorScheme.primary
         // Add other mappings
+        Status.deleted -> colorScheme.error
     }
 }
