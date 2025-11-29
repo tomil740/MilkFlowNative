@@ -72,7 +72,6 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
                     )
                 }
             }
-
         ) {
 
             LaunchedEffect(demandsMangerSatesAndEvents.uiMessage) {
