@@ -97,18 +97,20 @@ class SyncIfNeededUseCase(
             return Result.Error(DataError.Network.NO_INTERNET) // No internet connection
         }
 
-        // Update the local metadata with the new sync check date
-        repository.setProductLocalMetaData(
-            ProductMetadata(
-                lastProductsUpdate = remoteTimestamp,
-                lastSyncCheckDate = currentDate.toString()
-            )
-        )
-
         // 3. Check if data is up-to-date
         if (remoteTimestamp == localMetadata.lastProductsUpdate) {
+            // Update the local metadata with the new sync check date
+            repository.setProductLocalMetaData(
+                ProductMetadata(
+                    lastProductsUpdate = remoteTimestamp,
+                    lastSyncCheckDate = currentDate.toString()
+                )
+            )
             return Result.Success(false) // No need to sync
         }
+
+
+
 
         // 4. Perform the data sync
         val syncResult = repository.syncProductData(
