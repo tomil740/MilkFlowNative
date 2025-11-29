@@ -53,8 +53,16 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun logout() {
+        withContext(Dispatchers.IO) {
+            // Clear all cached users on logout to ensure fresh data on next login
+            try {
+                userDao.clearAllUsers()
+            } catch (e: Exception) {
+                // Log but don't fail logout if cache clear fails
+                println("Failed to clear users cache on logout: ${e.message}")
+            }
+        }
         authStorageImpl.clearAuthInfo()
-
     }
 
     override fun getAuthState(): Flow<AuthData?> {
