@@ -91,14 +91,14 @@ class ProductCatalogVm(
             is ProductCatalogEvents.AddToCart -> {
                 screenModelScope.launch {
                     _uiState.update { it.copy(isLoading =true) }
-                    var theMes = "item has been Add to cart"
+                    var theMes = "המוצר נוסף לעגלה"
                     if (_uiState.value.authState!=null){
                         cartRepository.addItemToCart(
                             uid = _uiState.value.authState!!,
                             item = event.cartItem
                         )
                     }else{
-                        theMes =  "Auth to get access to cart"
+                        theMes =  "התחבר כדי לגשת לעגלה"
                     }
 
                     _uiState.update { it.copy(isLoading = false, emptyDataMes =theMes) }
@@ -113,9 +113,9 @@ class ProductCatalogVm(
             ProductCatalogEvents.OnEmptyProducts -> {
 
                 //get the matched case(connection error, auth or a server error) and update the matched field
-                var theMes = "There is no mathced data for you in the selected category ${uiState.value.selectedCategory?.name}"
+                var theMes = "אין נתונים תואמים עבורך בקטגוריה הנבחרת ${uiState.value.selectedCategory?.name}"
                 if(uiState.value.products.isEmpty()){
-                    theMes = "Auth to get access to products catalog data"
+                    theMes = "התחבר כדי לגשת לקטלוג המוצרים"
                 }
 
                 _uiState.update { it.copy(emptyDataMes =theMes) }
@@ -142,7 +142,7 @@ class ProductCatalogVm(
                 is Result.Success -> {
                     _uiState.update { it.copy(isLoading = false) }
                     if (result.data) {
-                        _uiMessage.emit(UiText.DynamicString("Successfully synced"))
+                        _uiMessage.emit(UiText.DynamicString("סונכרן בהצלחה"))
                     }
                 }
             }

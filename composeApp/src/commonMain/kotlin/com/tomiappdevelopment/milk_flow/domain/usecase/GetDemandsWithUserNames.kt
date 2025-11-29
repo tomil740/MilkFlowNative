@@ -14,8 +14,8 @@ class GetDemandsWithUserNames(
     suspend operator fun invoke(status: Status,uid: String,isDistributor: Boolean): Flow<List<DemandWithNames>> =
         demandsRepo.getDemands(status,uid,isDistributor).map { demands ->
             demands.map { demand ->
-                val userName = authRepo.getUserObjById(demand.userId)?.name ?: "Unknown"
-                val distName = demand.distributerId?.let { authRepo.getUserObjById(it)?.name } ?: "N/A"
+                val userName = authRepo.getUserObjById(demand.userId)?.name ?: "לא ידוע"
+                val distName = demand.distributerId?.let { authRepo.getUserObjById(it)?.name } ?: "לא זמין"
                 DemandWithNames(demand, userName, distName)
             }
         }

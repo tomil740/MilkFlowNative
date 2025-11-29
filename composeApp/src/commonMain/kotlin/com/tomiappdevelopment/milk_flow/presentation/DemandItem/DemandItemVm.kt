@@ -86,10 +86,10 @@ class DemandItemVm(
         } else {
             // Send feedback if validation fails
             val errorMsg = when {
-                uiState.isLoading -> "Please wait, operation in progress"
-                uiState.demandItem.id.isEmpty() -> "No demands to update"
-                uiState.demandItem.status == Status.completed -> "Cant update status completed!"
-                else -> "Unknown validation error"
+                uiState.isLoading -> "אנא המתן, הפעולה בעיצומה"
+                uiState.demandItem.id.isEmpty() -> "אין דרישות לעדכון"
+                uiState.demandItem.status == Status.completed -> "לא ניתן לעדכן סטטוס שהושלם"
+                else -> "שגיאת אימות לא ידועה"
             }
             screenModelScope.launch {
                 _uiMessage.emit(UiText.DynamicString(errorMsg))

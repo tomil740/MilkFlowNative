@@ -81,6 +81,16 @@
     <string name="delete_confirm">מחק</string>
     <string name="cancel">ביטול</string>
 
+    <string name="user_name_unknown">לא ידוע</string>
+    <string name="user_name_not_available">לא זמין</string>
+    <string name="content_desc_sync_demands">סנכרן דרישות</string>
+    <string name="connection_status_connected">מחובר</string>
+    <string name="connection_status_weak">חיבור חלש</string>
+    <string name="connection_status_no_connection">אין חיבור</string>
+    <string name="message_successfully_synced">סונכרן בהצלחה</string>
+    <string name="error_please_wait">אנא המתן, הפעולה בעיצומה</string>
+    <string name="error_no_demands_to_update">אין דרישות לעדכון</string>
+    <string name="error_cant_update_completed">לא ניתן לעדכן סטטוס שהושלם</string>
 
 
 

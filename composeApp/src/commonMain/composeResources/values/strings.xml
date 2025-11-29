@@ -35,7 +35,7 @@
 
 
     //hard code general
-    <string name="label_update_status">Update status to %1$s</string>
+    <string name="label_update_status">עדכן סטטוס ל %1$s</string>
     <string name="msg_user_not_authenticated">User not logged in. Please sign in to access information.</string>
     <string name="error_not_authenticated_no_data">User not logged in. Please sign in to view data.</string>
     <string name="dialog_demand_update_success_title">Success</string>
@@ -81,6 +81,17 @@
     <string name="delete_dialog_text">Are you sure you want to delete this demand? This action cannot be undone.</string>
     <string name="delete_confirm">Delete</string>
     <string name="cancel">Cancel</string>
+
+    <string name="user_name_unknown">Unknown</string>
+    <string name="user_name_not_available">N/A</string>
+    <string name="content_desc_sync_demands">Sync demands</string>
+    <string name="connection_status_connected">Connected</string>
+    <string name="connection_status_weak">Weak Connection</string>
+    <string name="connection_status_no_connection">No Connection</string>
+    <string name="message_successfully_synced">Successfully synced</string>
+    <string name="error_please_wait">Please wait, operation in progress</string>
+    <string name="error_no_demands_to_update">No demands to update</string>
+    <string name="error_cant_update_completed">Cant update status completed!</string>
 
 
 </resources>
