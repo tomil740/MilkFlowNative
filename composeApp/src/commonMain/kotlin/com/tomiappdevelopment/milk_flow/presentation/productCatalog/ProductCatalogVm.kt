@@ -12,9 +12,10 @@ import com.tomiappdevelopment.milk_flow.domain.usecase.GetAuthorizedProducts
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -29,13 +30,11 @@ class ProductCatalogVm(
     private val cartRepository: CartRepository
     ): ScreenModel{
 
-    private val uiMessage = Channel<UiText>()
-
+    private val _uiMessage = MutableSharedFlow<UiText>()
+    val uiMessage = _uiMessage.asSharedFlow()
 
     private val _uiState = MutableStateFlow(
-        ProductCatalogUiState(
-            uiMessage = uiMessage
-        )
+        ProductCatalogUiState()
     )
     private var syncJob: Job? = null
     private val fullCacheEmptyFlag = MutableStateFlow<Boolean>(false)
@@ -137,13 +136,13 @@ class ProductCatalogVm(
             when (val result = syncIfNeededUseCase.invoke()) {
                 is Result.Error -> {
                     _uiState.update { it.copy(isLoading = false) }
-                    uiMessage.send(UiText.DynamicString(result.error.toString()))
+                    _uiMessage.emit(UiText.DynamicString(result.error.toString()))
                 }
 
                 is Result.Success -> {
                     _uiState.update { it.copy(isLoading = false) }
                     if (result.data) {
-                        uiMessage.send(UiText.DynamicString("Successfully synced"))
+                        _uiMessage.emit(UiText.DynamicString("Successfully synced"))
                     }
                 }
             }

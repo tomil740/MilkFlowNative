@@ -15,16 +15,15 @@ import com.tomiappdevelopment.milk_flow.domain.repositories.ProductRepository
 import com.tomiappdevelopment.milk_flow.domain.usecase.UpdateDemandsStatusUseCase
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import com.tomiappdevelopment.milk_flow.presentation.util.toUiText
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.collections.map
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class DemandItemVm(
     private val productsRepo: ProductRepository,
     private val demandsRepository: DemandsRepository,
@@ -33,11 +32,11 @@ class DemandItemVm(
     private val updateDemandsStatusUseCase:UpdateDemandsStatusUseCase
 ): ScreenModel {
 
-    private val uiMessage = Channel<UiText>()
+    private val _uiMessage = MutableSharedFlow<UiText>()
+    val uiMessage = _uiMessage.asSharedFlow()
+
     private val _uiState = MutableStateFlow(
-        DemandItemUiState(
-            uiMessage = uiMessage
-        )
+        DemandItemUiState()
     )
 
     //the observable stateflow ui state that is listening to the original ui state
@@ -76,7 +75,7 @@ class DemandItemVm(
                 when (result) {
                     is Result.Error -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        uiMessage.send((result.error.toUiText()))
+                        _uiMessage.emit((result.error.toUiText()))
                     }
 
                     is Result.Success -> {
@@ -93,7 +92,7 @@ class DemandItemVm(
                 else -> "Unknown validation error"
             }
             screenModelScope.launch {
-                uiMessage.send(UiText.DynamicString(errorMsg))
+                _uiMessage.emit(UiText.DynamicString(errorMsg))
             }
         }
     }
@@ -130,7 +129,7 @@ class DemandItemVm(
                     )
                 }
             } catch (e: Exception) {
-                uiMessage.send(UiText.DynamicString("שגיאה בטעינת הדרישה: ${e.message}"))
+                _uiMessage.emit(UiText.DynamicString("שגיאה בטעינת הדרישה: ${e.message}"))
                 _uiState.update { it.copy(isLoading = false) }
             }
         }

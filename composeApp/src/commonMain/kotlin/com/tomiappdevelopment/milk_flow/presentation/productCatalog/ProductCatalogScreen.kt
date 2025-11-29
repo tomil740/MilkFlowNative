@@ -42,7 +42,6 @@ import com.tomiappdevelopment.milk_flow.domain.models.Product
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.CategoriesBar
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.ProductDialog
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.ProductPreviewItem
-import kotlinx.coroutines.flow.consumeAsFlow
 
 @Composable
 fun ProductCatalogScreen(productCatalogStatesAndEvents:ProductCatalogStatesAndEvents) {
@@ -59,8 +58,8 @@ fun ProductCatalogScreen(productCatalogStatesAndEvents:ProductCatalogStatesAndEv
             SnackbarHost(hostState = snackBarHostState)
         }
     ) {
-        LaunchedEffect(productCatalogStatesAndEvents.uiState.uiMessage) {
-            productCatalogStatesAndEvents.uiState.uiMessage.consumeAsFlow()
+        LaunchedEffect(productCatalogStatesAndEvents.uiMessage) {
+            productCatalogStatesAndEvents.uiMessage
                 .collect {
                     snackBarHostState.showSnackbar(
                         it.asString2(),

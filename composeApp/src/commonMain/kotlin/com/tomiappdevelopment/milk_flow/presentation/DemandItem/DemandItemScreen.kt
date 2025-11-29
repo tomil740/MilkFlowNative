@@ -33,7 +33,6 @@ import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.DemandsMange
 import com.tomiappdevelopment.milk_flow.presentation.core.components.CheckoutButton
 import com.tomiappdevelopment.milk_flow.presentation.core.components.EmptyDataMessage
 import com.tomiappdevelopment.milk_flow.presentation.core.components.LoadingSpinner
-import kotlinx.coroutines.flow.consumeAsFlow
 import milkflow.composeapp.generated.resources.Res
 import milkflow.composeapp.generated.resources.dialog_demand_update_success_message
 import milkflow.composeapp.generated.resources.dialog_demand_update_success_title
@@ -79,8 +78,8 @@ fun DemandItemScreen(demandsItemSatesAndEvents: DemandsItemSatesAndEvents
 
         ) {
 
-            LaunchedEffect(demandsItemSatesAndEvents.uiState.uiMessage) {
-                demandsItemSatesAndEvents.uiState.uiMessage.consumeAsFlow()
+            LaunchedEffect(demandsItemSatesAndEvents.uiMessage) {
+                demandsItemSatesAndEvents.uiMessage
                     .collect {
                         snackBarHostState.showSnackbar(
                             it.asString2(),

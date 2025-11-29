@@ -23,10 +23,11 @@ import com.tomiappdevelopment.milk_flow.domain.util.Result
 import com.tomiappdevelopment.milk_flow.presentation.util.toUiText
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -60,11 +61,11 @@ class DemandsMangerVm(
 
     private var syncNewDemandJob:Job?=null
 
-    private val uiMessage = Channel<UiText>()
+    private val _uiMessage = MutableSharedFlow<UiText>()
+    val uiMessage = _uiMessage.asSharedFlow()
+
     private val _uiState = MutableStateFlow(
-        DemandsManagerUiState(
-            uiMessage = uiMessage
-        )
+        DemandsManagerUiState()
     )
 
     private val fullCacheEmptyFlag = MutableStateFlow<Boolean>(false)
@@ -127,14 +128,14 @@ class DemandsMangerVm(
                 when (a) {
                     is Result.Error<DataError> -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        uiMessage.send((a.error.toUiText()))
+                        _uiMessage.emit((a.error.toUiText()))
                     }
 
                     is Result.Success<Boolean> -> {
                         _uiState.update { it.copy(isLoading = false) }
                         if (a.data) {
                             println("A full products replacement ${a.data}")
-                            uiMessage.send(UiText.StringResource(Res.string.success_products_synced))
+                            _uiMessage.emit(StringResource(Res.string.success_products_synced))
                         }
                     }
                 }
@@ -176,12 +177,12 @@ class DemandsMangerVm(
                         when (result) {
                             is Result.Error -> {
                                 _uiState.update { it.copy(isLoading = false) }
-                                uiMessage.send((result.error.toUiText()))
+                                _uiMessage.emit((result.error.toUiText()))
                             }
 
                             is Result.Success -> {
                                 _uiState.update { it.copy(isLoading = false) }
-                                uiMessage.send(StringResource(Res.string.success_demands_updated))
+                                _uiMessage.emit(StringResource(Res.string.success_demands_updated))
                                 syncNewDemandUseCase()
                             }
                         }
@@ -195,7 +196,7 @@ class DemandsMangerVm(
                         else -> StringResource(Res.string.error_validation_unknown)
                     }
                     screenModelScope.launch {
-                        uiMessage.send(errorMsg)
+                        _uiMessage.emit(errorMsg)
                     }
                 }
             }
@@ -222,7 +223,7 @@ class DemandsMangerVm(
                 is Result.Success -> {
                     val isNewDelete = result.data
                     if (isNewDelete){
-                        uiMessage.send(UiText.StringResource(Res.string.notification_demand_deleted))
+                        _uiMessage.emit(StringResource(Res.string.notification_demand_deleted))
                     }
                     _uiState.update {
                         it.copy(

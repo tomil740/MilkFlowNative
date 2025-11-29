@@ -5,7 +5,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
+import com.tomiappdevelopment.milk_flow.core.presentation.UiText
 import com.tomiappdevelopment.milk_flow.domain.core.Status
+import kotlinx.coroutines.flow.Flow
 
 class DemandsMangerScreenClass():Screen {
     @Composable
@@ -17,6 +19,7 @@ class DemandsMangerScreenClass():Screen {
             onStatusSelected = { status -> a.onEvent(DemandsMangerEvents.OnStatusSelected(status)) },
             onToggleView = { a.onEvent(DemandsMangerEvents.OnToggleView) },
             onUpdateDemandsStatus = { isToDel1 -> a.onEvent(DemandsMangerEvents.OnUpdateDemandsStatus(isToDel =isToDel1 )) },
+            uiMessage = a.uiMessage,
             refresh = { a.onEvent(DemandsMangerEvents.Refresh) }
         )
 
@@ -30,6 +33,7 @@ class DemandsMangerScreenClass():Screen {
 
 data class DemandsMangerSatesAndEvents(
     val uiState: DemandsManagerUiState,
+    val uiMessage: Flow<UiText>,
     val onStatusSelected: (Status) -> Unit,
     val onToggleView: () -> Unit,
     val onUpdateDemandsStatus: (Boolean) -> Unit,

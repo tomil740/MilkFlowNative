@@ -75,8 +75,8 @@ fun DemandsMangerScreen(demandsMangerSatesAndEvents: DemandsMangerSatesAndEvents
 
         ) {
 
-            LaunchedEffect(demandsMangerSatesAndEvents.uiState.uiMessage) {
-                demandsMangerSatesAndEvents.uiState.uiMessage.consumeAsFlow()
+            LaunchedEffect(demandsMangerSatesAndEvents.uiMessage) {
+                demandsMangerSatesAndEvents.uiMessage
                     .collect {
                         snackBarHostState.showSnackbar(
                             it.asString2(),

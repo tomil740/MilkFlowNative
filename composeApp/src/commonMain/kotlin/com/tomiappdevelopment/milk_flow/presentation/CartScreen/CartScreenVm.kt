@@ -14,9 +14,10 @@ import com.tomiappdevelopment.milk_flow.domain.usecase.SyncIfNeededUseCase
 import com.tomiappdevelopment.milk_flow.domain.util.Result
 import com.tomiappdevelopment.milk_flow.presentation.util.toUiText
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
@@ -39,14 +40,13 @@ class CartScreenVm(
     private val getConnectionState: GetConnectionState
     ): ScreenModel {
 
-    private val uiMessage = Channel<UiText>()
-
+    private val _uiMessage = MutableSharedFlow<UiText>()
+    val uiMessage = _uiMessage.asSharedFlow()
 
     private val _uiState = MutableStateFlow(
         CartScreenUiState(
             cartProducts = listOf(),
-            isLoading = false,
-            uiMessage = uiMessage
+            isLoading = false
         )
     )
     val uiState = _uiState.stateIn(screenModelScope, SharingStarted.WhileSubscribed(5000), _uiState.value)
@@ -74,14 +74,14 @@ class CartScreenVm(
                 when (syncResult) {
                     is Result.Error -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        uiMessage.send(UiText.DynamicString(syncResult.error.toString()))
+                        _uiMessage.emit(UiText.DynamicString(syncResult.error.toString()))
                     }
 
                     is Result.Success -> {
                         _uiState.update { it.copy(isLoading = false) }
                         if (syncResult.data) {
 
-                            uiMessage.send(UiText.StringResource(Res.string.message_products_synced_success))
+                            _uiMessage.emit(UiText.StringResource(Res.string.message_products_synced_success))
 
                         }
                     }
@@ -114,7 +114,7 @@ class CartScreenVm(
                         _uiState.update {
                             it.copy(cartProducts = listOf())
                         }
-                        uiMessage.send(UiText.StringResource(Res.string.error_not_authenticated_no_data))
+                        _uiMessage.emit(UiText.StringResource(Res.string.error_not_authenticated_no_data))
 
                     }
                 }
@@ -137,7 +137,7 @@ class CartScreenVm(
                     val authState = authManagerVm.userState.firstOrNull()
                     if (authState == null) {
                         _uiState.update { it.copy(isLoading = false) }
-                        uiMessage.send(UiText.StringResource(Res.string.message_cart_requires_auth))
+                        _uiMessage.emit(UiText.StringResource(Res.string.message_cart_requires_auth))
                         return@launch
                     }
 
@@ -151,7 +151,7 @@ class CartScreenVm(
                     when (result) {
                         is Result.Error -> {
                              _uiState.update { it.copy(isLoading = false) }
-                            uiMessage.send((result.error.toUiText()))
+                            _uiMessage.emit((result.error.toUiText()))
                         }
 
                         is Result.Success -> {
@@ -161,7 +161,7 @@ class CartScreenVm(
                                     isLoading = false,
                                 )
                             }
-                            uiMessage.send(UiText.StringResource(Res.string.message_demand_submitted_success))
+                            _uiMessage.emit(UiText.StringResource(Res.string.message_demand_submitted_success))
                         }
                     }
                 }
@@ -186,7 +186,7 @@ class CartScreenVm(
                             )
                         }
                     }else{
-                        uiMessage.send(UiText.StringResource(Res.string.message_cart_requires_auth))
+                        _uiMessage.emit(UiText.StringResource(Res.string.message_cart_requires_auth))
                     }
                     _uiState.update { it.copy(isLoading = false) }
                 }

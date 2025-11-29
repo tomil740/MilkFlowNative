@@ -19,25 +19,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
 import com.tomiappdevelopment.milk_flow.domain.models.CartProduct
-import com.tomiappdevelopment.milk_flow.domain.models.DemandWithNames
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartHeader
 import com.tomiappdevelopment.milk_flow.presentation.CartScreen.components.CartPreviewItem
 import com.tomiappdevelopment.milk_flow.presentation.core.components.CheckoutButton
-import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.DemandPreviewItem
-import com.tomiappdevelopment.milk_flow.presentation.DemandsManager.components.StatusMenuBar
 import com.tomiappdevelopment.milk_flow.presentation.core.components.EmptyDataMessage
 import com.tomiappdevelopment.milk_flow.presentation.core.components.LoadingSpinner
 import com.tomiappdevelopment.milk_flow.presentation.productCatalog.components.ProductDialog
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.datetime.LocalDateTime
-import network.chaintech.utils.now
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -67,8 +59,8 @@ fun CartScreen(cartSatesAndEvents: CartSatesAndEvents
 
         ) {
 
-            LaunchedEffect(cartSatesAndEvents.uiState.uiMessage) {
-                cartSatesAndEvents.uiState.uiMessage.consumeAsFlow()
+            LaunchedEffect(cartSatesAndEvents.uiMessage) {
+                cartSatesAndEvents.uiMessage
                     .collectLatest {
                         snackBarHostState.showSnackbar(
                             it.asString2(),
