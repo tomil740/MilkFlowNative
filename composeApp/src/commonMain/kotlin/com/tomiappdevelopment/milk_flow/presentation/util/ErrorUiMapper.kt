@@ -43,8 +43,6 @@ fun DemandError.toUiText(): UiText = when (this) {
     is DemandError.Serialization -> UiText.StringResource(Res.string.error_serialization)
     is DemandError.InvalidStatus -> UiText.StringResource(Res.string.error_invalid_status)
     is DemandError.Unknown -> UiText.StringResource(Res.string.error_unknown)
-
-    else -> UiText.DynamicString("Unknown error: ${this::class.simpleName}")
 }
 
 @OptIn(ExperimentalResourceApi::class)

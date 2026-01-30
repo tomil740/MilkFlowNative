@@ -6,7 +6,6 @@ import com.tomiappdevelopment.milk_flow.data.remote.core.isOnline
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.DemandDto
 import com.tomiappdevelopment.milk_flow.data.remote.dtoModels.PagedDemandsDto
 import com.tomiappdevelopment.milk_flow.data.util.getUtcTimestamp
-import com.tomiappdevelopment.milk_flow.data.util.toISO
 import com.tomiappdevelopment.milk_flow.domain.core.Status
 import com.tomiappdevelopment.milk_flow.domain.models.CartItem
 import com.tomiappdevelopment.milk_flow.domain.models.subModels.DemandStatusUpdateEntry
@@ -21,10 +20,7 @@ import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.util.network.UnresolvedAddressException
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -39,21 +35,13 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
-import network.chaintech.utils.now
-import kotlin.time.Duration.Companion.hours
 
 class DemandsRemoteDao(
     private val httpClient: HttpClient
 ) {
 
-    suspend fun getDemandsPage(
-        pageSize: Int? = null,
-    ): Result<PagedDemandsDto, DataError.Network> {
-        val now = Clock.System.now()
-        val thresholdInstant = now.minus(72.hours)
-        val thresholdTimestamp = thresholdInstant.toLocalDateTime(TimeZone.UTC).toString() + "Z"
-
-        val limit = if(pageSize!=null){pageSize}else{12}
+    suspend fun syncDemandsData(sinceTimestamp: String): Result<PagedDemandsDto, DataError.Network> {
+        //val limit = 100
 
         val structuredQuery = buildJsonObject {
             putJsonObject("structuredQuery") {
@@ -61,52 +49,19 @@ class DemandsRemoteDao(
                     add(buildJsonObject { put("collectionId", FirebaseConfig.Collections.Demand.COLLECTION_ID) })
                 }
                 putJsonObject("where") {
-                    putJsonObject("compositeFilter") {
-                        put("op", "AND")
-                        putJsonArray("filters") {
-                            // Filter by createdAt >= timestamp
-                            addJsonObject {
-                                putJsonObject("fieldFilter") {
-                                    putJsonObject("field") { put("fieldPath",  FirebaseConfig.Collections.Demand.CREATED_AT) }
-                                    put("op", "GREATER_THAN_OR_EQUAL")
-                                    putJsonObject("value") { put("timestampValue", thresholdTimestamp) }
-                                }
-                            }
-/*
-                            addJsonObject {
-                                putJsonObject("fieldFilter") {
-                                    putJsonObject("field") { put("fieldPath", "distributerId") }
-                                    put("op", "EQUAL")
-                                    putJsonObject("value") { put("stringValue", "3ZVdiB3TUBZWYXT164Iex2P5Ov32") }
-                                }
-                            }
-
-
- */
-
-
-
-
-                        }
+                    putJsonObject("fieldFilter") {
+                        putJsonObject("field") { put("fieldPath", FirebaseConfig.Collections.Demand.UPDATE_AT) }
+                        put("op", "GREATER_THAN_OR_EQUAL")
+                        putJsonObject("value") { put("timestampValue", sinceTimestamp) }
                     }
                 }
-
                 putJsonArray("orderBy") {
                     addJsonObject {
-                        putJsonObject("field") { put("fieldPath",  FirebaseConfig.Collections.Demand.UPDATE_AT) }
+                        putJsonObject("field") { put("fieldPath", FirebaseConfig.Collections.Demand.UPDATE_AT) }
                         put("direction", "DESCENDING")
                     }
                 }
-/*
-                if (startAfterTimestamp != null) {
-                    putJsonArray("startAfter") {
-                        add(JsonPrimitive(startAfterTimestamp)) // ✅ Raw timestamp string
-                    }
-                }
-
- */
-
-                put("limit", limit) // Always include
+                //put("limit", limit)
             }
         }
 
@@ -120,6 +75,8 @@ class DemandsRemoteDao(
                 contentType(ContentType.Application.Json)
                 setBody(TextContent(jsonBodyString, ContentType.Application.Json))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: UnresolvedAddressException) {
             return Result.Error(DataError.Network.NO_INTERNET)
         } catch (e: SerializationException) {
@@ -144,9 +101,6 @@ class DemandsRemoteDao(
 
 
         try {
-
-            var lastCreatedAtCursor: String? = null
-
             val rootElement = Json.parseToJsonElement(responseBody)
             if (rootElement is JsonArray) {
                 for (docElement in rootElement) {
@@ -215,19 +169,16 @@ class DemandsRemoteDao(
                                 products = products
                             )
                         )
-
-                        if (createdAt.isNotEmpty()) lastCreatedAtCursor = createdAt
                     }
                 }
             }
 
-            val nextPageCursor = if (demands.size == limit) lastCreatedAtCursor else null
+            return Result.Success(PagedDemandsDto(demands, null))
 
-            return Result.Success(PagedDemandsDto(demands, nextPageCursor))
-
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             println("Fail?:$e ")
-
             println("@DemandParseError $e")
             return Result.Error(DataError.Network.UNKNOWN)
         }

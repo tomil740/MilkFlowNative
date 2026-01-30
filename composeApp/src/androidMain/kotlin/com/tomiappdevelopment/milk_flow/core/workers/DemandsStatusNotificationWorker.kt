@@ -1,7 +1,6 @@
 package com.tomiappdevelopment.milk_flow.core.workers
 
 import android.content.Context
-import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.tomiappdevelopment.milk_flow.core.notifications.NotificationSender
@@ -14,6 +13,7 @@ import com.tomiappdevelopment.milk_flow.domain.repositories.AuthRepository
 import com.tomiappdevelopment.milk_flow.domain.repositories.DemandsRepository
 import com.tomiappdevelopment.milk_flow.domain.usecase.SyncNewDemands
 import com.tomiappdevelopment.milk_flow.domain.util.DemandError
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.firstOrNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -67,9 +67,9 @@ class DemandsStatusNotificationWorker(
 
 
             Result.success()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Log.i("work","teh exe ${e.message}")
-
             Result.retry()
         }
     }

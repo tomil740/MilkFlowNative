@@ -20,3 +20,5 @@ captures
 *.apk
 *.jks
 keystore.properties
+
+CODE_REVIEW_GUIDELINES.md
