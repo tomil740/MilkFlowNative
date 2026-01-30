@@ -1,5 +1,6 @@
 package com.tomiappdevelopment.milk_flow.data.repositories
 
+import com.tomiappdevelopment.milk_flow.data.local.DemandSyncStore
 import com.tomiappdevelopment.milk_flow.data.local.dao.DemandDao
 import com.tomiappdevelopment.milk_flow.data.local.entities.toDemandWithProductsE
 import com.tomiappdevelopment.milk_flow.data.remote.DemandsRemoteDao
@@ -22,21 +23,21 @@ class DemandsRepositoryImpl(
     private val demandsRemoteDao: DemandsRemoteDao,
     private val demandsDao: DemandDao
 ): DemandsRepository {
-    override suspend fun fetchNewPage(page: Int?,uid: String,isDistributor: Boolean): Result<DemandsWithNextPageToken, DataError.Network> {
-         val fetchedData = demandsRemoteDao.getDemandsPage(page)
-       return when(fetchedData){
-            is Result.Error<DataError.Network> -> return fetchedData
-            is Result.Success<PagedDemandsDto> -> {
-                // Transform the PagedDemandsDto to DemandsWithNextPageToken
-
-                val demandsWithNextPageToken = DemandsWithNextPageToken(
-                    demands = fetchedData.data.demands.map { it.toDemand() },
-                    nextPageToken = fetchedData.data.nextPageToken
+    override suspend fun fetchNewPage(page: Int?, uid: String, isDistributor: Boolean): Result<DemandsWithNextPageToken, DataError.Network> {
+        val sinceTimestamp = DemandSyncStore.getDemandsLastSync()
+        val fetchedData = demandsRemoteDao.getDemandsPage(sinceTimestamp)
+        return when (fetchedData) {
+            is Result.Error -> fetchedData
+            is Result.Success -> {
+                DemandSyncStore.setDemandsLastSync()
+                Result.Success(
+                    DemandsWithNextPageToken(
+                        demands = fetchedData.data.demands.map { it.toDemand() },
+                        nextPageToken = fetchedData.data.nextPageToken
+                    )
                 )
-                Result.Success(demandsWithNextPageToken)
             }
         }
-
     }
 
     override suspend fun getDemandById(demandId: String): Demand? {
