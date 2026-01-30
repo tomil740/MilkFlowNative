@@ -23,9 +23,9 @@ class DemandsRepositoryImpl(
     private val demandsRemoteDao: DemandsRemoteDao,
     private val demandsDao: DemandDao
 ): DemandsRepository {
-    override suspend fun fetchNewPage(page: Int?, uid: String, isDistributor: Boolean): Result<DemandsWithNextPageToken, DataError.Network> {
+    override suspend fun syncDemandsData(uid: String, isDistributor: Boolean): Result<DemandsWithNextPageToken, DataError.Network> {
         val sinceTimestamp = DemandSyncStore.getDemandsLastSync()
-        val fetchedData = demandsRemoteDao.getDemandsPage(sinceTimestamp)
+        val fetchedData = demandsRemoteDao.syncDemandsData(sinceTimestamp)
         return when (fetchedData) {
             is Result.Error -> fetchedData
             is Result.Success -> {

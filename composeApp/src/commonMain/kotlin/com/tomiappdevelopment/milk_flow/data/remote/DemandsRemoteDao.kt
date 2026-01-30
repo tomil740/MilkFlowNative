@@ -20,6 +20,7 @@ import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.util.network.UnresolvedAddressException
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -39,8 +40,8 @@ class DemandsRemoteDao(
     private val httpClient: HttpClient
 ) {
 
-    suspend fun getDemandsPage(sinceTimestamp: String): Result<PagedDemandsDto, DataError.Network> {
-        val limit = 100
+    suspend fun syncDemandsData(sinceTimestamp: String): Result<PagedDemandsDto, DataError.Network> {
+        //val limit = 100
 
         val structuredQuery = buildJsonObject {
             putJsonObject("structuredQuery") {
@@ -60,7 +61,7 @@ class DemandsRemoteDao(
                         put("direction", "DESCENDING")
                     }
                 }
-                put("limit", limit)
+                //put("limit", limit)
             }
         }
 
@@ -74,6 +75,8 @@ class DemandsRemoteDao(
                 contentType(ContentType.Application.Json)
                 setBody(TextContent(jsonBodyString, ContentType.Application.Json))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: UnresolvedAddressException) {
             return Result.Error(DataError.Network.NO_INTERNET)
         } catch (e: SerializationException) {
@@ -172,9 +175,10 @@ class DemandsRemoteDao(
 
             return Result.Success(PagedDemandsDto(demands, null))
 
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             println("Fail?:$e ")
-
             println("@DemandParseError $e")
             return Result.Error(DataError.Network.UNKNOWN)
         }

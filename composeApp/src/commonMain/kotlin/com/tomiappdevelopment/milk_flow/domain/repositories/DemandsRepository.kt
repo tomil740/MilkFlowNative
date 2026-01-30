@@ -10,9 +10,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface DemandsRepository {
 
-    // Fetch a page of demands from remote API within last 72 hours,
-    // ordered by updatedAt, paginated by page number
-    suspend fun fetchNewPage(page: Int?,uid: String,isDistributor: Boolean): Result<DemandsWithNextPageToken, DataError.Network>
+    // Sync demands from remote (since lastSync); single call, no pagination.
+    suspend fun syncDemandsData(uid: String, isDistributor: Boolean): Result<DemandsWithNextPageToken, DataError.Network>
 
     // Get a single demand by its ID from local DB
     suspend fun getDemandById(demandId: String): Demand?
